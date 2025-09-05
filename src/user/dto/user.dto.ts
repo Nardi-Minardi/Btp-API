@@ -1,0 +1,36 @@
+export class UserDto {
+  id: number;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
+  deleted?: number | null;
+  fullname?: string | null;
+  username?: string | null;
+  valid?: number | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  nik?: string | null;
+  email?: string | null;
+  noTelp?: string | null;
+  identifier?: string | null;
+  jenisKorporasi?: number | null;
+  tglIzin?: Date | null;
+  jenisKantor?: number | null;
+  nib?: string | null;
+  noSk?: string | null;
+  npwp?: string | null;
+  noRekomOjkBi?: string | null;
+  noKitasPaspor?: string | null;
+  tmptLahir?: string | null;
+  tglLahir?: Date | null;
+  jnsKelamin?: string | null;
+  agama?: number | null;
+  alamat?: string | null;
+  idProv?: string | null;
+  idKab?: string | null;
+  idKec?: string | null;
+  idKel?: string | null;
+  rt?: string | null;
+  rw?: string | null;
+  kodePos?: string | null;
+  nip?: string | null;
+}

@@ -1,0 +1,89 @@
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
+
+// src/common/interfaces/jwt-payload.interface.ts
+export interface JwtPayload {
+  user_id: number;
+  username: string;
+  expired: number;
+  iat: number;
+  exp: number;
+}
+
+//cencor character
+export function censorCharacter(character: string): string {
+  if (character.length === 0) return character;
+
+  return character
+    .split('')
+    .map((ch, i) => (i % 2 === 1 ? '*' : ch)) // sensor huruf selang-seling
+    .join('');
+}
+
+// create expiredt 60 days from now
+export function createExpiredDate(): Date {
+  const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() + 60); // Add 60 days
+  return currentDate;
+}
+
+//generate 16 digit unique angka
+export function generateUniqueString(prefix: string): string {
+  // generate angka random 16 digit
+  const randomPart = Math.floor(
+    Math.random() * 10 ** 16, // 16 digit
+  )
+    .toString()
+    .padStart(16, '0');
+
+  return `${prefix}${randomPart}`;
+}
+
+//decode from header token jwt
+export async function getUserFromToken(
+  authorization?: string,
+): Promise<JwtPayload | undefined> {
+  if (!authorization) return undefined;
+
+  const [type, token] = authorization.split(' ');
+  if (type !== 'Bearer') {
+    return undefined;
+  }
+
+  try {
+    const jwtService = new JwtService({ secret: process.env.JWT_SECRET });
+    const payload = await jwtService.verifyAsync<JwtPayload>(token); // typed!
+    return payload;
+  } catch (err) {
+    return undefined;
+  }
+}
+
+// utils/prisma-mapper.ts
+export function filterAllowedFields<T extends object>(
+  data: Record<string, any>,
+  allowed: (keyof T)[],
+): Partial<T> {
+  const filtered: Partial<T> = {};
+  for (const key of allowed) {
+    if (key in data) {
+      filtered[key] = data[key as string];
+    }
+  }
+  return filtered;
+}
+
+// Helper: validasi nama lengkap harus minimal 3 suku kata
+export function isValidFullName(name: string): boolean {
+  if (!name || typeof name !== 'string') {
+    return false;
+  }
+
+  // pecah berdasarkan spasi, hilangkan spasi kosong
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter((part) => part.length > 0); // asal tidak kosong
+
+  return parts.length >= 3;
+}
