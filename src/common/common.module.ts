@@ -14,8 +14,6 @@ import { AuthGuard } from './guards/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { S3Service } from './s3.service';
-import { PendaftaranGuard } from './guards/pendaftaran.guard';
-import { PerubahanGuard } from './guards/perubahan.guard';
 
 @Global()
 @Module({
@@ -55,8 +53,6 @@ import { PerubahanGuard } from './guards/perubahan.guard';
     UsermanPrismaService,
     ValidationService,
     S3Service,
-    PendaftaranGuard,
-    PerubahanGuard,
     // RedisService,
     { provide: APP_FILTER, useClass: ErrorFilter },
     { provide: APP_GUARD, useClass: AuthGuard },
@@ -67,8 +63,6 @@ import { PerubahanGuard } from './guards/perubahan.guard';
     UsermanPrismaService,
     ValidationService,
     S3Service,
-    PendaftaranGuard,
-    PerubahanGuard,
   ],
 })
 export class CommonModule {}

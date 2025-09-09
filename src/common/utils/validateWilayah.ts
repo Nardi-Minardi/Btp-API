@@ -2,10 +2,10 @@
 import { NotFoundException } from '@nestjs/common';
 
 type Repository = {
-  getProvinsi: (id: string | number) => Promise<any>;
-  getKabupaten: (id: string | number) => Promise<any>;
-  getKecamatan: (id: string | number) => Promise<any>;
-  getKelurahan: (id: string | number) => Promise<any>;
+  findProvinsiById: (id: string | number) => Promise<any>;
+  findKabupatenById: (id: string | number) => Promise<any>;
+  findKecamatanById: (id: string | number) => Promise<any>;
+  findKelurahanById: (id: string | number) => Promise<any>;
 };
 
 
@@ -20,28 +20,28 @@ export async function validateWilayah(
   repo: Repository,
   alamat: InformasiAlamat,
 ) {
-  const provinsi = await repo.getProvinsi(alamat.idProvinsi);
+  const provinsi = await repo.findProvinsiById(alamat.idProvinsi);
   if (!provinsi) {
     throw new NotFoundException(
       `Provinsi dengan ID ${alamat.idProvinsi} tidak ditemukan di database`,
     );
   }
 
-  const kabupaten = await repo.getKabupaten(alamat.idKabupaten);
+  const kabupaten = await repo.findKabupatenById(alamat.idKabupaten);
   if (!kabupaten) {
     throw new NotFoundException(
       `Kabupaten dengan ID ${alamat.idKabupaten} tidak ditemukan di database`,
     );
   }
 
-  const kecamatan = await repo.getKecamatan(alamat.idKecamatan);
+  const kecamatan = await repo.findKecamatanById(alamat.idKecamatan);
   if (!kecamatan) {
     throw new NotFoundException(
       `Kecamatan dengan ID ${alamat.idKecamatan} tidak ditemukan di database`,
     );
   }
 
-  const kelurahan = await repo.getKelurahan(alamat.idKelurahan);
+  const kelurahan = await repo.findKelurahanById(alamat.idKelurahan);
   if (!kelurahan) {
     throw new NotFoundException(
       `Kelurahan dengan ID ${alamat.idKelurahan} tidak ditemukan di database`,

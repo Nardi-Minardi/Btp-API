@@ -333,14 +333,14 @@ model PpnsPerpanjangKtp {
 model PpnsSurat {
   id                  Int       @id @default(autoincrement())
   id_user             Int?      @db.Integer
+  id_layanan          Int?      @db.Integer
   lembaga_kementerian Int?      @db.Integer
   instansi            Int?      @db.Integer
   no_surat            String?   @db.VarChar(255)
   tgl_surat           DateTime? @db.Date
-  perhal              String?   @db.Text
+  perihal              String?   @db.Text
   nama_pengusul       String?   @db.Text
   jabatan_pengusul    String?   @db.Text
-  jenis_transaksi     String?   @db.Text
   status              Boolean?  @default(false)
   created_at          DateTime? @default(now()) @db.Timestamp(6)
   created_by          Int?      @db.Integer
@@ -351,46 +351,46 @@ model PpnsSurat {
 }
 
 model PpnsUpload {
-  id             Int                 @id @default(autoincrement())
-  id_surat       Int?                @db.Integer
-  id_ppns        Int?                @db.Integer
-  file_type      String?             @db.VarChar(255)
-  original_name  String?             @db.VarChar(255)
-  status         status_upload_enum?
-  keterangan     String?             @db.Text
-  s3_key         String?             @db.VarChar(255)
-  mime_type      String?             @db.VarChar(255)
-  file_size      Int?                @db.Integer
-  uploaded_at    DateTime?           @db.Timestamp(6)
-  verifikator_by Int?                @db.Integer
-  verifikator_at DateTime?           @db.Timestamp(6)
+  id             Int               @id @default(autoincrement())
+  id_surat       Int?              @db.Integer
+  id_ppns        Int?              @db.Integer
+  file_type      String?           @db.VarChar(255)
+  original_name  String?           @db.VarChar(255)
+  status         status_upload_ii?
+  keterangan     String?           @db.Text
+  s3_key         String?           @db.VarChar(255)
+  mime_type      String?           @db.VarChar(255)
+  file_size      Int?              @db.Integer
+  uploaded_at    DateTime?         @default(now()) @db.Timestamp(6)
+  verifikator_by Int?              @db.Integer
+  verifikator_at DateTime?         @db.Timestamp(6)
 
   @@map("tr_ppns_upload")
 }
 
 model PpnsVerifikasiData {
-  id                    Int                 @id @default(autoincrement())
-  id_surat              Int?                @db.Integer
-  id_data_ppns          Int?                @db.Integer
-  verifikasi_data       status_upload_enum?
-  keterangan_data       String?             @db.Text
-  verifikasi_wilayah    String?             @db.VarChar(255)
-  keterangan_wilayah    String?             @db.Text
-  status_a              status_upload_enum?
-  keterangan_a          String?             @db.Text
-  status_b              status_upload_enum?
-  keterangan_b          String?             @db.Text
-  status_c              status_upload_enum?
-  keterangan_c          String?             @db.Text
-  status_d              status_upload_enum?
-  keterangan_d          String?             @db.Text
-  status_e              status_upload_enum?
-  keterangan_e          String?             @db.Text
-  status_f              status_upload_enum?
-  keterangan_f          String?             @db.Text
-  keterangan_verifikasi String?             @db.VarChar(255)
-  verifikator_by        Int?                @db.Integer
-  verifikator_at        DateTime?           @db.Timestamp(6)
+  id                    Int            @id @default(autoincrement())
+  id_surat              Int?           @db.Integer
+  id_data_ppns          Int?           @db.Integer
+  verifikasi_data       status_upload?
+  keterangan_data       String?        @db.Text
+  verifikasi_wilayah    String?        @db.VarChar(255)
+  keterangan_wilayah    String?        @db.Text
+  status_a              status_upload?
+  keterangan_a          String?        @db.Text
+  status_b              status_upload?
+  keterangan_b          String?        @db.Text
+  status_c              status_upload?
+  keterangan_c          String?        @db.Text
+  status_d              status_upload?
+  keterangan_d          String?        @db.Text
+  status_e              status_upload?
+  keterangan_e          String?        @db.Text
+  status_f              status_upload?
+  keterangan_f          String?        @db.Text
+  keterangan_verifikasi String?        @db.VarChar(255)
+  verifikator_by        Int?           @db.Integer
+  verifikator_at        DateTime?      @db.Timestamp(6)
 
   @@map("tr_ppns_verifikasi_data")
 }
@@ -450,8 +450,15 @@ enum status_enum {
   dataBaru @map("Data Baru")
 }
 
-enum status_upload_enum {
+enum status_upload {
   sesuai      @map("Sesuai")
   tidakSesuai @map("Tidak Sesuai")
   tolak       @map("Tolak")
+}
+
+enum status_upload_ii {
+  sesuai      @map("Sesuai")
+  tidakSesuai @map("Tidak Sesuai")
+  tolak       @map("Tolak")
+  pending     @map("Pending")
 }

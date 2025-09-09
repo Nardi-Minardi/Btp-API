@@ -39,7 +39,7 @@ export class DataMasterController {
   async getNotarisPenggantiDetail(
     @Param('idNotarisPengganti') idNotarisPengganti: string,
   ): Promise<WebResponse<NotarisPenggantiDto>> {
-    const result = await this.dataMasterRepository.getNotarisPenggantiById(
+    const result = await this.dataMasterRepository.findNotarisPenggantiById(
       Number(idNotarisPengganti),
     );
 
@@ -68,7 +68,7 @@ export class DataMasterController {
   async detailKbli(
     @Param('idKbli') idKbli: string,
   ): Promise<WebResponse<KbliDto>> {
-    const rawResult = await this.dataMasterRepository.getKbliById(
+    const rawResult = await this.dataMasterRepository.findKbliById(
       Number(idKbli),
     );
 

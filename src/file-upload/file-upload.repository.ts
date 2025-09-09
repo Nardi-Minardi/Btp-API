@@ -1,28 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { TbUpload, Prisma } from '.prisma/main-client';
+import { PpnsUpload, Prisma } from '.prisma/main-client';
 import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class FileUploadRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  create(data: Prisma.TbUploadCreateInput): Promise<TbUpload> {
-    return this.prismaService.tbUpload.create({ data });
+  createPpnsUpload(data: Prisma.PpnsUploadCreateInput): Promise<PpnsUpload> {
+    return this.prismaService.ppnsUpload.create({ data });
   }
 
-  update(id: number, data: Partial<TbUpload>): Promise<TbUpload> {
-    return this.prismaService.tbUpload.update({
-      where: { id_file: id },
+  updatePpnsUpload(id: number, data: Partial<PpnsUpload>): Promise<PpnsUpload> {
+    return this.prismaService.ppnsUpload.update({
+      where: { id: id },
       data,
     });
   }
 
-  findByFileTypeAndIdTransaksi(
+  findFilePpnsUpload(
     file_type: string,
-    id_transaksi: number,
-  ): Promise<TbUpload | null> {
-    return this.prismaService.tbUpload.findFirst({
-      where: { file_type, id_transaksi },
+    id_surat: number,
+    id_ppns: number,
+  ): Promise<PpnsUpload | null> {
+    return this.prismaService.ppnsUpload.findFirst({
+      where: { file_type, id_surat, id_ppns },
     });
   }
 }

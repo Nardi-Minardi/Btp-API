@@ -6,11 +6,11 @@ services:
     container_name: ahu_badan_usaha_api_dev
     restart: unless-stopped
     ports:
-      - '3011:3011'
+      - '3013:3013'
     environment:
       - NODE_ENV=development
       - LOG_LEVEL=debug
-      - PORT=3011
+      - PORT=3013
       - DATABASE_URL=postgresql://postgres:AHUPostgres1!@192.168.72.90:5432/badan_usaha
       - MASTER_DATABASE_URL=postgresql://postgres:AHUPostgres1!@192.168.72.90:5432/master_data
       - USERMAN_DATABASE_URL=postgresql://postgres:AHUPostgres1!@192.168.72.90:5432/userman

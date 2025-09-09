@@ -33,6 +33,6 @@ RUN npx prisma generate --schema=./prisma/main/schema.prisma \
 # Debug: cek isi dist
 RUN ls -la ./dist
 
-EXPOSE 3011
+EXPOSE 3013
 CMD ["node", "dist/main"]
   

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { promisify } from 'util';
@@ -7,6 +7,8 @@ import * as fs from 'fs';
 import { S3Service } from 'src/common/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
+import { status_upload_ii } from '.prisma/main-client';
+import { PpnsUploadDto } from './dto/upload.dto';
 
 @Injectable()
 export class FileUploadService {
@@ -28,43 +30,49 @@ export class FileUploadService {
   async handleUpload(
     file: Express.Multer.File,
     folder: string,
-    idTransaksiCv: number,
+    idTransaksi: number,
+    idPpns: number,
     namaLayanan: string,
     idLayanan: number,
     fileType: string,
-  ) {
-    // compress jika > 2 MB
+    status: status_upload_ii,
+  ): Promise<PpnsUploadDto> {
+
     let fileBuffer: Buffer = file.buffer;
+
+    // compress jika file > 2 MB
     if (file.size > 2 * 1024 * 1024) {
       const tmpInput = `/tmp/${Date.now()}-${file.originalname}`;
       const tmpOutput = `/tmp/compressed-${Date.now()}-${file.originalname}`;
+
       fs.writeFileSync(tmpInput, file.buffer);
       await this.compressPdf(tmpInput, tmpOutput);
       fileBuffer = fs.readFileSync(tmpOutput);
+
       fs.unlinkSync(tmpInput);
       fs.unlinkSync(tmpOutput);
     }
 
-    const optKey = `${folder}/${idTransaksiCv}/`;
+    // simpan ke S3
+    const optKey = `${folder}/${idTransaksi}/`;
     const fileName = `${namaLayanan}-${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`;
     const objectKey = await this.s3Service.uploadBuffer(
       fileBuffer,
       fileName,
-      file?.mimetype,
+      file.mimetype,
       optKey,
     );
 
     return {
-      id_layanan: idLayanan,
-      id_jenis_bu: idTransaksiCv,
-      id_transaksi: idTransaksiCv,
-      original_name: file.originalname,
+      id_surat: idTransaksi,
+      id_ppns: idPpns,
       file_type: fileType,
-      file_size: file.size,
-      mime_type: file.mimetype,
+      original_name: file.originalname,
+      keterangan: '',
       s3_key: objectKey,
-      created_at: new Date(),
-      updated_at: new Date(),
+      mime_type: file.mimetype,
+      file_size: file.size,
+      status,
     };
   }
 }
