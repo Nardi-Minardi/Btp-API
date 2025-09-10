@@ -10,6 +10,7 @@ import { ValidationService } from 'src/common/validation.service';
 import { Logger } from 'winston';
 import {
   CreateRequestSendVerifikatorDto,
+  CreateResponsePermohonanVerifikasiPpnsDataPnsDto,
   CreateResponsePermohonanVerifikasiSuratDto,
   CreateResponseSendVerifikatorDto,
 } from './dto/create.permohonan-verifikasi.dto';
@@ -120,7 +121,19 @@ export class PermohonanVerifikasiService {
         dataUploadDB,
       );
     }
-    return { result };
+
+    // mapping hasil ke DTO (pastikan tanggal diubah ke ISO string)
+    const response: CreateResponsePermohonanVerifikasiSuratDto = {
+      ...result,
+      no_surat: result.no_surat ?? '',
+      tgl_surat: result.tgl_surat ? result.tgl_surat.toISOString() : '',
+      created_at: result.created_at ? result.created_at.toISOString() : '',
+      verifikator_at: result.verifikator_at
+        ? result.verifikator_at.toISOString()
+        : null,
+    };
+
+    return response;
   }
 
   async doSendVerifikator(
@@ -180,9 +193,9 @@ export class PermohonanVerifikasiService {
   }
 
   async storeCalonPpnsStep1(
-    request: CreateRequestSendVerifikatorDto,
+    request: any,
     authorization?: string,
-  ): Promise<CreateResponseSendVerifikatorDto> {
+  ): Promise<CreateResponsePermohonanVerifikasiPpnsDataPnsDto> {
     this.logger.debug('Request send permohonan verifikator surat', { request });
 
     // Handle if body is empty
@@ -227,50 +240,89 @@ export class PermohonanVerifikasiService {
     await Promise.all(
       createRequest.wilayah_kerja.map((w: any) =>
         validateWilayah(this.dataMasterRepository, {
-          idProvinsi: w.id_provinsi,
-          idKabupaten: w.id_kabupaten,
-          idKecamatan: w.id_kecamatan,
-          idKelurahan: w.id_kelurahan,
+          idProvinsi: w.provinsi_penempatan,
+          idKabupaten: w.kabupaten_penempatan,
+          idKecamatan: w.id_kecamatan || undefined,
+          idKelurahan: w.id_kelurahan || undefined,
         }),
       ),
     );
 
+    const existingPpnsDataPns =
+      await this.permohonanVerifikasiRepository.findPpnDataPnsByIdSurat(
+        createRequest.id_surat,
+      );
+
     const createData = {
       id_surat: createRequest.id_surat,
+      nama: createRequest.identitas_pns.nama,
+      nip: createRequest.identitas_pns.nip,
+      nama_gelar: createRequest.identitas_pns.nama_gelar,
+      jabatan: createRequest.identitas_pns.jabatan,
+      pangkat_atau_golongan: createRequest.identitas_pns.pangkat_golongan,
+      jenis_kelamin: createRequest.identitas_pns.jenis_kelamin,
+      agama: createRequest.identitas_pns.agama,
+      nama_sekolah: createRequest.identitas_pns.nama_sekolah,
+      gelar_terakhir: createRequest.identitas_pns.gelar_terakhir,
+      no_ijazah: createRequest.identitas_pns.no_ijazah,
+      tgl_ijazah: createRequest.identitas_pns.tgl_ijazah, // sudah Date dari Zod
+      tahun_lulus: createRequest.identitas_pns.tahun_lulus,
 
-      identitas_pns: {
-        nama: createRequest.identitas_pns.nama,
-        nip: createRequest.identitas_pns.nip,
-        nama_gelar: createRequest.identitas_pns.nama_gelar,
-        jabatan: createRequest.identitas_pns.jabatan,
-        pangkat_golongan: createRequest.identitas_pns.pangkat_golongan,
-        jenis_kelamin: createRequest.identitas_pns.jenis_kelamin,
-        agama: createRequest.identitas_pns.agama,
-        nama_sekolah: createRequest.identitas_pns.nama_sekolah,
-        gelar_terakhir: createRequest.identitas_pns.gelar_terakhir,
-        no_ijazah: createRequest.identitas_pns.no_ijazah,
-        tgl_ijazah: createRequest.identitas_pns.tgl_ijazah,
-        tahun_lulus: createRequest.identitas_pns.tahun_lulus,
-      },
-
-      wilayah_kerja: createRequest.wilayah_kerja.map((w: any) => ({
-        id_provinsi: w.id_provinsi,
-        id_kabupaten: w.id_kabupaten,
-        id_kecamatan: w.id_kecamatan,
-        id_kelurahan: w.id_kelurahan,
-        uu_dikawal: w.uu_dikawal,
-      })),
-
-      lokasi_penempatan: {
-        id_provinsi: createRequest.lokasi_penempatan.id_provinsi,
-        id_kabupaten: createRequest.lokasi_penempatan.id_kabupaten,
-        unit_kerja: createRequest.lokasi_penempatan.unit_kerja,
+      // nested create relasi
+      ppns_wilayah_kerja: {
+        create: createRequest.wilayah_kerja.map((w: any) => {
+          const [uu1, uu2, uu3] = w.uu_dikawal;
+          return {
+            id_surat: createRequest.id_surat,
+            id_layanan: createRequest.id_layanan,
+            provinsi_penempatan: w.provinsi_penempatan,
+            kabupaten_penempatan: w.kabupaten_penempatan,
+            unit_kerja: w.unit_kerja,
+            penempatan_baru: w.penempatan_baru ? '1' : '0',
+            uu_dikawal_1: uu1 ?? null,
+            uu_dikawal_2: uu2 ?? null,
+            uu_dikawal_3: uu3 ?? null,
+          };
+        }),
       },
     };
 
-    // Return sukses
-    return {
-      message: `Permohonan Ppns Surat dengan ID ${createRequest.id_surat} berhasil dikirim ke verifikator`,
-    };
+    let result;
+
+    if (existingPpnsDataPns) {
+      //update
+      result =
+        await this.permohonanVerifikasiRepository.updatePermohonanVerifikasiPpnsDataPns(
+          existingPpnsDataPns.id,
+          {
+            ...createData,
+            ppns_wilayah_kerja: {
+              deleteMany: {}, // delete all existing related wilayah kerja
+              create: createRequest.wilayah_kerja.map((w: any) => {
+                const [uu1, uu2, uu3] = w.uu_dikawal;
+                return {
+                  id_surat: createRequest.id_surat,
+                  id_layanan: createRequest.id_layanan,
+                  provinsi_penempatan: w.provinsi_penempatan,
+                  kabupaten_penempatan: w.kabupaten_penempatan,
+                  unit_kerja: w.unit_kerja,
+                  penempatan_baru: w.penempatan_baru ? '1' : '0',
+                  uu_dikawal_1: uu1 ?? null,
+                  uu_dikawal_2: uu2 ?? null,
+                  uu_dikawal_3: uu3 ?? null,
+                };
+              }),
+            },
+          },
+        );
+    } else {
+      // create data calon ppns
+      result =
+        await this.permohonanVerifikasiRepository.savePermohonanVerifikasiPpnsDataPns(
+          createData,
+        );
+    }
+
+    return result;
   }
 }

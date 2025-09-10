@@ -56,6 +56,7 @@ export class PermohonanVerifikasiValidation {
 
   static readonly CREATE_CALON_PPNS_STEP1: ZodType = z.object({
     id_surat: z.number(),
+    id_layanan: z.number(),
     identitas_pns: z.object({
       nama: z.string().min(1, 'Nama is required'),
       nip: z.string().min(1, 'NIP is required'),
@@ -65,7 +66,10 @@ export class PermohonanVerifikasiValidation {
       jenis_kelamin: z.enum(['Laki-laki', 'Perempuan'], {
         message: 'Jenis Kelamin must be Laki-laki or Perempuan',
       }),
-      agama: z.string().min(1, 'Agama is required'),
+      agama: z.enum(
+        ['Islam', 'Kristen Protestan', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'],
+        { message: 'Agama must be one of (Islam, Kristen Protestan, Katolik, Hindu, Buddha, Konghucu)' },
+      ),
       nama_sekolah: z.string().min(1, 'Nama Sekolah is required'),
       gelar_terakhir: z.string().min(1, 'Gelar Terakhir is required'),
       no_ijazah: z.string().min(1, 'No Ijazah is required'),
@@ -94,9 +98,9 @@ export class PermohonanVerifikasiValidation {
           unit_kerja: z.string().min(1, 'Unit Kerja is required'),
           penempatan_baru: z.boolean(),
           uu_dikawal: z
-          .array(z.number().min(1, 'uu_dikawal is required'))
-          .min(1, 'Minimal 1 uu_dikawal')
-          .max(3, 'Maksimal 3 uu_dikawal'),
+          .array(z.string().min(1, 'UU Dikawal cannot be empty'))
+          .min(1, 'UU Dikawal must have at least one entry')
+          .max(3, 'UU Dikawal can have at most 3 entries'),
         }),
       )
       .min(1, 'Minimal harus ada 1 wilayah kerja'),

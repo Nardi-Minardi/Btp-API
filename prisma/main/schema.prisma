@@ -40,25 +40,6 @@ model PpnsTypeFile {
   @@map("m_ppns_type_file")
 }
 
-model PpnsDataPns {
-  id                    Int       @id @default(autoincrement())
-  id_surat              Int?      @db.Integer
-  nama                  String?   @db.VarChar(255)
-  nip                   String?   @db.VarChar(255)
-  nama_gelar            String?   @db.VarChar(255)
-  jabatan               String?   @db.VarChar(255)
-  pangkat_atau_golongan String?   @db.VarChar(255)
-  jenis_kelamin         String?   @db.VarChar(255)
-  agama                 String?   @db.VarChar(255)
-  nama_sekolah          String?   @db.VarChar(255)
-  gelar_terakhir        String?   @db.VarChar(255)
-  no_ijazah             String?   @db.VarChar(255)
-  tgl_ijazah            DateTime? @db.Date
-  tahun_lulus           Int?      @db.Integer
-
-  @@map("tr_ppns_data_pns")
-}
-
 model PpnsDataPpns {
   id                    Int       @id @default(autoincrement())
   id_surat              Int?      @db.Integer
@@ -338,21 +319,25 @@ model PpnsSurat {
   instansi            Int?      @db.Integer
   no_surat            String?   @db.VarChar(255)
   tgl_surat           DateTime? @db.Date
-  perihal              String?   @db.Text
+  perihal             String?   @db.Text
   nama_pengusul       String?   @db.Text
   jabatan_pengusul    String?   @db.Text
-  status              Boolean?  @default(false)
-  created_at          DateTime? @default(now()) @db.Timestamp(6)
+  status              Boolean   @default(false) // jadikan non-nullable, karena selalu ada default
+  created_at          DateTime  @default(now()) @db.Timestamp(6)
   created_by          Int?      @db.Integer
   verifikator_by      Int?      @db.Integer
   verifikator_at      DateTime? @db.Timestamp(6)
+
+  // Relasi
+  ppns_upload   PpnsUpload?   @relation("PpnsUploadPpnsSurat")
+  ppns_data_pns PpnsDataPns[] @relation("PpnsDataPnsPpnsSurat")
 
   @@map("tr_ppns_surat")
 }
 
 model PpnsUpload {
   id             Int               @id @default(autoincrement())
-  id_surat       Int?              @db.Integer
+  id_surat       Int?              @unique @db.Integer
   id_ppns        Int?              @db.Integer
   file_type      String?           @db.VarChar(255)
   original_name  String?           @db.VarChar(255)
@@ -361,11 +346,56 @@ model PpnsUpload {
   s3_key         String?           @db.VarChar(255)
   mime_type      String?           @db.VarChar(255)
   file_size      Int?              @db.Integer
-  uploaded_at    DateTime?         @default(now()) @db.Timestamp(6)
+  uploaded_at    DateTime          @default(now()) @db.Timestamp(6)
   verifikator_by Int?              @db.Integer
   verifikator_at DateTime?         @db.Timestamp(6)
 
+  // Relasi
+  ppns_surat PpnsSurat? @relation("PpnsUploadPpnsSurat", fields: [id_surat], references: [id])
+
   @@map("tr_ppns_upload")
+}
+
+//ini calon pemohon
+model PpnsDataPns {
+  id                    Int       @id @default(autoincrement())
+  id_surat              Int?      @db.Integer
+  nama                  String?   @db.VarChar(255)
+  nip                   String?   @db.VarChar(255)
+  nama_gelar            String?   @db.VarChar(255)
+  jabatan               String?   @db.VarChar(255)
+  pangkat_atau_golongan String?   @db.VarChar(255)
+  jenis_kelamin         String?   @db.VarChar(255)
+  agama                 String?   @db.VarChar(255)
+  nama_sekolah          String?   @db.VarChar(255)
+  gelar_terakhir        String?   @db.VarChar(255)
+  no_ijazah             String?   @db.VarChar(255)
+  tgl_ijazah            DateTime? @db.Date
+  tahun_lulus           Int?      @db.Integer
+
+  // Relasi
+  ppns_surat         PpnsSurat?     @relation("PpnsDataPnsPpnsSurat", fields: [id_surat], references: [id])
+  ppns_wilayah_kerja WilayahKerja[] @relation("PpnsDataPnsWilayahKerja")
+
+  @@map("tr_ppns_data_pns")
+}
+
+model WilayahKerja {
+  id                   Int     @id @default(autoincrement())
+  id_layanan           Int?    @db.Integer
+  id_ppns              Int?    @db.Integer
+  id_surat             Int?    @db.Integer
+  provinsi_penempatan  String? @db.VarChar(255)
+  kabupaten_penempatan String? @db.VarChar(255)
+  unit_kerja           String? @db.VarChar(255)
+  penempatan_baru      String? @db.VarChar(255)
+  uu_dikawal_1         String? @db.VarChar(255)
+  uu_dikawal_2         String? @db.VarChar(255)
+  uu_dikawal_3         String? @db.VarChar(255)
+
+  ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsWilayahKerja", fields: [id_ppns], references: [id])
+
+  @@map("tr_wilayah_kerja")
 }
 
 model PpnsVerifikasiData {
@@ -427,22 +457,6 @@ model PpnsVerifikasiPpns {
   status_4                         status_enum?
 
   @@map("tr_ppns_verifikasi_ppns")
-}
-
-model WilayahKerja {
-  id                   Int     @id @default(autoincrement())
-  id_layanan           Int?    @db.Integer
-  id_ppns              Int?    @db.Integer
-  id_surat             Int?    @db.Integer
-  provinsi_penempatan  String? @db.VarChar(255)
-  kabupaten_penempatan String? @db.VarChar(255)
-  unit_kerja           String? @db.VarChar(255)
-  penempatan_baru      String? @db.VarChar(255)
-  uu_dikawal_1         String? @db.VarChar(255)
-  uu_dikawal_2         String? @db.VarChar(255)
-  uu_dikawal_3         String? @db.VarChar(255)
-
-  @@map("tr_wilayah_kerja")
 }
 
 enum status_enum {

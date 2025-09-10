@@ -2,7 +2,7 @@ import { Body, Controller, Headers, Inject, NotFoundException, Param, Post, Get,
 import { WebResponse } from 'src/common/web.response';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { CreateResponsePermohonanVerifikasiSuratDto, CreateResponseSendVerifikatorDto } from './dto/create.permohonan-verifikasi.dto';
+import { CreateResponsePermohonanVerifikasiPpnsDataPnsDto, CreateResponsePermohonanVerifikasiSuratDto, CreateResponseSendVerifikatorDto } from './dto/create.permohonan-verifikasi.dto';
 import { PermohonanVerifikasiService } from './permohonan-verifikasi.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
@@ -63,7 +63,7 @@ export class PermohonanVerifikasiController {
   async createCalonPpns(
     @Body() request,
     @Headers() headers: Record<string, any>,
-  ): Promise<WebResponse<CreateResponseSendVerifikatorDto>> {
+  ): Promise<WebResponse<CreateResponsePermohonanVerifikasiPpnsDataPnsDto>> {
     const authorization = headers['authorization'] || '';
     const result = await this.permohonanVerifikasiService.storeCalonPpnsStep1(
       request,
