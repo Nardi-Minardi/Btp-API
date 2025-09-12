@@ -11,7 +11,9 @@ import { Logger } from 'winston';
 import {
   CreateRequestSendVerifikatorDto,
   CreateResponsePermohonanVerifikasiPpnsDataPnsDto,
+  CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto,
   CreateResponsePermohonanVerifikasiSuratDto,
+  CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto,
   CreateResponseSendVerifikatorDto,
 } from './dto/create.permohonan-verifikasi.dto';
 import { PermohonanVerifikasiValidation } from './permohonan-verifikasi.validation';
@@ -23,10 +25,15 @@ import { FileUploadService } from 'src/file-upload/file-upload.service';
 import { FileUploadRepository } from 'src/file-upload/file-upload.repository';
 import { PermohonanVerifikasiRepository } from './permohonan-verifikasi.repository';
 import { S3Service } from 'src/common/s3.service';
-import { status_upload_ii } from '.prisma/main-client';
+import { status_upload_ii, Prisma } from '.prisma/main-client';
 import { PpnsUploadDto } from 'src/file-upload/dto/upload.dto';
 import { validateWilayah } from 'src/common/utils/validateWilayah';
 import { DataMasterRepository } from 'src/data-master/data-master.repository';
+import {
+  GetPermohonanVerifikasiSuratPaginationDto,
+  ListPermohonanVerifikasiSurat,
+  PermohonanVerifikasiSuratPaginationDto,
+} from './dto/get.permohonan-verifikasi.dto';
 
 @Injectable()
 export class PermohonanVerifikasiService {
@@ -46,7 +53,7 @@ export class PermohonanVerifikasiService {
     },
     authorization?: string,
   ): Promise<CreateResponsePermohonanVerifikasiSuratDto> {
-    this.logger.debug('Request Creating permohonan verifikasi surat', {
+    this.logger.debug('Request Creating permohonan verifikasi create surat', {
       request,
     });
     const createRequest = this.validationService.validate(
@@ -65,7 +72,7 @@ export class PermohonanVerifikasiService {
 
     const createData = {
       id_user: userLogin.user_id,
-      id_layanan: Number(createRequest.id_layanan),
+      id_layanan: 1, // layanan ppns tetap 1
       lembaga_kementerian: Number(createRequest.lembaga_kementerian),
       instansi: Number(createRequest.instansi),
       no_surat: noSurat,
@@ -104,7 +111,7 @@ export class PermohonanVerifikasiService {
         request.dok_surat_pernyataan,
         'dokumen-surat-pernyataan',
         result.id,
-        result.id_user,
+        null,
         'verifikasi',
         1,
         'dokumen-surat-pernyataan',
@@ -118,7 +125,10 @@ export class PermohonanVerifikasiService {
     if (dataUploadDB.length > 0) {
       await this.permohonanVerifikasiRepository.createOrUpdatePpnsUpload(
         result.id,
-        dataUploadDB,
+        dataUploadDB.map((d) => ({
+          ...d,
+          id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
+        })),
       );
     }
 
@@ -140,7 +150,10 @@ export class PermohonanVerifikasiService {
     request: CreateRequestSendVerifikatorDto,
     authorization?: string,
   ): Promise<CreateResponseSendVerifikatorDto> {
-    this.logger.debug('Request send permohonan verifikator surat', { request });
+    this.logger.debug(
+      'Request send permohonan verifikator send verifikasi to verifikator',
+      { request },
+    );
 
     // Handle if body is empty
     if (!request || Object.keys(request).length === 0) {
@@ -180,6 +193,17 @@ export class PermohonanVerifikasiService {
       );
     }
 
+    //cek relasi ppns_data_pns harus ada, relasi berupa array
+    if (
+      !existingSurat.ppns_data_pns ||
+      existingSurat.ppns_data_pns.length === 0
+    ) {
+      throw new HttpException(
+        `Data Ppns surat dengan ID ${createRequest.id_surat} belum memiliki data calon ppns, silakan lengkapi data calon ppns terlebih dahulu`,
+        400,
+      );
+    }
+
     //update statusnya
     await this.permohonanVerifikasiRepository.updateStatusPpnSurat(
       createRequest.id_surat,
@@ -192,11 +216,14 @@ export class PermohonanVerifikasiService {
     };
   }
 
-  async storeCalonPpnsStep1(
+  async storeCalonPpns(
     request: any,
     authorization?: string,
   ): Promise<CreateResponsePermohonanVerifikasiPpnsDataPnsDto> {
-    this.logger.debug('Request send permohonan verifikator surat', { request });
+    this.logger.debug(
+      'Request Creating permohonan verifikasi create calon pemohon',
+      { request },
+    );
 
     // Handle if body is empty
     if (!request || Object.keys(request).length === 0) {
@@ -248,11 +275,6 @@ export class PermohonanVerifikasiService {
       ),
     );
 
-    const existingPpnsDataPns =
-      await this.permohonanVerifikasiRepository.findPpnDataPnsByIdSurat(
-        createRequest.id_surat,
-      );
-
     const createData = {
       id_surat: createRequest.id_surat,
       nama: createRequest.identitas_pns.nama,
@@ -287,42 +309,426 @@ export class PermohonanVerifikasiService {
       },
     };
 
+    const existingPpnsDataPns =
+      await this.permohonanVerifikasiRepository.findPpnsDataPnsByIdSurat(
+        createRequest.id_surat,
+      );
+
     let result;
 
     if (existingPpnsDataPns) {
       //update
+      result = await this.permohonanVerifikasiRepository.updatePpnsDataPns(
+        existingPpnsDataPns.id,
+        {
+          ...createData,
+          ppns_wilayah_kerja: {
+            deleteMany: {}, // delete all existing related wilayah kerja
+            create: createRequest.wilayah_kerja.map((w: any) => {
+              const [uu1, uu2, uu3] = w.uu_dikawal;
+              return {
+                id_surat: createRequest.id_surat,
+                id_layanan: 1,
+                provinsi_penempatan: w.provinsi_penempatan,
+                kabupaten_penempatan: w.kabupaten_penempatan,
+                unit_kerja: w.unit_kerja,
+                penempatan_baru: w.penempatan_baru ? '1' : '0',
+                uu_dikawal_1: uu1 ?? null,
+                uu_dikawal_2: uu2 ?? null,
+                uu_dikawal_3: uu3 ?? null,
+              };
+            }),
+          },
+        },
+      );
+    } else {
+      // create data calon ppns
       result =
-        await this.permohonanVerifikasiRepository.updatePermohonanVerifikasiPpnsDataPns(
-          existingPpnsDataPns.id,
+        await this.permohonanVerifikasiRepository.savePpnsDataPns(createData);
+    }
+
+    //update id_ppns di ppns_upload yang id_ppns null dan id_surat sama dengan createRequest.id_surat
+    await this.permohonanVerifikasiRepository.updatePpnsUploadIdPpns(
+      Number(createRequest.id_surat),
+      Number(result.id),
+    );
+
+    return result;
+  }
+
+  async storeVerifikasiPpns(
+    request: any,
+    authorization?: string,
+  ): Promise<CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto> {
+    this.logger.debug('Request send permohonan verifikator surat', { request });
+
+    // Handle if body is empty
+    if (!request || Object.keys(request).length === 0) {
+      this.logger.error('Request body is empty');
+      throw new BadRequestException('Request body cannot be empty');
+    }
+
+    const createRequest = this.validationService.validate(
+      PermohonanVerifikasiValidation.CREATE_CALON_PPNS_STEP2,
+      request,
+    );
+
+    //get user login
+    const userLogin = await getUserFromToken(authorization);
+    if (!userLogin) {
+      this.logger.error('Authorization token is missing');
+      throw new BadRequestException('Authorization is missing');
+    }
+
+    //cek data pppns
+    const existingPpnsDataPns =
+      await this.permohonanVerifikasiRepository.findPpnsDataPnsById(
+        createRequest.id_data_ppns,
+      );
+
+    if (!existingPpnsDataPns) {
+      throw new NotFoundException(
+        `Data calon ppns dengan ID ${createRequest.id_data_ppns} tidak ditemukan`,
+      );
+    }
+
+    const createData = {
+      id_data_ppns: createRequest.id_data_ppns,
+      tgl_pengangkatan_sk_pns: createRequest.masa_kerja.tgl_pengangkatan_sk_pns,
+      sk_kenaikan_pangkat: createRequest.masa_kerja.sk_kenaikan_pangkat,
+      nama_sekolah: createRequest.pendidikan_terakhir.nama_sekolah,
+      no_ijazah: createRequest.pendidikan_terakhir.no_ijazah,
+      tgl_ijazah: createRequest.pendidikan_terakhir.tgl_ijazah,
+      tgl_lulus: createRequest.pendidikan_terakhir.tgl_lulus,
+      // gelar_terakhir: createRequest.pendidikan_terakhir.gelar_terakhir,
+      teknis_operasional_penegak_hukum:
+        createRequest.teknis_operasional_penegak_hukum ? '1' : '0',
+      jabatan: createRequest.jabatan,
+      nama_rs: createRequest.surat_sehat_jasmani_rohani.nama_rs,
+      tgl_surat_rs: createRequest.surat_sehat_jasmani_rohani.tgl_surat_rs,
+      tahun_1: createRequest.dp3.tahun_1,
+      nilai_1: createRequest.dp3.nilai_1,
+      tahun_2: createRequest.dp3.tahun_2,
+      nilai_2: createRequest.dp3.nilai_2,
+    };
+
+    //cek data pppns
+    const existingPpnsVerifikasiPns =
+      await this.permohonanVerifikasiRepository.findPpnsVerifikasiPnsById(
+        createRequest.id_data_ppns,
+      );
+
+    let result;
+
+    if (existingPpnsVerifikasiPns) {
+      //update
+      result =
+        await this.permohonanVerifikasiRepository.updatePpnsVerifikasiPns(
+          existingPpnsVerifikasiPns.id,
           {
             ...createData,
-            ppns_wilayah_kerja: {
-              deleteMany: {}, // delete all existing related wilayah kerja
-              create: createRequest.wilayah_kerja.map((w: any) => {
-                const [uu1, uu2, uu3] = w.uu_dikawal;
-                return {
-                  id_surat: createRequest.id_surat,
-                  id_layanan: createRequest.id_layanan,
-                  provinsi_penempatan: w.provinsi_penempatan,
-                  kabupaten_penempatan: w.kabupaten_penempatan,
-                  unit_kerja: w.unit_kerja,
-                  penempatan_baru: w.penempatan_baru ? '1' : '0',
-                  uu_dikawal_1: uu1 ?? null,
-                  uu_dikawal_2: uu2 ?? null,
-                  uu_dikawal_3: uu3 ?? null,
-                };
-              }),
-            },
           },
         );
     } else {
       // create data calon ppns
       result =
-        await this.permohonanVerifikasiRepository.savePermohonanVerifikasiPpnsDataPns(
+        await this.permohonanVerifikasiRepository.savePpnsVerifikasiPns(
           createData,
         );
     }
 
+    //update column nama_sekolah , gelar_terakhir, no_ijazah, tgl_ijazah, tahun_lulus di ppns_data_pns
+    await Prisma.validator<Prisma.PpnsDataPnsUpdateInput>()({
+      nama_sekolah: createRequest.pendidikan_terakhir.nama_sekolah,
+      gelar_terakhir: createRequest.pendidikan_terakhir.gelar_terakhir,
+      no_ijazah: createRequest.pendidikan_terakhir.no_ijazah,
+      tgl_ijazah: createRequest.pendidikan_terakhir.tgl_ijazah,
+      tahun_lulus: createRequest.pendidikan_terakhir.tahun_lulus,
+    });
+    await this.permohonanVerifikasiRepository.updatePpnsDataPns(
+      existingPpnsDataPns.id,
+      {
+        nama_sekolah: createRequest.pendidikan_terakhir.nama_sekolah,
+        gelar_terakhir: createRequest.pendidikan_terakhir.gelar_terakhir,
+        no_ijazah: createRequest.pendidikan_terakhir.no_ijazah,
+        tgl_ijazah: createRequest.pendidikan_terakhir.tgl_ijazah,
+        tahun_lulus: createRequest.pendidikan_terakhir.tahun_lulus,
+      },
+    );
+
     return result;
+  }
+
+  async storeUploadDokumen(
+    request: any & {
+      dok_verifikasi_sk_masa_kerja?: Express.Multer.File;
+      dok_verifikasi_sk_pangkat?: Express.Multer.File;
+      dok_verifikasi_ijazah?: Express.Multer.File;
+      dok_verifikasi_sk_jabatan_teknis_oph?: Express.Multer.File;
+      dok_verifikasi_sehat_jasmani?: Express.Multer.File;
+      dok_verifikasi_penilaian_pekerjaan?: Express.Multer.File;
+    },
+    authorization?: string,
+  ): Promise<CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto> {
+    this.logger.debug(
+      'Request Creating permohonan verifikasi create upload dokumen',
+      {
+        request,
+      },
+    );
+    const createRequest = this.validationService.validate(
+      PermohonanVerifikasiValidation.CREATE_CALON_PPNS_STEP3,
+      request,
+    );
+
+    //get user login
+    const userLogin = await getUserFromToken(authorization);
+    if (!userLogin) {
+      this.logger.error('Authorization token is missing');
+      throw new BadRequestException('Authorization is missing');
+    }
+
+    //cek find surat
+    const existingSurat =
+      await this.permohonanVerifikasiRepository.findPpnSuratById(
+        Number(createRequest.id_surat),
+      );
+
+    if (!existingSurat) {
+      throw new HttpException(
+        `Data Ppns surat dengan ID ${createRequest.id_surat} tidak ditemukan`,
+        400,
+      );
+    }
+
+    //cek find ppns
+    const existingPpnsDataPns =
+      await this.permohonanVerifikasiRepository.findPpnsDataPnsById(
+        Number(createRequest.id_ppns),
+      );
+    if (!existingPpnsDataPns) {
+      throw new NotFoundException(
+        `Data calon ppns dengan ID ${createRequest.id_ppns} tidak ditemukan`,
+      );
+    }
+
+    const dataUploadDB: PpnsUploadDto[] = [];
+
+    if (request.dok_verifikasi_sk_masa_kerja) {
+      const existing = await this.fileUploadRepository.findFilePpnsUpload(
+        'verifikasi_sk_masa_kerja',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+      );
+
+      if (existing?.s3_key) {
+        await this.s3Service.deleteFile(existing.s3_key);
+      }
+
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_verifikasi_sk_masa_kerja,
+        'verifikasi_sk_masa_kerja',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+        'verifikasi',
+        1, //idlayanan
+        'verifikasi_sk_masa_kerja',
+        status_upload_ii.pending,
+      );
+
+      dataUploadDB.push(upload);
+    }
+
+    if (request.dok_verifikasi_sk_pangkat) {
+      const existing = await this.fileUploadRepository.findFilePpnsUpload(
+        'verifikasi_sk_pangkat',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+      );
+      if (existing?.s3_key) {
+        await this.s3Service.deleteFile(existing.s3_key);
+      }
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_verifikasi_sk_pangkat,
+        'verifikasi_sk_pangkat',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+        'verifikasi',
+        1, //idlayanan
+        'verifikasi_sk_pangkat',
+        status_upload_ii.pending,
+      );
+      dataUploadDB.push(upload);
+    }
+
+    if (request.dok_verifikasi_ijazah) {
+      const existing = await this.fileUploadRepository.findFilePpnsUpload(
+        'verifikasi_ijazah',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+      );
+      if (existing?.s3_key) {
+        await this.s3Service.deleteFile(existing.s3_key);
+      }
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_verifikasi_ijazah,
+        'verifikasi_ijazah',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+        'verifikasi',
+        1, //idlayanan
+        'verifikasi_ijazah',
+        status_upload_ii.pending,
+      );
+      dataUploadDB.push(upload);
+    }
+
+    if (request.dok_verifikasi_sk_jabatan_teknis_oph) {
+      const existing = await this.fileUploadRepository.findFilePpnsUpload(
+        'verifikasi_sk_jabatan_teknis_oph',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+      );
+      if (existing?.s3_key) {
+        await this.s3Service.deleteFile(existing.s3_key);
+      }
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_verifikasi_sk_jabatan_teknis_oph,
+        'verifikasi_sk_jabatan_teknis_oph',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+        'verifikasi',
+        1, //idlayanan
+        'verifikasi_sk_jabatan_teknis_oph',
+        status_upload_ii.pending,
+      );
+      dataUploadDB.push(upload);
+    }
+
+    if (request.dok_verifikasi_sehat_jasmani) {
+      const existing = await this.fileUploadRepository.findFilePpnsUpload(
+        'verifikasi_sehat_jasmani',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+      );
+      if (existing?.s3_key) {
+        await this.s3Service.deleteFile(existing.s3_key);
+      }
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_verifikasi_sehat_jasmani,
+        'verifikasi_sehat_jasmani',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+        'verifikasi',
+        1, //idlayanan
+        'verifikasi_sehat_jasmani',
+        status_upload_ii.pending,
+      );
+      dataUploadDB.push(upload);
+    }
+
+    if (request.dok_verifikasi_penilaian_pekerjaan) {
+      const existing = await this.fileUploadRepository.findFilePpnsUpload(
+        'verifikasi_penilaian_pekerjaan',
+        existingSurat.id,
+        existingPpnsDataPns.id,
+      );
+      if (existing?.s3_key) {
+        await this.s3Service.deleteFile(existing.s3_key);
+      }
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_verifikasi_penilaian_pekerjaan,
+        'verifikasi_penilaian_pekerjaan',
+        existingSurat.id,
+
+        existingPpnsDataPns.id,
+        'verifikasi',
+        1, //idlayanan
+        'verifikasi_penilaian_pekerjaan',
+        status_upload_ii.pending,
+      );
+      dataUploadDB.push(upload);
+    }
+
+    // simpan file upload ke DB
+    if (dataUploadDB.length > 0) {
+      await this.permohonanVerifikasiRepository.createOrUpdatePpnsUpload(
+        existingSurat.id,
+        dataUploadDB.map((d) => ({
+          ...d,
+          id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
+        })),
+      );
+    }
+
+    return { message: 'Upload dokumen berhasil disimpan/diupdate' };
+  }
+
+  async getListPermohonanVerifikasiSurat(
+    request: PermohonanVerifikasiSuratPaginationDto,
+    authorization: string,
+  ): Promise<GetPermohonanVerifikasiSuratPaginationDto> {
+    this.logger.debug('Fetching list permohonan verifikasi surat', { request });
+
+    // 1️⃣ Validasi input
+    const getRequest = this.validationService.validate(
+      PermohonanVerifikasiValidation.GET_SURAT_PAGINATION,
+      request,
+    );
+
+    // 2️⃣ Ambil user login
+    const userLogin = await getUserFromToken(authorization);
+    if (!userLogin) {
+      this.logger.error('Authorization token is missing');
+      throw new BadRequestException('Authorization is missing');
+    }
+
+    // 3️⃣ Ambil data + count secara paralel
+    const [data, total] = await Promise.all([
+      this.permohonanVerifikasiRepository.findAllWithPaginationSurat(
+        getRequest.search,
+        getRequest.page,
+        getRequest.limit,
+        getRequest.orderBy,
+        getRequest.orderDirection,
+        getRequest.filters,
+        userLogin.user_id,
+      ),
+      this.permohonanVerifikasiRepository.countPermohonanVerifikasiSurat(
+        getRequest.search,
+        userLogin.user_id,
+      ),
+    ]);
+
+    // 4️⃣ Buat pagination
+    const pagination = {
+      currentPage: getRequest.page,
+      totalPage: Math.ceil(total / getRequest.limit),
+      totalData: total,
+    };
+
+    // 5️⃣ Return data dengan mapping field tanggal dan null safety
+    return {
+      data: data.map((item: any) => ({
+        id: item.id,
+        id_user: item.id_user,
+        lembaga_kementerian: item.lembaga_kementerian,
+        instansi: item.instansi,
+        no_surat: item.no_surat ?? '',
+        tgl_surat: item.tgl_surat ? item.tgl_surat.toISOString() : '',
+        perihal: item.perihal ?? '',
+        nama_pengusul: item.nama_pengusul ?? '',
+        jabatan_pengusul: item.jabatan_pengusul ?? '',
+        status: item.status ?? null,
+        created_at: item.created_at ? item.created_at.toISOString() : '',
+        created_by: item.created_by ?? null,
+        verifikator_by: item.verifikator_by ?? null,
+        verifikator_at: item.verifikator_at
+          ? item.verifikator_at.toISOString()
+          : null,
+        id_layanan: item.id_layanan ?? null,
+      })),
+      pagination,
+    };
   }
 }

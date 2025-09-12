@@ -31,7 +31,7 @@ export class FileUploadService {
     file: Express.Multer.File,
     folder: string,
     idTransaksi: number,
-    idPpns: number,
+    idPpns: number | null,
     namaLayanan: string,
     idLayanan: number,
     fileType: string,
@@ -65,7 +65,7 @@ export class FileUploadService {
 
     return {
       id_surat: idTransaksi,
-      id_ppns: idPpns,
+      id_ppns: idPpns ? idPpns : null,
       file_type: fileType,
       original_name: file.originalname,
       keterangan: '',

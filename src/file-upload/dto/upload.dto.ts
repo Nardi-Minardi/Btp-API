@@ -4,7 +4,7 @@ import {
 
 export class PpnsUploadDto {
   id_surat: number;
-  id_ppns: number;
+  id_ppns: number | null;
   file_type: string;
   original_name: string;
   keterangan: string;
