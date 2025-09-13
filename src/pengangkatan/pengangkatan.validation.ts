@@ -1,7 +1,7 @@
 import { z, ZodType } from 'zod';
 import dayjs from 'dayjs';
 
-export class PermohonanVerifikasiValidation {
+export class PengangkatanValidation {
 
   static readonly CREATE_VERIFIKASI_PPNS: ZodType = z.object({
     id_data_ppns: z.number(),

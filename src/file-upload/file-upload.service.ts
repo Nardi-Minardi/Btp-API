@@ -33,7 +33,7 @@ export class FileUploadService {
     idTransaksi: number,
     idPpns: number | null,
     namaLayanan: string,
-    idLayanan: number,
+    idLayanan: number | null,
     fileType: string,
     status: status_upload_ii,
   ): Promise<PpnsUploadDto> {

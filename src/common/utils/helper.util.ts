@@ -87,3 +87,24 @@ export function isValidFullName(name: string): boolean {
 
   return parts.length >= 3;
 }
+
+export function dateOnlyToLocal(dateInput: string | Date): Date | null {
+  if (!dateInput) return null;
+
+  let year: number, month: number, day: number;
+
+  if (typeof dateInput === "string") {
+    // format "YYYY-MM-DD"
+    [year, month, day] = dateInput.split("-").map(Number);
+  } else if (dateInput instanceof Date) {
+    // kalau sudah Date, ambil komponen lokalnya
+    year = dateInput.getFullYear();
+    month = dateInput.getMonth() + 1;
+    day = dateInput.getDate();
+  } else {
+    throw new Error("Invalid date input format");
+  }
+
+  // bikin Date jam 12:00 agar aman dari pergeseran zona waktu
+  return new Date(year, month - 1, day, 12, 0, 0);
+}

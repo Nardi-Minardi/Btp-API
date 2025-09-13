@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DataMasterModule } from './data-master/data-master.module';
 import { PermohonanVerifikasiModule } from './permohonan-verifikasi/permohonan-verifikasi.module';
+import { SuratModule } from './surat/surat.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { PermohonanVerifikasiModule } from './permohonan-verifikasi/permohonan-v
     UserModule,
     DataMasterModule,
     PermohonanVerifikasiModule,
+    SuratModule
   ],
   controllers: [],
   providers: [],

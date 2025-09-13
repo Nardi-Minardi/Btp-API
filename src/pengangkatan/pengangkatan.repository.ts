@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common';
 import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Prisma, status_upload_ii } from '.prisma/main-client/client';
-import { CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto } from './dto/create.permohonan-verifikasi.dto';
+import { CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto } from './dto/create.pengangkatan.dto';
 import { SuratRepository } from 'src/surat/surat.repository';
 
 @Injectable()
-export class PermohonanVerifikasiRepository {
+export class PengangkatanRepository {
   constructor(
     private readonly masterPrismaService: MasterPrismaService,
     private readonly prismaService: PrismaService,

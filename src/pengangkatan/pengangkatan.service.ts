@@ -11,8 +11,7 @@ import { Logger } from 'winston';
 import {
   CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto,
   CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto,
-} from './dto/create.permohonan-verifikasi.dto';
-import { PermohonanVerifikasiValidation } from './permohonan-verifikasi.validation';
+} from './dto/create.pengangkatan.dto';
 import {
   dateOnlyToLocal,
   generateUniqueString,
@@ -20,20 +19,21 @@ import {
 } from 'src/common/utils/helper.util';
 import { FileUploadService } from 'src/file-upload/file-upload.service';
 import { FileUploadRepository } from 'src/file-upload/file-upload.repository';
-import { PermohonanVerifikasiRepository } from './permohonan-verifikasi.repository';
 import { S3Service } from 'src/common/s3.service';
 import { status_upload_ii, Prisma } from '.prisma/main-client';
 import { PpnsUploadDto } from 'src/file-upload/dto/upload.dto';
 import { SuratRepository } from 'src/surat/surat.repository';
+import { PengangkatanRepository } from './pengangkatan.repository';
+import { PengangkatanValidation } from './pengangkatan.validation';
 
 @Injectable()
-export class PermohonanVerifikasiService {
+export class PengangkatanService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private validationService: ValidationService,
     private fileUploadService: FileUploadService,
     private fileUploadRepository: FileUploadRepository,
-    private permohonanVerifikasiRepository: PermohonanVerifikasiRepository,
+    private pengangkatanRepository: PengangkatanRepository,
     private suratRepository: SuratRepository,
     private s3Service: S3Service,
   ) {}
@@ -51,7 +51,7 @@ export class PermohonanVerifikasiService {
     }
 
     const createRequest = this.validationService.validate(
-      PermohonanVerifikasiValidation.CREATE_VERIFIKASI_PPNS,
+      PengangkatanValidation.CREATE_VERIFIKASI_PPNS,
       request,
     );
 
@@ -103,7 +103,7 @@ export class PermohonanVerifikasiService {
 
     //cek data pppns
     const existingPpnsVerifikasiPns =
-      await this.permohonanVerifikasiRepository.findPpnsVerifikasiPnsById(
+      await this.pengangkatanRepository.findPpnsVerifikasiPnsById(
         createRequest.id_data_ppns,
       );
 
@@ -111,19 +111,16 @@ export class PermohonanVerifikasiService {
 
     if (existingPpnsVerifikasiPns) {
       //update
-      result =
-        await this.permohonanVerifikasiRepository.updatePpnsVerifikasiPns(
-          existingPpnsVerifikasiPns.id,
-          {
-            ...createData,
-          },
-        );
+      result = await this.pengangkatanRepository.updatePpnsVerifikasiPns(
+        existingPpnsVerifikasiPns.id,
+        {
+          ...createData,
+        },
+      );
     } else {
       // create data calon ppns
       result =
-        await this.permohonanVerifikasiRepository.savePpnsVerifikasiPns(
-          createData,
-        );
+        await this.pengangkatanRepository.savePpnsVerifikasiPns(createData);
     }
 
     //update column nama_sekolah , gelar_terakhir, no_ijazah, tgl_ijazah, tahun_lulus di ppns_data_pns
@@ -167,7 +164,7 @@ export class PermohonanVerifikasiService {
       },
     );
     const createRequest = this.validationService.validate(
-      PermohonanVerifikasiValidation.CREATE_VERIFIKASI_UPLOAD,
+      PengangkatanValidation.CREATE_VERIFIKASI_UPLOAD,
       request,
     );
 
@@ -340,7 +337,7 @@ export class PermohonanVerifikasiService {
 
     // simpan file upload ke DB
     if (dataUploadDB.length > 0) {
-      await this.permohonanVerifikasiRepository.createOrUpdateVerifikasiPpnsUpload(
+      await this.pengangkatanRepository.createOrUpdateVerifikasiPpnsUpload(
         existingSurat.id,
         dataUploadDB.map((d) => ({
           ...d,

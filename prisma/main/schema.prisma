@@ -14,32 +14,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Instansi {
-  id             Int     @id @default(autoincrement())
-  id_kementerian Int?    @db.Integer
-  nama           String? @db.VarChar(255)
+model PpnsKementerian {
+  id         Int       @id @default(autoincrement())
+  nama       String?   @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
 
-  Kementerian Kementerian? @relation("MasterInstansiKementerian", fields: [id_kementerian], references: [id])
-
-  @@map("m_instansi")
-}
-
-model Kementerian {
-  id   Int     @id @default(autoincrement())
-  nama String? @db.VarChar(255)
-  created_at DateTime @default(now()) @db.Timestamp(6)
-
-  Instansi Instansi[] @relation("MasterInstansiKementerian")
+  ppns_instansi PpnsInstansi[] @relation("MasterInstansiKementerian")
 
   @@map("m_kementerian")
 }
 
+model PpnsInstansi {
+  id             Int       @id @default(autoincrement())
+  id_kementerian Int?      @db.Integer
+  nama           String?   @db.VarChar(255)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+
+  ppns_kementerian PpnsKementerian? @relation("MasterInstansiKementerian", fields: [id_kementerian], references: [id])
+
+  @@map("m_instansi")
+}
+
 model PpnsTypeFile {
-  id   Int     @id @default(autoincrement())
-  nama String? @db.VarChar(255)
-  created_at DateTime @default(now()) @db.Timestamp(6)
+  id         Int       @id @default(autoincrement())
+  nama       String?   @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
 
   @@map("m_ppns_type_file")
+}
+
+model PpnsLayanan {
+  id         Int       @id @default(autoincrement())
+  nama       String?   @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+
+  //one-to-many relation ppns surat
+  ppns_surat         PpnsSurat[]    @relation("PpnsSuratPpnsLayanan")
+  ppns_wilayah_kerja WilayahKerja[] @relation("PpnsLayananWilayahKerja")
+
+  @@map("m_ppns_layanan")
 }
 
 model PpnsDataPpns {
@@ -333,6 +346,7 @@ model PpnsSurat {
   // Relasi
   ppns_upload   PpnsUpload?   @relation("PpnsUploadPpnsSurat")
   ppns_data_pns PpnsDataPns[] @relation("PpnsDataPnsPpnsSurat")
+  ppns_layanan  PpnsLayanan?  @relation("PpnsSuratPpnsLayanan", fields: [id_layanan], references: [id])
 
   @@map("tr_ppns_surat")
 }
@@ -396,6 +410,7 @@ model WilayahKerja {
   uu_dikawal_3         String? @db.VarChar(255)
 
   ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsWilayahKerja", fields: [id_ppns], references: [id])
+  ppns_layanan  PpnsLayanan? @relation("PpnsLayananWilayahKerja", fields: [id_layanan], references: [id])
 
   @@map("tr_wilayah_kerja")
 }
@@ -404,7 +419,7 @@ model WilayahKerja {
 model PpnsVerifikasiPpns {
   id                               Int          @id @default(autoincrement())
   id_data_ppns                     Int?         @db.Integer
-  tgl_pengangkatan_sk_pns             DateTime?    @db.Date
+  tgl_pengangkatan_sk_pns          DateTime?    @db.Date
   sk_kenaikan_pangkat              String?      @db.VarChar(255)
   nama_sekolah                     String?      @db.VarChar(255)
   no_ijazah                        String?      @db.VarChar(255)
@@ -433,7 +448,6 @@ model PpnsVerifikasiPpns {
 
   @@map("tr_ppns_verifikasi_ppns")
 }
-
 
 model PpnsVerifikasiData {
   id                    Int            @id @default(autoincrement())

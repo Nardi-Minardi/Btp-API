@@ -11,15 +11,15 @@ import {
 import { Pagination, WebResponse } from 'src/common/web.response';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto, CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto } from './dto/create.permohonan-verifikasi.dto';
-import { PermohonanVerifikasiService } from './permohonan-verifikasi.service';
+import { CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto, CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto } from './dto/create.pengangkatan.dto';
+import { PengangkatanService } from './pengangkatan.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
-@Controller('/verifikasi')
-export class PermohonanVerifikasiController {
+@Controller('/pengangkatan')
+export class PengangkatanController {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private permohonanVerifikasiService: PermohonanVerifikasiService,
+    private pengangkatanService: PengangkatanService,
   ) {}
 
   @Post('/ppns/create')
@@ -31,7 +31,7 @@ export class PermohonanVerifikasiController {
     WebResponse<CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto>
   > {
     const authorization = headers['authorization'] || '';
-    const result = await this.permohonanVerifikasiService.storeVerifikasiPpns(
+    const result = await this.pengangkatanService.storeVerifikasiPpns(
       request,
       authorization,
     );
@@ -82,7 +82,7 @@ export class PermohonanVerifikasiController {
         files?.dok_verifikasi_penilaian_pekerjaan?.[0] ?? null,
     };
 
-    const result = await this.permohonanVerifikasiService.storeUploadDokumen(
+    const result = await this.pengangkatanService.storeUploadDokumen(
       request,
       authorization,
     );
