@@ -4,7 +4,7 @@ export class CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto {
   id_surat: number | null;
   masa_kerja: any | null;
   pendidikan_terakhir: any | null;
-  teknis_operasional_penegak_hukum: string | null;
+  teknis_operasional_penegak_hukum: boolean | null;
   jabatan: string | null;
   surat_sehat_jasmani_rohani: any | null;
   dp3: any | null;

@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { DataMasterModule } from './data-master/data-master.module';
 import { PermohonanVerifikasiModule } from './permohonan-verifikasi/permohonan-verifikasi.module';
 import { SuratModule } from './surat/surat.module';
+import { PengangkatanModule } from './pengangkatan/pengangkatan.module';
 
 @Module({
   imports: [
@@ -12,8 +13,9 @@ import { SuratModule } from './surat/surat.module';
     AuthModule,
     UserModule,
     DataMasterModule,
+    SuratModule,
     PermohonanVerifikasiModule,
-    SuratModule
+    PengangkatanModule
   ],
   controllers: [],
   providers: [],

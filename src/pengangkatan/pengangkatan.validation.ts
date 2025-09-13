@@ -1,153 +1,304 @@
 import { z, ZodType } from 'zod';
 import dayjs from 'dayjs';
 
-export class PengangkatanValidation {
+const zBooleanFromFormData = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null) return undefined;
 
-  static readonly CREATE_VERIFIKASI_PPNS: ZodType = z.object({
-    id_data_ppns: z.number(),
-    masa_kerja: z.object({
-      tgl_pengangkatan_sk_pns: z
-        .string()
-        .trim()
-        .refine(
-          (val) => {
-            if (!val) return true; // kosong → valid (nanti dicek di refine level root)
-            return !isNaN(Date.parse(val));
-          },
-          {
-            message: 'Tanggal Pengangkatan SK PNS must be a valid date string',
-          },
-        )
-        .transform((val) => (val ? dayjs(val).toDate() : undefined)),
-      sk_kenaikan_pangkat: z.string().min(1, 'SK Kenaikan Pangkat is required'),
-    }),
-    pendidikan_terakhir: z.object({
+    if (typeof val === 'string') {
+      if (val.toLowerCase() === 'true') return true;
+      if (val.toLowerCase() === 'false') return false;
+      return val; // return saja string, biar z.boolean() di bawah yg gagal
+    }
+
+    return val;
+  },
+  z.boolean({ required_error: 'Value must be true or false' }),
+);
+
+export class PengangkatanValidation {
+  static readonly CREATE_PENGANGKATAN_PPNS: ZodType = z
+    .object({
+      id_data_ppns: z.string().min(1, 'id_data_ppns is required'),
+
       nama_sekolah: z.string().min(1, 'Nama Sekolah is required'),
       gelar_terakhir: z.string().min(1, 'Gelar Terakhir is required'),
       no_ijazah: z.string().min(1, 'No Ijazah is required'),
       tgl_ijazah: z
         .string()
         .trim()
-        .refine(
-          (val) => {
-            if (!val) return true; // kosong → valid (nanti dicek di refine level root)
-            return !isNaN(Date.parse(val));
-          },
-          { message: 'Tanggal Ijazah must be a valid date string' },
-        )
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message: 'Tanggal Ijazah must be a valid date string',
+        })
         .transform((val) => (val ? dayjs(val).toDate() : undefined)),
-      tahun_lulus: z
-        .number({ invalid_type_error: 'Tahun Lulus must be a number' })
-        .int('Tahun Lulus must be an integer')
-        .min(1900, 'Tahun Lulus must be at least 1900')
-        .max(new Date().getFullYear(), 'Tahun Lulus cannot be in the future'),
-    }),
-    teknis_operasional_penegak_hukum: z.boolean(),
-    jabatan: z.string().min(1, 'Jabatan is required'),
-    surat_sehat_jasmani_rohani: z.object({
-      nama_rs: z.string().min(1, 'Nama RS is required'),
-      tgl_surat_rs: z
+
+      tahun_lulus: z.string().min(1, 'Tahun Lulus is required'),
+      no_sttpl: z.string().min(1, 'No STTPL is required'),
+      tgl_sttpl: z
         .string()
         .trim()
-        .refine(
-          (val) => {
-            if (!val) return true; // kosong → valid (nanti dicek di refine level root)
-            return !isNaN(Date.parse(val));
-          },
-          { message: 'Tanggal Surat RS must be a valid date string' },
-        )
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message: 'Tanggal STPL must be a valid date string',
+        })
         .transform((val) => (val ? dayjs(val).toDate() : undefined)),
-    }),
-    dp3: z.object({
-      tahun_1: z.number().int().min(0),
-      nilai_1: z.number().min(0),
-      tahun_2: z.number().int().min(0),
-      nilai_2: z.number().min(0),
-    }),
-  });
+      tgl_verifikasi: z
+        .string()
+        .trim()
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message: 'Tanggal Verifikasi must be a valid date string',
+        })
+        .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+      teknis_operasional_penegak_hukum: zBooleanFromFormData,
+      jabatan: z.string().min(1, 'Jabatan is required'),
 
-  static readonly CREATE_VERIFIKASI_UPLOAD: ZodType = z.object({
+      // ======= SURAT POLISI =======
+      cek_surat_polisi: zBooleanFromFormData,
+      no_surat_polisi: z.string().optional(),
+      tgl_surat_polisi: z
+        .string()
+        .optional()
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message: 'Tanggal Surat Polisi must be a valid date string',
+        })
+        .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+      perihal_surat_polisi: z.string().optional(),
+      no_tanda_terima_polisi: z.string().optional(),
+      tgl_tanda_terima_polisi: z
+        .string()
+        .optional()
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message: 'Tanggal Tanda Terima Polisi must be a valid date string',
+        })
+        .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+      perihal_tanda_terima_polisi: z.string().optional(),
+      dok_tanda_terima_polisi: z
+        .any()
+        .optional()
+        .refine(
+          (file: Express.Multer.File | undefined) =>
+            !file || file.mimetype === 'application/pdf',
+          { message: 'dok_tanda_terima_polisi harus berupa PDF' },
+        )
+        .refine(
+          (file: Express.Multer.File | undefined) =>
+            !file || file.size <= 5 * 1024 * 1024,
+          { message: 'Ukuran dok_tanda_terima_polisi maksimal 5 MB' },
+        ),
+
+      // ======= SURAT KEJAKSAAN =======
+      cek_surat_kejaksaan_agung: zBooleanFromFormData,
+      no_surat_kejaksaan_agung: z.string().optional(),
+      tgl_surat_kejaksaan_agung: z
+        .string()
+        .optional()
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message: 'Tanggal Surat Kejaksaan Agung must be a valid date string',
+        })
+        .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+      perihal_surat_kejaksaan_agung: z.string().optional(),
+      no_tanda_terima_kejaksaan_agung: z.string().optional(),
+      tgl_tanda_terima_kejaksaan_agung: z
+        .string()
+        .optional()
+        .refine((val) => !val || !isNaN(Date.parse(val)), {
+          message:
+            'Tanggal Tanda Terima Kejaksaan Agung must be a valid date string',
+        })
+        .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+      perihal_tanda_terima_kejaksaan_agung: z.string().optional(),
+      dok_tanda_terima_kejaksaan_agung: z
+        .any()
+        .optional()
+        .refine(
+          (file: Express.Multer.File | undefined) =>
+            !file || file.mimetype === 'application/pdf',
+          { message: 'dok_tanda_terima_kejaksaan_agung harus berupa PDF' },
+        )
+        .refine(
+          (file: Express.Multer.File | undefined) =>
+            !file || file.size <= 5 * 1024 * 1024,
+          { message: 'Ukuran dok_tanda_terima_kejaksaan_agung maksimal 5 MB' },
+        ),
+    })
+    .superRefine((data, ctx) => {
+      // ====== VALIDASI SURAT POLISI ======
+      if (data.cek_surat_polisi) {
+        if (!data.no_surat_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['no_surat_polisi'],
+            message: 'No Surat Polisi is required when cek_surat_polisi = true',
+          });
+        }
+        if (!data.tgl_surat_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tgl_surat_polisi'],
+            message:
+              'Tanggal Surat Polisi is required when cek_surat_polisi = true',
+          });
+        }
+        if (!data.perihal_surat_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['perihal_surat_polisi'],
+            message:
+              'Perihal Surat Polisi is required when cek_surat_polisi = true',
+          });
+        }
+      } else {
+        if (!data.no_tanda_terima_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['no_tanda_terima_polisi'],
+            message:
+              'No Tanda Terima Polisi is required when cek_surat_polisi = false',
+          });
+        }
+        if (!data.tgl_tanda_terima_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tgl_tanda_terima_polisi'],
+            message:
+              'Tanggal Tanda Terima Polisi is required when cek_surat_polisi = false',
+          });
+        }
+        if (!data.perihal_tanda_terima_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['perihal_tanda_terima_polisi'],
+            message:
+              'Perihal Tanda Terima Polisi is required when cek_surat_polisi = false',
+          });
+        }
+        if (!data.dok_tanda_terima_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['dok_tanda_terima_polisi'],
+            message:
+              'Dok Tanda Terima Polisi is required when cek_surat_polisi = false',
+          });
+        }
+      }
+
+      // ====== VALIDASI SURAT KEJAKSAAN ======
+      if (data.cek_surat_kejaksaan_agung) {
+        if (!data.no_surat_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['no_surat_kejaksaan_agung'],
+            message:
+              'No Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
+          });
+        }
+        if (!data.tgl_surat_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tgl_surat_kejaksaan_agung'],
+            message:
+              'Tanggal Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
+          });
+        }
+        if (!data.perihal_surat_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['perihal_surat_kejaksaan_agung'],
+            message:
+              'Perihal Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
+          });
+        }
+      } else {
+        if (!data.no_tanda_terima_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['no_tanda_terima_kejaksaan_agung'],
+            message:
+              'No Tanda Terima Kejaksaan Agung is required when cek_surat_kejaksaan_agung = false',
+          });
+        }
+        if (!data.tgl_tanda_terima_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tgl_tanda_terima_kejaksaan_agung'],
+            message:
+              'Tanggal Tanda Terima Kejaksaan Agung is required when cek_surat_kejaksaan_agung = false',
+          });
+        }
+        if (!data.perihal_tanda_terima_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['perihal_tanda_terima_kejaksaan_agung'],
+            message:
+              'Perihal Tanda Terima Kejaksaan Agung is required when cek_surat_kejaksaan_agung = false',
+          });
+        }
+        if (!data.dok_tanda_terima_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['dok_tanda_terima_kejaksaan_agung'],
+            message:
+              'Dok Tanda Terima Kejaksaan Agung is required when cek_surat_kejaksaan_agung = false',
+          });
+        }
+      }
+    });
+
+  static readonly CREATE_PENGANGKATAN_UPLOAD: ZodType = z.object({
     id_surat: z.string().min(1, 'id_surat is required'),
     id_ppns: z.string().min(1, 'id_ppns is required'),
-    dok_verifikasi_sk_masa_kerja: z
+    dok_surat_permohonan_pengangkatan: z
       .any()
       .optional()
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.mimetype === 'application/pdf',
-        { message: 'dok_verifikasi_sk_masa_kerja harus berupa PDF' },
+        { message: 'dok_surat_permohonan_pengangkatan harus berupa PDF' },
       )
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.size <= 5 * 1024 * 1024,
-        { message: 'Ukuran dok_verifikasi_sk_masa_kerja maksimal 5 MB' },
+        { message: 'Ukuran dok_surat_permohonan_pengangkatan maksimal 5 MB' },
       ),
-    dok_verifikasi_sk_pangkat: z
+    dok_fotokopi_tamat_pendidikan: z
       .any()
       .optional()
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.mimetype === 'application/pdf',
-        { message: 'dok_verifikasi_sk_pangkat harus berupa PDF' },
+        { message: 'dok_fotokopi_tamat_pendidikan harus berupa PDF' },
       )
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.size <= 5 * 1024 * 1024,
-        { message: 'Ukuran dok_verifikasi_sk_pangkat maksimal 5 MB' },
+        { message: 'Ukuran dok_fotokopi_tamat_pendidikan maksimal 5 MB' },
       ),
-    dok_verifikasi_ijazah: z
+    dok_surat_pertimbangan: z
       .any()
       .optional()
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.mimetype === 'application/pdf',
-        { message: 'dok_verifikasi_ijazah harus berupa PDF' },
+        { message: 'dok_surat_pertimbangan harus berupa PDF' },
       )
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.size <= 5 * 1024 * 1024,
-        { message: 'Ukuran dok_verifikasi_ijazah maksimal 5 MB' },
+        { message: 'Ukuran dok_surat_pertimbangan maksimal 5 MB' },
       ),
-    dok_verifikasi_sk_jabatan_teknis_oph: z
+    foto: z
       .any()
       .optional()
       .refine(
         (file: Express.Multer.File | undefined) =>
-          !file || file.mimetype === 'application/pdf',
-        { message: 'dok_verifikasi_sk_jabatan_teknis_oph harus berupa PDF' },
+          !file || file.mimetype === 'jpeg' || file.mimetype === 'png' || file.mimetype === 'jpg' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg',
+        { message: 'foto harus berupa JPEG/PNG/JPG' },
       )
       .refine(
         (file: Express.Multer.File | undefined) =>
           !file || file.size <= 5 * 1024 * 1024,
         {
-          message: 'Ukuran dok_verifikasi_sk_jabatan_teknis_oph maksimal 5 MB',
+          message: 'Ukuran foto maksimal 5 MB',
         },
-      ),
-    dok_verifikasi_sehat_jasmani: z
-      .any()
-      .optional()
-      .refine(
-        (file: Express.Multer.File | undefined) =>
-          !file || file.mimetype === 'application/pdf',
-        { message: 'dok_verifikasi_sehat_jasmani harus berupa PDF' },
-      )
-      .refine(
-        (file: Express.Multer.File | undefined) =>
-          !file || file.size <= 5 * 1024 * 1024,
-        { message: 'Ukuran dok_verifikasi_sehat_jasmani maksimal 5 MB' },
-      ),
-    dok_verifikasi_penilaian_pekerjaan: z
-      .any()
-      .optional()
-      .refine(
-        (file: Express.Multer.File | undefined) =>
-          !file || file.mimetype === 'application/pdf',
-        { message: 'dok_verifikasi_penilaian_pekerjaan harus berupa PDF' },
-      )
-      .refine(
-        (file: Express.Multer.File | undefined) =>
-          !file || file.size <= 5 * 1024 * 1024,
-        { message: 'Ukuran dok_verifikasi_penilaian_pekerjaan maksimal 5 MB' },
       ),
   });
 }

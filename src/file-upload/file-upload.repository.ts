@@ -21,8 +21,8 @@ export class FileUploadRepository {
     file_type: string,
     id_surat: number,
     id_ppns: number,
-  ): Promise<PpnsUpload | null> {
-    return this.prismaService.ppnsUpload.findFirst({
+  ): Promise<PpnsUpload[]> {
+    return this.prismaService.ppnsUpload.findMany({
       where: { file_type, id_surat, id_ppns },
     });
   }

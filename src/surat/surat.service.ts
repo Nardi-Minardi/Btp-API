@@ -201,10 +201,11 @@ export class SuratService {
         result.id_user,
       );
 
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
-
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_surat_pernyataan,
         'dokumen-surat-pernyataan',
@@ -225,10 +226,17 @@ export class SuratService {
         result.id,
         dataUploadDB.map((d) => ({
           ...d,
-          id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
+          id_ppns: userLogin.user_id,
         })),
       );
     }
+
+    // ✅ ambil ulang file upload dari DB supaya data pasti sudah tersimpan
+    const dok_pernyataan = await this.fileUploadRepository.findFilePpnsUpload(
+      'dokumen-surat-pernyataan',
+      Number(result.id),
+      Number(result.id_user),
+    );
 
     // mapping hasil ke DTO (pastikan tanggal diubah ke ISO string)
     const response: CreateResponseSuratDto = {
@@ -239,6 +247,7 @@ export class SuratService {
       verifikator_at: result.verifikator_at
         ? result.verifikator_at.toISOString()
         : null,
+      dok_surat_pernyataan: dok_pernyataan[0],
     };
 
     return response;
@@ -455,6 +464,7 @@ export class SuratService {
     await this.suratRepository.updatePpnsUploadIdPpns(
       Number(createRequest.id_surat),
       Number(result.id),
+      userLogin.user_id,
     );
 
     return result;

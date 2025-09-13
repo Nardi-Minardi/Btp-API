@@ -9,7 +9,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ValidationService } from 'src/common/validation.service';
 import { Logger } from 'winston';
 import {
-  CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto,
+  CreateResponsePengangkatanPpnsDto,
   CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto,
 } from './dto/create.pengangkatan.dto';
 import {
@@ -23,8 +23,13 @@ import { S3Service } from 'src/common/s3.service';
 import { status_upload_ii, Prisma } from '.prisma/main-client';
 import { PpnsUploadDto } from 'src/file-upload/dto/upload.dto';
 import { SuratRepository } from 'src/surat/surat.repository';
-import { PengangkatanRepository } from './pengangkatan.repository';
+import {
+  PengangkatanRepository,
+  PpnsPengangkatanCreateInputWithExtra,
+  PpnsPengangkatanUpdateInputWithExtra,
+} from './pengangkatan.repository';
 import { PengangkatanValidation } from './pengangkatan.validation';
+import { LayananRepository } from 'src/layanan/layanan.repository';
 
 @Injectable()
 export class PengangkatanService {
@@ -35,14 +40,18 @@ export class PengangkatanService {
     private fileUploadRepository: FileUploadRepository,
     private pengangkatanRepository: PengangkatanRepository,
     private suratRepository: SuratRepository,
+    private layananRepository: LayananRepository,
     private s3Service: S3Service,
   ) {}
 
-  async storeVerifikasiPpns(
-    request: any,
+  async storePengangkatanPpns(
+    request: any & {
+      dok_tanda_terima_polisi: Express.Multer.File;
+      dok_tanda_terima_kejaksaan_agung: Express.Multer.File;
+    },
     authorization?: string,
-  ): Promise<CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto> {
-    this.logger.debug('Request send permohonan verifikasi PPNS', { request });
+  ): Promise<any> {
+    this.logger.debug('Request create new pengangkatan PPNS', { request });
 
     // Handle if body is empty
     if (!request || Object.keys(request).length === 0) {
@@ -51,7 +60,7 @@ export class PengangkatanService {
     }
 
     const createRequest = this.validationService.validate(
-      PengangkatanValidation.CREATE_VERIFIKASI_PPNS,
+      PengangkatanValidation.CREATE_PENGANGKATAN_PPNS,
       request,
     );
 
@@ -64,7 +73,7 @@ export class PengangkatanService {
 
     //cek data pppns
     const existingPpnsDataPns = await this.suratRepository.findPpnsDataPnsById(
-      createRequest.id_data_ppns,
+      Number(createRequest.id_data_ppns),
     );
 
     if (!existingPpnsDataPns) {
@@ -74,86 +83,197 @@ export class PengangkatanService {
     }
 
     const createData = {
-      id_data_ppns: createRequest.id_data_ppns,
-      tgl_pengangkatan_sk_pns: createRequest.masa_kerja.tgl_pengangkatan_sk_pns
-        ? dateOnlyToLocal(createRequest.masa_kerja.tgl_pengangkatan_sk_pns)
+      id_data_ppns: Number(createRequest.id_data_ppns),
+      id_surat: existingPpnsDataPns.id_surat,
+      nama_sekolah: createRequest.nama_sekolah,
+      no_ijazah: createRequest.no_ijazah,
+      tgl_ijazah: createRequest.tgl_ijazah
+        ? dateOnlyToLocal(createRequest.tgl_ijazah)
         : null,
-      sk_kenaikan_pangkat: createRequest.masa_kerja.sk_kenaikan_pangkat,
-      nama_sekolah: createRequest.pendidikan_terakhir.nama_sekolah,
-      no_ijazah: createRequest.pendidikan_terakhir.no_ijazah,
-      tgl_ijazah: createRequest.pendidikan_terakhir.tgl_ijazah
-        ? dateOnlyToLocal(createRequest.pendidikan_terakhir.tgl_ijazah)
+      // tgl_lulus: createRequest.tgl_lulus
+      //   ? dateOnlyToLocal(createRequest.tgl_lulus)
+      //   : null,
+      tahun_lulus: Number(createRequest.tahun_lulus),
+      // gelar_terakhir: createRequest.gelar_terakhir,
+      no_sttpl: createRequest.no_sttpl,
+      tgl_sttpl: createRequest.tgl_sttpl
+        ? dateOnlyToLocal(createRequest.tgl_sttpl)
         : null,
-      tgl_lulus: createRequest.pendidikan_terakhir.tgl_lulus
-        ? dateOnlyToLocal(createRequest.pendidikan_terakhir.tgl_lulus)
+      tgl_verifikasi: createRequest.tgl_verifikasi
+        ? dateOnlyToLocal(createRequest.tgl_verifikasi)
         : null,
-      // gelar_terakhir: createRequest.pendidikan_terakhir.gelar_terakhir,
       teknis_operasional_penegak_hukum:
         createRequest.teknis_operasional_penegak_hukum ? '1' : '0',
       jabatan: createRequest.jabatan,
-      nama_rs: createRequest.surat_sehat_jasmani_rohani.nama_rs,
-      tgl_surat_rs: createRequest.surat_sehat_jasmani_rohani.tgl_surat_rs
-        ? dateOnlyToLocal(createRequest.surat_sehat_jasmani_rohani.tgl_surat_rs)
+      cek_surat_polisi: createRequest.cek_surat_polisi ? '1' : '0',
+      no_surat_polisi: createRequest.cek_surat_polisi
+        ? createRequest.no_surat_polisi
+        : createRequest.no_tanda_terima_polisi,
+      tgl_surat_polisi: createRequest.cek_surat_polisi
+        ? createRequest.tgl_surat_polisi
+          ? dateOnlyToLocal(createRequest.tgl_surat_polisi)
+          : dateOnlyToLocal(createRequest.tgl_tanda_terima_polisi)
         : null,
-      tahun_1: createRequest.dp3.tahun_1,
-      nilai_1: createRequest.dp3.nilai_1,
-      tahun_2: createRequest.dp3.tahun_2,
-      nilai_2: createRequest.dp3.nilai_2,
+      perihal_surat_polisi: createRequest.cek_surat_polisi
+        ? createRequest.perihal_surat_polisi
+        : createRequest.perihal_tanda_terima_polisi,
+      cek_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung
+        ? '1'
+        : '0',
+      no_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung
+        ? createRequest.no_surat_kejaksaan_agung
+        : createRequest.no_tanda_terima_kejaksaan_agung,
+      tgl_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung
+        ? createRequest.tgl_surat_kejaksaan_agung
+          ? dateOnlyToLocal(createRequest.tgl_surat_kejaksaan_agung)
+          : dateOnlyToLocal(createRequest.tgl_tanda_terima_kejaksaan_agung)
+        : null,
+      perihal_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung
+        ? createRequest.perihal_surat_kejaksaan_agung
+        : createRequest.perihal_tanda_terima_kejaksaan_agung,
     };
 
-    //cek data pppns
-    const existingPpnsVerifikasiPns =
-      await this.pengangkatanRepository.findPpnsVerifikasiPnsById(
-        createRequest.id_data_ppns,
+    //cek data pengangkatan
+    const existingPpnsPengangkatan =
+      await this.pengangkatanRepository.findPpnsPengangkatanById(
+        Number(createRequest.id_data_ppns),
       );
 
     let result;
 
-    if (existingPpnsVerifikasiPns) {
+    if (existingPpnsPengangkatan) {
       //update
-      result = await this.pengangkatanRepository.updatePpnsVerifikasiPns(
-        existingPpnsVerifikasiPns.id,
-        {
-          ...createData,
-        },
+      result = await this.pengangkatanRepository.updatePpnsPengangkatan(
+        existingPpnsPengangkatan.id,
+        createData as unknown as PpnsPengangkatanUpdateInputWithExtra,
       );
     } else {
       // create data calon ppns
-      result =
-        await this.pengangkatanRepository.savePpnsVerifikasiPns(createData);
+      result = await this.pengangkatanRepository.savePpnsPengangkatan(
+        createData as unknown as PpnsPengangkatanCreateInputWithExtra,
+      );
+    }
+
+    const dataUploadDB: PpnsUploadDto[] = [];
+
+    const layanan =
+      await this.layananRepository.findLayananByNama('pengangkatan');
+
+    // jika ada dokumen tanda terima polisi
+    if (request.dok_tanda_terima_polisi) {
+      const existingPolisi = await this.fileUploadRepository.findFilePpnsUpload(
+        'dokumen-tanda-terima-polisi',
+        Number(existingPpnsDataPns.id_surat),
+        Number(createRequest.id_data_ppns),
+      );
+
+      await Promise.all(
+        existingPolisi.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
+
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_tanda_terima_polisi,
+        'dokumen-tanda-terima-polisi',
+        existingPpnsDataPns.id_surat ?? 0,
+        createData.id_data_ppns,
+        'pengangkatan',
+        layanan ? layanan.id : null,
+        'dokumen-tanda-terima-polisi',
+        status_upload_ii.pending,
+      );
+
+      dataUploadDB.push(upload);
+    }
+
+    // jika ada dokumen tanda terima kejaksaan agung
+    if (request.dok_tanda_terima_kejaksaan_agung) {
+      const existingKejaksaan =
+        await this.fileUploadRepository.findFilePpnsUpload(
+          'dokumen-tanda-terima-kejaksaan-agung',
+          Number(existingPpnsDataPns.id_surat),
+          Number(createRequest.id_data_ppns),
+        );
+      await Promise.all(
+        existingKejaksaan.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
+      const upload = await this.fileUploadService.handleUpload(
+        request.dok_tanda_terima_kejaksaan_agung,
+        'dokumen-tanda-terima-kejaksaan-agung',
+        existingPpnsDataPns.id_surat ?? 0,
+        createData.id_data_ppns,
+        'pengangkatan',
+        layanan ? layanan.id : null,
+        'dokumen-tanda-terima-kejaksaan-agung',
+        status_upload_ii.pending,
+      );
+      dataUploadDB.push(upload);
+    }
+
+    // simpan file upload ke DB
+    if (dataUploadDB.length > 0) {
+      await this.suratRepository.createOrUpdatePpnsUpload(
+        existingPpnsDataPns.id_surat ?? 0,
+        dataUploadDB.map((d) => ({
+          ...d,
+          id_surat: existingPpnsDataPns.id_surat ?? 0,
+          id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
+        })),
+      );
     }
 
     //update column nama_sekolah , gelar_terakhir, no_ijazah, tgl_ijazah, tahun_lulus di ppns_data_pns
     await Prisma.validator<Prisma.PpnsDataPnsUpdateInput>()({
-      nama_sekolah: createRequest.pendidikan_terakhir.nama_sekolah,
-      gelar_terakhir: createRequest.pendidikan_terakhir.gelar_terakhir,
-      no_ijazah: createRequest.pendidikan_terakhir.no_ijazah,
-      tgl_ijazah: createRequest.pendidikan_terakhir.tgl_ijazah
-        ? dateOnlyToLocal(createRequest.pendidikan_terakhir.tgl_ijazah)
+      nama_sekolah: createRequest.nama_sekolah,
+      gelar_terakhir: createRequest.gelar_terakhir,
+      no_ijazah: createRequest.no_ijazah,
+      tgl_ijazah: createRequest.tgl_ijazah
+        ? dateOnlyToLocal(createRequest.tgl_ijazah)
         : null,
-      tahun_lulus: createRequest.pendidikan_terakhir.tahun_lulus,
+      tahun_lulus: Number(createRequest.tahun_lulus),
     });
     await this.suratRepository.updatePpnsDataPns(existingPpnsDataPns.id, {
-      nama_sekolah: createRequest.pendidikan_terakhir.nama_sekolah,
-      gelar_terakhir: createRequest.pendidikan_terakhir.gelar_terakhir,
-      no_ijazah: createRequest.pendidikan_terakhir.no_ijazah,
-      tgl_ijazah: createRequest.pendidikan_terakhir.tgl_ijazah
-        ? dateOnlyToLocal(createRequest.pendidikan_terakhir.tgl_ijazah)
+      nama_sekolah: createRequest.nama_sekolah,
+      gelar_terakhir: createRequest.gelar_terakhir,
+      no_ijazah: createRequest.no_ijazah,
+      tgl_ijazah: createRequest.tgl_ijazah
+        ? dateOnlyToLocal(createRequest.tgl_ijazah)
         : null,
-      tahun_lulus: createRequest.pendidikan_terakhir.tahun_lulus,
+      tahun_lulus: Number(createRequest.tahun_lulus),
     });
 
-    return result;
+    // ✅ ambil ulang file upload dari DB supaya data pasti sudah tersimpan
+    const dok_tanda_terima_polisi =
+      await this.fileUploadRepository.findFilePpnsUpload(
+        'dokumen-tanda-terima-polisi',
+        Number(existingPpnsDataPns.id_surat),
+        Number(createRequest.id_data_ppns),
+      );
+    const dok_tanda_terima_kejaksaan_agung =
+      await this.fileUploadRepository.findFilePpnsUpload(
+        'dokumen-tanda-terima-kejaksaan-agung',
+        Number(existingPpnsDataPns.id_surat),
+        Number(createRequest.id_data_ppns),
+      );
+
+    // gabungkan uploads ke response
+    return {
+      ...result,
+      dok_tanda_terima_polisi: dok_tanda_terima_polisi[0] || null,
+      dok_tanda_terima_kejaksaan_agung:
+        dok_tanda_terima_kejaksaan_agung[0] || null,
+    } as CreateResponsePengangkatanPpnsDto;
   }
 
   async storeUploadDokumen(
     request: any & {
-      dok_verifikasi_sk_masa_kerja?: Express.Multer.File;
-      dok_verifikasi_sk_pangkat?: Express.Multer.File;
-      dok_verifikasi_ijazah?: Express.Multer.File;
-      dok_verifikasi_sk_jabatan_teknis_oph?: Express.Multer.File;
-      dok_verifikasi_sehat_jasmani?: Express.Multer.File;
-      dok_verifikasi_penilaian_pekerjaan?: Express.Multer.File;
+      dok_surat_permohonan_pengangkatan?: Express.Multer.File;
+      dok_fotokopi_tamat_pendidikan?: Express.Multer.File;
+      dok_surat_pertimbangan?: Express.Multer.File;
+      foto?: Express.Multer.File;
     },
     authorization?: string,
   ): Promise<CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto> {
@@ -164,7 +284,7 @@ export class PengangkatanService {
       },
     );
     const createRequest = this.validationService.validate(
-      PengangkatanValidation.CREATE_VERIFIKASI_UPLOAD,
+      PengangkatanValidation.CREATE_PENGANGKATAN_UPLOAD,
       request,
     );
 
@@ -199,137 +319,100 @@ export class PengangkatanService {
 
     const dataUploadDB: PpnsUploadDto[] = [];
 
-    if (request.dok_verifikasi_sk_masa_kerja) {
+    if (request.dok_surat_permohonan_pengangkatan) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sk_masa_kerja',
+        'dokumen-surat-permohonan-pengangkatan',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
 
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
 
       const upload = await this.fileUploadService.handleUpload(
-        request.dok_verifikasi_sk_masa_kerja,
-        'verifikasi_sk_masa_kerja',
+        request.dok_surat_permohonan_pengangkatan,
+        'dokumen-surat-permohonan-pengangkatan',
         existingSurat.id,
         existingPpnsDataPns.id,
-        'verifikasi',
+        'pengangkatan',
         existingSurat.id_layanan || null,
-        'verifikasi_sk_masa_kerja',
+        'dokumen-surat-permohonan-pengangkatan',
         status_upload_ii.pending,
       );
 
       dataUploadDB.push(upload);
     }
 
-    if (request.dok_verifikasi_sk_pangkat) {
+    if (request.dok_fotokopi_tamat_pendidikan) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sk_pangkat',
+        'dokumen-fotokopi-tamat-pendidikan',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
-        request.dok_verifikasi_sk_pangkat,
-        'verifikasi_sk_pangkat',
+        request.dok_fotokopi_tamat_pendidikan,
+        'dokumen-fotokopi-tamat-pendidikan',
         existingSurat.id,
         existingPpnsDataPns.id,
-        'verifikasi',
+        'pengangkatan',
         existingSurat.id_layanan || null,
-        'verifikasi_sk_pangkat',
+        'dokumen-fotokopi-tamat-pendidikan',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
     }
 
-    if (request.dok_verifikasi_ijazah) {
+    if (request.dok_surat_pertimbangan) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_ijazah',
+        'dokumen-surat-pertimbangan',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
-        request.dok_verifikasi_ijazah,
-        'verifikasi_ijazah',
+        request.dok_surat_pertimbangan,
+        'dokumen-surat-pertimbangan',
         existingSurat.id,
         existingPpnsDataPns.id,
-        'verifikasi',
+        'pengangkatan',
         existingSurat.id_layanan || null,
-        'verifikasi_ijazah',
+        'dokumen-surat-pertimbangan',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
     }
 
-    if (request.dok_verifikasi_sk_jabatan_teknis_oph) {
+    if (request.foto) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sk_jabatan_teknis_oph',
+        'foto',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
-        request.dok_verifikasi_sk_jabatan_teknis_oph,
-        'verifikasi_sk_jabatan_teknis_oph',
+        request.foto,
+        'foto',
         existingSurat.id,
         existingPpnsDataPns.id,
-        'verifikasi',
+        'pengangkatan',
         existingSurat.id_layanan || null,
-        'verifikasi_sk_jabatan_teknis_oph',
-        status_upload_ii.pending,
-      );
-      dataUploadDB.push(upload);
-    }
-
-    if (request.dok_verifikasi_sehat_jasmani) {
-      const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sehat_jasmani',
-        existingSurat.id,
-        existingPpnsDataPns.id,
-      );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
-      const upload = await this.fileUploadService.handleUpload(
-        request.dok_verifikasi_sehat_jasmani,
-        'verifikasi_sehat_jasmani',
-        existingSurat.id,
-        existingPpnsDataPns.id,
-        'verifikasi',
-        existingSurat.id_layanan || null,
-        'verifikasi_sehat_jasmani',
-        status_upload_ii.pending,
-      );
-      dataUploadDB.push(upload);
-    }
-
-    if (request.dok_verifikasi_penilaian_pekerjaan) {
-      const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_penilaian_pekerjaan',
-        existingSurat.id,
-        existingPpnsDataPns.id,
-      );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
-      const upload = await this.fileUploadService.handleUpload(
-        request.dok_verifikasi_penilaian_pekerjaan,
-        'verifikasi_penilaian_pekerjaan',
-        existingSurat.id,
-
-        existingPpnsDataPns.id,
-        'verifikasi',
-        existingSurat.id_layanan || null,
-        'verifikasi_penilaian_pekerjaan',
+        'foto',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -341,6 +424,7 @@ export class PengangkatanService {
         existingSurat.id,
         dataUploadDB.map((d) => ({
           ...d,
+          id_surat: existingSurat.id,
           id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
         })),
       );

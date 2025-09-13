@@ -42,7 +42,9 @@ export class PermohonanVerifikasiService {
     request: any,
     authorization?: string,
   ): Promise<CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto> {
-    this.logger.debug('Request send permohonan verifikasi PPNS', { request });
+    this.logger.debug('Request create permohonan verifikasi, Verikasi PPNS', {
+      request,
+    });
 
     // Handle if body is empty
     if (!request || Object.keys(request).length === 0) {
@@ -204,23 +206,24 @@ export class PermohonanVerifikasiService {
 
     if (request.dok_verifikasi_sk_masa_kerja) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sk_masa_kerja',
+        'verifikasi-sk-masa-kerja',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
 
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
-
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_verifikasi_sk_masa_kerja,
-        'verifikasi_sk_masa_kerja',
+        'verifikasi-sk-masa-kerja',
         existingSurat.id,
         existingPpnsDataPns.id,
         'verifikasi',
         existingSurat.id_layanan || null,
-        'verifikasi_sk_masa_kerja',
+        'verifikasi-sk-masa-kerja',
         status_upload_ii.pending,
       );
 
@@ -229,21 +232,23 @@ export class PermohonanVerifikasiService {
 
     if (request.dok_verifikasi_sk_pangkat) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sk_pangkat',
+        'verifikasi-sk-pangkat',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_verifikasi_sk_pangkat,
-        'verifikasi_sk_pangkat',
+        'verifikasi-sk-pangkat',
         existingSurat.id,
         existingPpnsDataPns.id,
         'verifikasi',
         existingSurat.id_layanan || null,
-        'verifikasi_sk_pangkat',
+        'verifikasi-sk-pangkat',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -251,21 +256,23 @@ export class PermohonanVerifikasiService {
 
     if (request.dok_verifikasi_ijazah) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_ijazah',
+        'verifikasi-ijazah',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_verifikasi_ijazah,
-        'verifikasi_ijazah',
+        'verifikasi-ijazah',
         existingSurat.id,
         existingPpnsDataPns.id,
         'verifikasi',
         existingSurat.id_layanan || null,
-        'verifikasi_ijazah',
+        'verifikasi-ijazah',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -273,21 +280,23 @@ export class PermohonanVerifikasiService {
 
     if (request.dok_verifikasi_sk_jabatan_teknis_oph) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sk_jabatan_teknis_oph',
+        'verifikasi-sk-jabatan-teknis-oph',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_verifikasi_sk_jabatan_teknis_oph,
-        'verifikasi_sk_jabatan_teknis_oph',
+        'verifikasi-sk-jabatan-teknis-oph',
         existingSurat.id,
         existingPpnsDataPns.id,
         'verifikasi',
         existingSurat.id_layanan || null,
-        'verifikasi_sk_jabatan_teknis_oph',
+        'verifikasi-sk-jabatan-teknis-oph',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -295,21 +304,23 @@ export class PermohonanVerifikasiService {
 
     if (request.dok_verifikasi_sehat_jasmani) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_sehat_jasmani',
+        'verifikasi-sehat-jasmani',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_verifikasi_sehat_jasmani,
-        'verifikasi_sehat_jasmani',
+        'verifikasi-sehat-jasmani',
         existingSurat.id,
         existingPpnsDataPns.id,
         'verifikasi',
         existingSurat.id_layanan || null,
-        'verifikasi_sehat_jasmani',
+        'verifikasi-sehat-jasmani',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -317,22 +328,24 @@ export class PermohonanVerifikasiService {
 
     if (request.dok_verifikasi_penilaian_pekerjaan) {
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'verifikasi_penilaian_pekerjaan',
+        'verifikasi-penilaian-pekerjaan',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
-      if (existing?.s3_key) {
-        await this.s3Service.deleteFile(existing.s3_key);
-      }
+      await Promise.all(
+        existing.map(
+          (file) => file.s3_key && this.s3Service.deleteFile(file.s3_key),
+        ),
+      );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_verifikasi_penilaian_pekerjaan,
-        'verifikasi_penilaian_pekerjaan',
+        'verifikasi-penilaian-pekerjaan',
         existingSurat.id,
 
         existingPpnsDataPns.id,
         'verifikasi',
         existingSurat.id_layanan || null,
-        'verifikasi_penilaian_pekerjaan',
+        'verifikasi-penilaian-pekerjaan',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);

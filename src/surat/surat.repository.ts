@@ -429,7 +429,7 @@ export class SuratRepository {
     };
   }
 
-  async updatePpnsUploadIdPpns(id_surat: number, id_ppns: number) {
+  async updatePpnsUploadIdPpns(id_surat: number, id_ppns: number, userId: number) {
     console.log('DEBUG updatePpnsUploadIdPpns:', { id_surat, id_ppns });
 
     const updated = await this.prismaService.ppnsUpload.updateMany({
@@ -438,6 +438,7 @@ export class SuratRepository {
         OR: [
           { id_ppns: null }, // kalau NULL
           { id_ppns: 0 }, // kalau default-nya 0
+          { id_ppns: userId }, // atau masih pakai userId sementara
         ],
       },
       data: { id_ppns },

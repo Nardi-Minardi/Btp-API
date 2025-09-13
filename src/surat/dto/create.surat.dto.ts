@@ -14,6 +14,7 @@ export class CreateResponseSuratDto {
   created_by: number | null;
   verifikator_by: number | null;
   verifikator_at: string | null; // ISO date string | null
+  dok_surat_pernyataan?: any;
 }
 
 export class CreateResponsePpnsDataPnsDto {

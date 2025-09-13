@@ -235,42 +235,6 @@ model PpnsPenerbitanKembaliKtp {
   @@map("tr_ppns_penerbitan_kembali_ktp")
 }
 
-model PpnsPengangkatan {
-  id                               Int          @id @default(autoincrement())
-  id_surat                         Int?         @db.Integer
-  id_data_ppns                     Int?         @db.Integer
-  nama_sekolah                     String?      @db.VarChar(255)
-  no_ijazah                        String?      @db.VarChar(255)
-  tahun_lulus                      Int?         @db.Integer
-  no_sttpl                         String?      @db.VarChar(255)
-  tgl_sttpl                        DateTime?    @db.Date
-  tgl_verifikasi                   DateTime?    @db.Timestamp(6)
-  cek_surat_polisi                 String?      @db.VarChar(255)
-  no_surat_polisi                  String?      @db.VarChar(255)
-  tgl_surat_polisi                 DateTime?    @db.Date
-  perihal_surat_polisi             String?      @db.VarChar(255)
-  cek_surat_kejaksaan_agung        String?      @db.VarChar(255)
-  no_surat_kejaksaan_agung         String?      @db.VarChar(255)
-  tgl_surat_kejaksaan_agung        DateTime?    @db.Date
-  perihal_surat_kejaksaan_agung    String?      @db.VarChar(255)
-  teknis_operasional_penegak_hukum String?      @db.VarChar(255)
-  jabatan                          String?      @db.VarChar(255)
-  verifikator_1_by                 Int?         @db.Integer
-  verifikator_1_at                 DateTime?    @db.Timestamp(6)
-  status_1                         status_enum?
-  verifikator_2_by                 Int?         @db.Integer
-  verifikator_2_at                 DateTime?    @db.Timestamp(6)
-  status_2                         status_enum?
-  verifikator_3_by                 Int?         @db.Integer
-  verifikator_3_at                 DateTime?    @db.Timestamp(6)
-  status_3                         status_enum?
-  verifikator_4_by                 Int?         @db.Integer
-  verifikator_4_at                 DateTime?    @db.Timestamp(6)
-  status_4                         status_enum?
-
-  @@map("tr_ppns_pengangkatan")
-}
-
 model PpnsPengangkatanKembali {
   id                    Int          @id @default(autoincrement())
   id_surat              Int?         @db.Integer
@@ -372,7 +336,7 @@ model PpnsUpload {
   @@map("tr_ppns_upload")
 }
 
-//ini calon pemohon step 1 permohonan verifkasi
+//ini calon pemohon
 model PpnsDataPns {
   id                    Int       @id @default(autoincrement())
   id_surat              Int?      @db.Integer
@@ -415,7 +379,7 @@ model WilayahKerja {
   @@map("tr_wilayah_kerja")
 }
 
-//step 1 permohonan verifkasi
+//permohonan verifkasi
 model PpnsVerifikasiPpns {
   id                               Int          @id @default(autoincrement())
   id_data_ppns                     Int?         @db.Integer
@@ -447,6 +411,44 @@ model PpnsVerifikasiPpns {
   status_4                         status_enum?
 
   @@map("tr_ppns_verifikasi_ppns")
+}
+
+//pengangkatan ppns
+model PpnsPengangkatan {
+  id                               Int          @id @default(autoincrement())
+  id_surat                         Int?         @db.Integer
+  id_data_ppns                     Int?         @db.Integer
+  nama_sekolah                     String?      @db.VarChar(255)
+  no_ijazah                        String?      @db.VarChar(255)
+  tahun_lulus                      Int?         @db.Integer
+  no_sttpl                         String?      @db.VarChar(255)
+  tgl_sttpl                        DateTime?    @db.Date
+  tgl_ijazah                       DateTime?    @db.Date
+  tgl_verifikasi                   DateTime?    @db.Timestamp(6)
+  cek_surat_polisi                 String?      @db.VarChar(255)
+  no_surat_polisi                  String?      @db.VarChar(255)
+  tgl_surat_polisi                 DateTime?    @db.Date
+  perihal_surat_polisi             String?      @db.VarChar(255)
+  cek_surat_kejaksaan_agung        String?      @db.VarChar(255)
+  no_surat_kejaksaan_agung         String?      @db.VarChar(255)
+  tgl_surat_kejaksaan_agung        DateTime?    @db.Date
+  perihal_surat_kejaksaan_agung    String?      @db.VarChar(255)
+  teknis_operasional_penegak_hukum String?      @db.VarChar(255)
+  jabatan                          String?      @db.VarChar(255)
+  verifikator_1_by                 Int?         @db.Integer
+  verifikator_1_at                 DateTime?    @db.Timestamp(6)
+  status_1                         status_enum?
+  verifikator_2_by                 Int?         @db.Integer
+  verifikator_2_at                 DateTime?    @db.Timestamp(6)
+  status_2                         status_enum?
+  verifikator_3_by                 Int?         @db.Integer
+  verifikator_3_at                 DateTime?    @db.Timestamp(6)
+  status_3                         status_enum?
+  verifikator_4_by                 Int?         @db.Integer
+  verifikator_4_at                 DateTime?    @db.Timestamp(6)
+  status_4                         status_enum?
+
+  @@map("tr_ppns_pengangkatan")
 }
 
 model PpnsVerifikasiData {

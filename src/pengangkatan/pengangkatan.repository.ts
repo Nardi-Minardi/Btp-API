@@ -5,8 +5,42 @@ import {
 } from '@nestjs/common';
 import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Prisma, status_upload_ii } from '.prisma/main-client/client';
-import { CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto } from './dto/create.pengangkatan.dto';
 import { SuratRepository } from 'src/surat/surat.repository';
+import { CreateResponsePengangkatanPpnsDto } from './dto/create.pengangkatan.dto';
+
+export type PpnsPengangkatanCreateInputWithExtra =
+  Prisma.PpnsPengangkatanCreateInput & {
+    gelar_terakhir?: string;
+    no_surat_polisi?: string;
+    tgl_surat_polisi?: Date;
+    perihal_surat_polisi?: string;
+    no_tanda_terima_polisi?: string;
+    tgl_tanda_terima_polisi?: Date;
+    perihal_tanda_terima_polisi?: string;
+    no_surat_kejaksaan_agung?: string;
+    tgl_surat_kejaksaan_agung?: Date;
+    perihal_surat_kejaksaan_agung?: string;
+    no_tanda_terima_kejaksaan_agung?: string;
+    tgl_tanda_terima_kejaksaan_agung?: Date;
+    perihal_tanda_terima_kejaksaan_agung?: string;
+  };
+
+export type PpnsPengangkatanUpdateInputWithExtra =
+  Prisma.PpnsPengangkatanUpdateInput & {
+    gelar_terakhir?: string;
+    no_surat_polisi?: string;
+    tgl_surat_polisi?: Date;
+    perihal_surat_polisi?: string;
+    no_tanda_terima_polisi?: string;
+    tgl_tanda_terima_polisi?: Date;
+    perihal_tanda_terima_polisi?: string;
+    no_surat_kejaksaan_agung?: string;
+    tgl_surat_kejaksaan_agung?: Date;
+    perihal_surat_kejaksaan_agung?: string;
+    no_tanda_terima_kejaksaan_agung?: string;
+    tgl_tanda_terima_kejaksaan_agung?: Date;
+    perihal_tanda_terima_kejaksaan_agung?: string;
+  };
 
 @Injectable()
 export class PengangkatanRepository {
@@ -16,14 +50,13 @@ export class PengangkatanRepository {
     private readonly suratRepository: SuratRepository,
   ) {}
 
-  async savePpnsVerifikasiPns(
-    data: Prisma.PpnsVerifikasiPpnsCreateInput,
-  ): Promise<CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto> {
-    const result = await this.prismaService.ppnsVerifikasiPpns.create({
+  async savePpnsPengangkatan(
+    data: PpnsPengangkatanCreateInputWithExtra,
+  ): Promise<CreateResponsePengangkatanPpnsDto> {
+    const result = await this.prismaService.ppnsPengangkatan.create({
       data,
     });
 
-    // Cari id_surat dari relasi
     let idSurat: number | null = null;
     if (typeof result.id_data_ppns === 'number') {
       const d = await this.suratRepository.findPpnsDataPnsById(
@@ -33,98 +66,181 @@ export class PengangkatanRepository {
       idSurat = d.id_surat ?? null;
     }
 
+    
+
     return {
-      id: result.id,
-      id_data_ppns: result.id_data_ppns,
+      id: result.id ?? null,
       id_surat: idSurat,
-      masa_kerja: {
-        tgl_pengangkatan_sk_pns: result.tgl_pengangkatan_sk_pns
-          ? result.tgl_pengangkatan_sk_pns.toISOString()
-          : null,
-        sk_kenaikan_pangkat: result.sk_kenaikan_pangkat ?? null,
-      },
-      pendidikan_terakhir: {
-        nama_sekolah: result.nama_sekolah ?? null,
-        no_ijazah: result.no_ijazah ?? null,
-        tgl_ijazah: result.tgl_ijazah ? result.tgl_ijazah.toISOString() : null,
-        tgl_lulus: result.tgl_lulus ? result.tgl_lulus.toISOString() : null,
-      },
+      id_data_ppns: result.id_data_ppns ?? null,
+      nama_sekolah: result.nama_sekolah ?? null,
+
+      // ✅ ambil dari request payload
+      gelar_terakhir: data.gelar_terakhir ?? null,
+
+      no_ijazah: result.no_ijazah ?? null,
+      tgl_ijazah: result.tgl_ijazah ? result.tgl_ijazah.toISOString() : null,
+      tahun_lulus: result.tahun_lulus ? String(result.tahun_lulus) : null,
+      no_sttpl: result.no_sttpl ?? null,
+      tgl_sttpl: result.tgl_sttpl ? result.tgl_sttpl.toISOString() : null,
+      tgl_verifikasi: result.tgl_verifikasi
+        ? result.tgl_verifikasi.toISOString()
+        : null,
       teknis_operasional_penegak_hukum:
-        result.teknis_operasional_penegak_hukum ?? null,
+        result.teknis_operasional_penegak_hukum !== null &&
+        result.teknis_operasional_penegak_hukum !== undefined &&
+        result.teknis_operasional_penegak_hukum === '1'
+          ? true
+          : result.teknis_operasional_penegak_hukum === '0'
+            ? false
+            : null,
       jabatan: result.jabatan ?? null,
-      surat_sehat_jasmani_rohani: {
-        nama_rs: result.nama_rs ?? null,
-        tgl_surat_rs: result.tgl_surat_rs
-          ? result.tgl_surat_rs.toISOString()
+
+      cek_surat_polisi:
+        result.cek_surat_polisi !== null
+          ? Boolean(result.cek_surat_polisi)
           : null,
-      },
-      dp3: {
-        tahun_1: result.tahun_1 ?? null,
-        nilai_1: result.nilai_1 ? Number(result.nilai_1) : null,
-        tahun_2: result.tahun_2 ?? null,
-        nilai_2: result.nilai_2 ? Number(result.nilai_2) : null,
-      },
+
+      // ✅ ambil dari request payload
+      no_surat_polisi: data.no_surat_polisi ?? null,
+      tgl_surat_polisi: data.tgl_surat_polisi
+        ? data.tgl_surat_polisi.toISOString()
+        : null,
+      perihal_surat_polisi: data.perihal_surat_polisi ?? null,
+      no_tanda_terima_polisi: data.no_tanda_terima_polisi ?? null,
+      tgl_tanda_terima_polisi: data.tgl_tanda_terima_polisi
+        ? data.tgl_tanda_terima_polisi.toISOString()
+        : null,
+      perihal_tanda_terima_polisi: data.perihal_tanda_terima_polisi ?? null,
+
+      cek_surat_kejaksaan_agung:
+        result.cek_surat_kejaksaan_agung !== null
+          ? Boolean(result.cek_surat_kejaksaan_agung)
+          : null,
+
+      // ✅ ambil dari request payload
+      no_surat_kejaksaan_agung: data.no_surat_kejaksaan_agung ?? null,
+      tgl_surat_kejaksaan_agung: data.tgl_surat_kejaksaan_agung
+        ? data.tgl_surat_kejaksaan_agung.toISOString()
+        : null,
+      perihal_surat_kejaksaan_agung: data.perihal_surat_kejaksaan_agung ?? null,
+      no_tanda_terima_kejaksaan_agung:
+        data.no_tanda_terima_kejaksaan_agung ?? null,
+      tgl_tanda_terima_kejaksaan_agung: data.tgl_tanda_terima_kejaksaan_agung
+        ? data.tgl_tanda_terima_kejaksaan_agung.toISOString()
+        : null,
+      perihal_tanda_terima_kejaksaan_agung:
+        data.perihal_tanda_terima_kejaksaan_agung ?? null,
+      // ✅ Ambil dari DB, bukan dari request
+     
     };
   }
 
-  async updatePpnsVerifikasiPns(
+  async updatePpnsPengangkatan(
     id: number,
-    data: Prisma.PpnsVerifikasiPpnsUpdateInput,
-  ): Promise<CreateResponsePermohonanVerifikasiPpnsVerifikasiPpnsDto> {
+    data: PpnsPengangkatanUpdateInputWithExtra,
+  ): Promise<CreateResponsePengangkatanPpnsDto> {
     // Cari id_surat lebih awal
     let idSurat: number | null = null;
     if (typeof data.id_data_ppns === 'number') {
       const pnsData = await this.suratRepository.findPpnsDataPnsById(
-        data.id_data_ppns,
+        Number(data.id_data_ppns),
       );
       if (!pnsData) throw new NotFoundException('Data PNS not found');
       idSurat = pnsData.id_surat ?? null;
     }
 
-    const result = await this.prismaService.ppnsVerifikasiPpns.update({
+    const result = await this.prismaService.ppnsPengangkatan.update({
       where: { id },
       data,
     });
 
-    // Destructure supaya tahun_1, nilai_1, tahun_2, nilai_2 tidak ikut di spread
-    const { tahun_1, nilai_1, tahun_2, nilai_2 } = result;
+    const uploads = await this.prismaService.ppnsUpload.findMany({
+      where: {
+        id_ppns: Number(data.id_data_ppns),
+        id_surat: idSurat,
+        file_type: {
+          in: [
+            'dokumen-tanda-terima-polisi',
+            'dokumen-tanda-terima-kejaksaan-agung',
+          ],
+        },
+      },
+    });
+
+    const dokPolisi = uploads.find(
+      (u) => u.file_type === 'dokumen-tanda-terima-polisi',
+    );
+    const dokKejaksaan = uploads.find(
+      (u) => u.file_type ===  'dokumen-tanda-terima-kejaksaan-agung',
+    );
 
     return {
-      id: result.id,
-      id_data_ppns: result.id_data_ppns,
+      id: result.id ?? null,
       id_surat: idSurat,
-      masa_kerja: {
-        tgl_pengangkatan_sk_pns: result.tgl_pengangkatan_sk_pns
-          ? result.tgl_pengangkatan_sk_pns.toISOString()
-          : null,
-        sk_kenaikan_pangkat: result.sk_kenaikan_pangkat ?? null,
-      },
-      pendidikan_terakhir: {
-        nama_sekolah: result.nama_sekolah ?? null,
-        no_ijazah: result.no_ijazah ?? null,
-        tgl_ijazah: result.tgl_ijazah ? result.tgl_ijazah.toISOString() : null,
-        tgl_lulus: result.tgl_lulus ? result.tgl_lulus.toISOString() : null,
-      },
+      id_data_ppns: result.id_data_ppns ?? null,
+      nama_sekolah: result.nama_sekolah ?? null,
+
+      // ✅ ambil dari request payload
+      gelar_terakhir: data.gelar_terakhir ?? null,
+
+      no_ijazah: result.no_ijazah ?? null,
+      tgl_ijazah: result.tgl_ijazah ? result.tgl_ijazah.toISOString() : null,
+      tahun_lulus: result.tahun_lulus ? String(result.tahun_lulus) : null,
+      no_sttpl: result.no_sttpl ?? null,
+      tgl_sttpl: result.tgl_sttpl ? result.tgl_sttpl.toISOString() : null,
+      tgl_verifikasi: result.tgl_verifikasi
+        ? result.tgl_verifikasi.toISOString()
+        : null,
       teknis_operasional_penegak_hukum:
-        result.teknis_operasional_penegak_hukum ?? null,
+        result.teknis_operasional_penegak_hukum !== null &&
+        result.teknis_operasional_penegak_hukum !== undefined &&
+        result.teknis_operasional_penegak_hukum === '1'
+          ? true
+          : result.teknis_operasional_penegak_hukum === '0'
+            ? false
+            : null,
       jabatan: result.jabatan ?? null,
-      surat_sehat_jasmani_rohani: {
-        nama_rs: result.nama_rs ?? null,
-        tgl_surat_rs: result.tgl_surat_rs
-          ? result.tgl_surat_rs.toISOString()
+
+      cek_surat_polisi:
+        result.cek_surat_polisi !== null
+          ? Boolean(result.cek_surat_polisi)
           : null,
-      },
-      dp3: {
-        tahun_1: tahun_1 ?? null,
-        nilai_1: nilai_1 ? Number(nilai_1) : null,
-        tahun_2: tahun_2 ?? null,
-        nilai_2: nilai_2 ? Number(nilai_2) : null,
-      },
+
+      // ✅ ambil dari request payload
+      no_surat_polisi: data.no_surat_polisi ?? null,
+      tgl_surat_polisi: data.tgl_surat_polisi
+        ? data.tgl_surat_polisi.toISOString()
+        : null,
+      perihal_surat_polisi: data.perihal_surat_polisi ?? null,
+      no_tanda_terima_polisi: data.no_tanda_terima_polisi ?? null,
+      tgl_tanda_terima_polisi: data.tgl_tanda_terima_polisi
+        ? data.tgl_tanda_terima_polisi.toISOString()
+        : null,
+      perihal_tanda_terima_polisi: data.perihal_tanda_terima_polisi ?? null,
+
+      cek_surat_kejaksaan_agung:
+        result.cek_surat_kejaksaan_agung !== null
+          ? Boolean(result.cek_surat_kejaksaan_agung)
+          : null,
+
+      // ✅ ambil dari request payload
+      no_surat_kejaksaan_agung: data.no_surat_kejaksaan_agung ?? null,
+      tgl_surat_kejaksaan_agung: data.tgl_surat_kejaksaan_agung
+        ? data.tgl_surat_kejaksaan_agung.toISOString()
+        : null,
+      perihal_surat_kejaksaan_agung: data.perihal_surat_kejaksaan_agung ?? null,
+      no_tanda_terima_kejaksaan_agung:
+        data.no_tanda_terima_kejaksaan_agung ?? null,
+      tgl_tanda_terima_kejaksaan_agung: data.tgl_tanda_terima_kejaksaan_agung
+        ? data.tgl_tanda_terima_kejaksaan_agung.toISOString()
+        : null,
+      perihal_tanda_terima_kejaksaan_agung:
+        data.perihal_tanda_terima_kejaksaan_agung ?? null,
     };
   }
 
-  async findPpnsVerifikasiPnsById(id_data_ppns: number) {
-    return this.prismaService.ppnsVerifikasiPpns.findFirst({
+  async findPpnsPengangkatanById(id_data_ppns: number) {
+    return this.prismaService.ppnsPengangkatan.findFirst({
       where: { id_data_ppns: id_data_ppns },
     });
   }

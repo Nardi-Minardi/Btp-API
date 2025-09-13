@@ -50,7 +50,11 @@ export class PermohonanVerifikasiRepository {
         tgl_lulus: result.tgl_lulus ? result.tgl_lulus.toISOString() : null,
       },
       teknis_operasional_penegak_hukum:
-        result.teknis_operasional_penegak_hukum ?? null,
+        result.teknis_operasional_penegak_hukum === '1'
+          ? true
+          : result.teknis_operasional_penegak_hukum === '0'
+            ? false
+            : null,
       jabatan: result.jabatan ?? null,
       surat_sehat_jasmani_rohani: {
         nama_rs: result.nama_rs ?? null,
@@ -106,7 +110,11 @@ export class PermohonanVerifikasiRepository {
         tgl_lulus: result.tgl_lulus ? result.tgl_lulus.toISOString() : null,
       },
       teknis_operasional_penegak_hukum:
-        result.teknis_operasional_penegak_hukum ?? null,
+        result.teknis_operasional_penegak_hukum === '1'
+          ? true
+          : result.teknis_operasional_penegak_hukum === '0'
+            ? false
+            : null,
       jabatan: result.jabatan ?? null,
       surat_sehat_jasmani_rohani: {
         nama_rs: result.nama_rs ?? null,
