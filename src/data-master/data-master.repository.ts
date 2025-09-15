@@ -6,8 +6,18 @@ import {
 import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Kbli, NotarisPengganti, Prisma, Wilayah } from '.prisma/master-client';
 import { PpnsInstansi, PpnsKementerian } from '.prisma/main-client/client';
-import { ListInstansiDto, ListKementerianDto } from './dto/data-master.dto';
-import { instansiAllowedFields, kementerianAllowedFields } from 'src/common/constants/data-master.fields';
+import {
+  ListDataPpnsDto,
+  ListInstansiDto,
+  ListKementerianDto,
+  ListLayananDto,
+} from './dto/data-master.dto';
+import {
+  dataPpnsAllowedFields,
+  instansiAllowedFields,
+  kementerianAllowedFields,
+  layananAllowedFields,
+} from 'src/common/constants/data-master.fields';
 
 @Injectable()
 export class DataMasterRepository {
@@ -138,9 +148,7 @@ export class DataMasterRepository {
     return this.masterPrismaService.notarisPengganti.count({ where });
   }
 
-  async countSearchKementerian(
-    search: string | undefined,
-  ): Promise<number> {
+  async countSearchKementerian(search: string | undefined): Promise<number> {
     // base where
     const where: any = {};
 
@@ -213,8 +221,8 @@ export class DataMasterRepository {
 
     const results = await this.prismaService.ppnsKementerian.findMany({
       where,
-      skip: (page - 1) * limit,
-      take: limit,
+      // skip: (page - 1) * limit, //matikan dulu pagination
+      // take: limit, //matikan dulu pagination
       orderBy: { [orderBy]: orderDirection },
       include: { ppns_instansi: true },
     });
@@ -227,9 +235,7 @@ export class DataMasterRepository {
     }));
   }
 
-  async countSearchInstansi(
-    search: string | undefined,
-  ): Promise<number> {
+  async countSearchInstansi(search: string | undefined): Promise<number> {
     // base where
     const where: any = {};
 
@@ -303,8 +309,8 @@ export class DataMasterRepository {
 
     const results = await this.prismaService.ppnsInstansi.findMany({
       where,
-      skip: (page - 1) * limit,
-      take: limit,
+      // skip: (page - 1) * limit,
+      // take: limit,
       orderBy: { [orderBy]: orderDirection },
       include: { ppns_kementerian: true },
     });
@@ -316,5 +322,211 @@ export class DataMasterRepository {
       ppns_kementerian: item.ppns_kementerian,
       created_at: item.created_at ? item.created_at.toISOString() : null,
     }));
+  }
+
+  async findAllWithPaginationLayanan(
+    search: string | undefined,
+    page: number,
+    limit: number,
+    orderBy: string | undefined = 'created_at',
+    orderDirection: 'asc' | 'desc' = 'desc',
+    filters?: Array<{ field: string; value: string }>,
+  ): Promise<ListLayananDto[]> {
+    if (!layananAllowedFields.includes(orderBy)) {
+      throw new BadRequestException(
+        `Field orderBy '${orderBy}' tidak valid. Gunakan salah satu: ${layananAllowedFields.join(', ')}`,
+      );
+    }
+
+    // base where
+    const where: any = {};
+    // global search
+    if (search) {
+      const orConditions: any[] = [
+        { nama: { contains: search, mode: 'insensitive' } },
+      ];
+      if (!isNaN(Number(search))) {
+        // kalau kolom Int
+        orConditions.push({ id: Number(search) });
+      }
+      where.OR = orConditions;
+    }
+
+    // --- filters ---
+    if (filters && Object.keys(filters).length > 0) {
+      const numberFields = ['id'];
+      const stringFields = ['nama'];
+      const enumFields = [];
+
+      const filterConditions: any[] = [];
+
+      for (const [field, value] of Object.entries(filters)) {
+        // number
+        if (numberFields.includes(field) && !isNaN(Number(value))) {
+          filterConditions.push({ [field]: Number(value) });
+          continue;
+        }
+
+        // string
+        if (stringFields.includes(field) && typeof value === 'string') {
+          filterConditions.push({
+            [field]: { contains: value, mode: 'insensitive' },
+          });
+          continue;
+        }
+
+        // enum: konversi label ke enum internal
+      }
+
+      if (filterConditions.length > 0) {
+        where.AND = filterConditions; // AND supaya semua filter cocok
+      }
+    }
+
+    const results = await this.prismaService.ppnsLayanan.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { [orderBy]: orderDirection },
+    });
+
+    return results.map((item) => ({
+      id: item.id,
+      nama: item.nama,
+      created_at: item.created_at ? item.created_at.toISOString() : null,
+    }));
+  }
+
+  async countSearchLayanan(search: string | undefined): Promise<number> {
+    // base where
+    const where: any = {};
+
+    // filter search hanya kalau ada
+    if (search) {
+      where.OR = [{ nama: { contains: search, mode: 'insensitive' } }];
+    }
+
+    return this.prismaService.ppnsLayanan.count({ where });
+  }
+
+  async findAllWithPaginationDataPpns(
+    search: string | undefined,
+    page: number,
+    limit: number,
+    orderBy: string | undefined = 'id',
+    orderDirection: 'asc' | 'desc' = 'desc',
+    filters?: Array<{ field: string; value: string }>,
+  ): Promise<ListDataPpnsDto[]> {
+    if (!dataPpnsAllowedFields.includes(orderBy)) {
+      throw new BadRequestException(
+        `Field orderBy '${orderBy}' tidak valid. Gunakan salah satu: ${dataPpnsAllowedFields.join(', ')}`,
+      );
+    }
+
+    // base where
+    const where: any = {};
+    // global search
+    if (search) {
+      const orConditions: any[] = [
+        { nama: { contains: search, mode: 'insensitive' } },
+        { nip: { contains: search, mode: 'insensitive' } },
+        { agama: { contains: search, mode: 'insensitive' } },
+        { nama_sekolah: { contains: search, mode: 'insensitive' } },
+        { gelar_terakhir: { contains: search, mode: 'insensitive' } },
+        { no_ijazah: { contains: search, mode: 'insensitive' } },
+        { tgl_ijazah: { contains: search, mode: 'insensitive' } },
+      ];
+      if (!isNaN(Number(search))) {
+        // kalau kolom Int
+        orConditions.push({ id: Number(search) });
+      }
+      where.OR = orConditions;
+    }
+
+    // --- filters ---
+    if (filters && Object.keys(filters).length > 0) {
+      const numberFields = ['id', 'id_surat', 'tahun_lulus'];
+      const stringFields = ['nama', 'nip', 'nama_gelar', 'jabatan', 'pangkat_atau_golongan', 'jenis_kelamin', 'agama', 'nama_sekolah', 'gelar_terakhir', 'no_ijazah'];
+      const enumFields = [];
+      const dateFields = ['tgl_ijazah'];
+
+      const filterConditions: any[] = [];
+
+      for (const [field, value] of Object.entries(filters)) {
+        // number
+        if (numberFields.includes(field) && !isNaN(Number(value))) {
+          filterConditions.push({ [field]: Number(value) });
+          continue;
+        }
+
+        // string
+        if (stringFields.includes(field) && typeof value === 'string') {
+          filterConditions.push({
+            [field]: { contains: value, mode: 'insensitive' },
+          });
+          continue;
+        }
+
+        // date
+        if (dateFields.includes(field) && typeof value === 'string') {
+          const dateValue = new Date(value);
+          if (!isNaN(dateValue.getTime())) {
+            filterConditions.push({ [field]: dateValue });
+          }
+          continue;
+        }
+
+        // enum: konversi label ke enum internal
+      }
+
+      if (filterConditions.length > 0) {
+        where.AND = filterConditions; // AND supaya semua filter cocok
+      }
+    }
+
+    const results = await this.prismaService.ppnsDataPpns.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { [orderBy]: orderDirection },
+    });
+
+    return results.map((item) => ({
+      id: item.id,
+      id_surat: item.id_surat || null,
+      nama: item.nama || null,
+      nip: item.nip || null,
+      nama_gelar: item.nama_gelar || null,
+      jabatan: item.jabatan || null,
+      pangkat_atau_golongan: item.pangkat_atau_golongan || null,
+      jenis_kelamin: item.jenis_kelamin || null,
+      agama: item.agama || null,
+      nama_sekolah: item.nama_sekolah || null,
+      gelar_terakhir: item.gelar_terakhir || null,
+      no_ijazah: item.no_ijazah || null,
+      tgl_ijazah: item.tgl_ijazah ? item.tgl_ijazah.toISOString() : null,
+      data_baru: item.data_baru || null,
+      aktif: item.aktif || null,
+    }));
+  }
+
+  async countSearchDataPpns(search: string | undefined): Promise<number> {
+    // base where
+    const where: any = {};
+
+    // filter search hanya kalau ada
+    if (search) {
+      where.OR = [
+        { nama: { contains: search, mode: 'insensitive' } },
+        { nip: { contains: search, mode: 'insensitive' } },
+        { agama: { contains: search, mode: 'insensitive' } },
+        { nama_sekolah: { contains: search, mode: 'insensitive' } },
+        { gelar_terakhir: { contains: search, mode: 'insensitive' } },
+        { no_ijazah: { contains: search, mode: 'insensitive' } },
+        { tgl_ijazah: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    return this.prismaService.ppnsDataPpns.count({ where });
   }
 }

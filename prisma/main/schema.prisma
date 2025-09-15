@@ -19,7 +19,8 @@ model PpnsKementerian {
   nama       String?   @db.VarChar(255)
   created_at DateTime? @default(now()) @db.Timestamp(6)
 
-  ppns_instansi PpnsInstansi[] @relation("MasterInstansiKementerian")
+  ppns_instansi PpnsInstansi[] @relation("MasterKementerianToInstansi")
+  ppns_surat    PpnsSurat[]    @relation("PpnsKementerianToSurat")
 
   @@map("m_kementerian")
 }
@@ -30,7 +31,8 @@ model PpnsInstansi {
   nama           String?   @db.VarChar(255)
   created_at     DateTime? @default(now()) @db.Timestamp(6)
 
-  ppns_kementerian PpnsKementerian? @relation("MasterInstansiKementerian", fields: [id_kementerian], references: [id])
+  ppns_kementerian PpnsKementerian? @relation("MasterKementerianToInstansi", fields: [id_kementerian], references: [id])
+  ppns_surat       PpnsSurat[]      @relation("PpnsInstansiToSurat")
 
   @@map("m_instansi")
 }
@@ -49,8 +51,8 @@ model PpnsLayanan {
   created_at DateTime? @default(now()) @db.Timestamp(6)
 
   //one-to-many relation ppns surat
-  ppns_surat         PpnsSurat[]    @relation("PpnsSuratPpnsLayanan")
-  ppns_wilayah_kerja WilayahKerja[] @relation("PpnsLayananWilayahKerja")
+  ppns_surat         PpnsSurat[]    @relation("PpnsSuratToLayanan")
+  ppns_wilayah_kerja WilayahKerja[] @relation("PpnsLayananToWilayahKerja")
 
   @@map("m_ppns_layanan")
 }
@@ -308,9 +310,11 @@ model PpnsSurat {
   verifikator_at      DateTime? @db.Timestamp(6)
 
   // Relasi
-  ppns_upload   PpnsUpload?   @relation("PpnsUploadPpnsSurat")
-  ppns_data_pns PpnsDataPns[] @relation("PpnsDataPnsPpnsSurat")
-  ppns_layanan  PpnsLayanan?  @relation("PpnsSuratPpnsLayanan", fields: [id_layanan], references: [id])
+  ppns_kementerian PpnsKementerian? @relation("PpnsKementerianToSurat", fields: [lembaga_kementerian], references: [id])
+  ppns_instansi    PpnsInstansi?    @relation("PpnsInstansiToSurat", fields: [instansi], references: [id])
+  ppns_layanan     PpnsLayanan?     @relation("PpnsSuratToLayanan", fields: [id_layanan], references: [id])
+  ppns_upload      PpnsUpload?      @relation("PpnsUploadToSurat")
+  ppns_data_pns    PpnsDataPns[]    @relation("PpnsDataToSurat")
 
   @@map("tr_ppns_surat")
 }
@@ -331,7 +335,7 @@ model PpnsUpload {
   verifikator_at DateTime?         @db.Timestamp(6)
 
   // Relasi
-  ppns_surat PpnsSurat? @relation("PpnsUploadPpnsSurat", fields: [id_surat], references: [id])
+  ppns_surat PpnsSurat? @relation("PpnsUploadToSurat", fields: [id_surat], references: [id])
 
   @@map("tr_ppns_upload")
 }
@@ -354,8 +358,8 @@ model PpnsDataPns {
   tahun_lulus           Int?      @db.Integer
 
   // Relasi
-  ppns_surat         PpnsSurat?     @relation("PpnsDataPnsPpnsSurat", fields: [id_surat], references: [id])
-  ppns_wilayah_kerja WilayahKerja[] @relation("PpnsDataPnsWilayahKerja")
+  ppns_surat         PpnsSurat?     @relation("PpnsDataToSurat", fields: [id_surat], references: [id])
+  ppns_wilayah_kerja WilayahKerja[] @relation("PpnsDataPnsToWilayahKerja")
 
   @@map("tr_ppns_data_pns")
 }
@@ -365,16 +369,20 @@ model WilayahKerja {
   id_layanan           Int?    @db.Integer
   id_ppns              Int?    @db.Integer
   id_surat             Int?    @db.Integer
+  id_provinsi          Int?    @db.Integer
+  id_kabkota           Int?    @db.Integer
+  id_kecamatan         Int?    @db.Integer
   provinsi_penempatan  String? @db.VarChar(255)
   kabupaten_penempatan String? @db.VarChar(255)
+  kecamatan_penempatan String? @db.VarChar(255)
   unit_kerja           String? @db.VarChar(255)
   penempatan_baru      String? @db.VarChar(255)
   uu_dikawal_1         String? @db.VarChar(255)
   uu_dikawal_2         String? @db.VarChar(255)
   uu_dikawal_3         String? @db.VarChar(255)
 
-  ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsWilayahKerja", fields: [id_ppns], references: [id])
-  ppns_layanan  PpnsLayanan? @relation("PpnsLayananWilayahKerja", fields: [id_layanan], references: [id])
+  ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsToWilayahKerja", fields: [id_ppns], references: [id])
+  ppns_layanan  PpnsLayanan? @relation("PpnsLayananToWilayahKerja", fields: [id_layanan], references: [id])
 
   @@map("tr_wilayah_kerja")
 }

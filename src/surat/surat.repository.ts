@@ -274,6 +274,7 @@ export class SuratRepository {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { [orderBy]: orderDirection },
+      include: { ppns_kementerian: true, ppns_instansi: true, ppns_layanan: true },
     });
 
     // mapping hasil
@@ -363,10 +364,11 @@ export class SuratRepository {
   }
 
   async findPpnsDataPnsByIdSurat(id_surat: number) {
-    return this.prismaService.ppnsDataPns.findFirst({
+    return this.prismaService.ppnsDataPns.findMany({
       where: { id_surat },
       include: {
         ppns_wilayah_kerja: true,
+        ppns_surat: true,
       },
     });
   }

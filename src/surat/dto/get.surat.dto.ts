@@ -31,7 +31,43 @@ export class ListSurat {
   verifikator_by: number | null;
   verifikator_at: string | null; // ISO date string | null
   id_layanan: number | null;
+  nama_kementerian: string | null;
+  nama_instansi: string | null;
   // ppns_upload : any [];
   // ppns_data_pns : any [];
   // ppns_verifikasi_ppns : any [];
+}
+
+export class GetCalonPemohonPaginationDto {
+  data: ListCalonPemohon[];
+  pagination: Pagination;
+}
+
+export class ListCalonPemohon {
+  id: number | null;
+  id_surat: number | null;
+  no_surat: string | null;
+  nama: string | null;
+  nip: string | null;
+  nama_gelar: string | null;
+  jabatan: string | null;
+  pangkat_atau_golongan: string | null;
+  jenis_kelamin: string | null;
+  agama: string | null;
+  nama_sekolah: string | null;
+  gelar_terakhir: string | null;
+  no_ijazah: string | null;
+  tgl_ijazah: string | null; // ISO date string
+  tahun_lulus: number | null;
+  ppns_wilayah_kerja?: ListWilayahKerja[] | null;
+}
+
+export class ListWilayahKerja {
+  id: number | null;
+  id_ppns: number | null;
+  id_surat: number | null;
+  id_provinsi: number | null;
+  id_kabkota: number | null;
+  id_kecamatan: number | null;
+  uu_dikawal: string[] | null;
 }

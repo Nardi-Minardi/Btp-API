@@ -19,4 +19,19 @@ export class DataMasterValidation {
     orderDirection: z.enum(['asc', 'desc']).optional(),
     filters: z.record(z.any()).optional(),
   });
+
+  static readonly GET_DATA_MASTER_WITHOUT_PAGINATION: ZodType = z.object({
+    search: z.string().optional(),
+    page: z.preprocess(
+      (val) => (typeof val === 'string' ? Number(val) : val),
+      z.number().optional(),
+    ),
+    limit: z.preprocess(
+      (val) => (typeof val === 'string' ? Number(val) : val),
+      z.number().optional(),
+    ),
+    orderBy: z.string().optional(),
+    orderDirection: z.enum(['asc', 'desc']).optional(),
+    filters: z.record(z.any()).optional(),
+  });
 }

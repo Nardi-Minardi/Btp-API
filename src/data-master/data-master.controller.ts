@@ -104,10 +104,10 @@ export class DataMasterController {
     };
   }
 
-  @Get('/kementerian')
+   @Get('/layanan')
   @HttpCode(200)
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
-  async getAllKementerian(
+  async getAllLayanan(
     @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
@@ -137,6 +137,68 @@ export class DataMasterController {
       queryWithParsedFilters,
     );
 
+    result = await this.dataMasterRepository.findAllWithPaginationLayanan(
+      getRequest.search,
+      getRequest.page,
+      getRequest.limit,
+      getRequest.orderBy,
+      getRequest.orderDirection,
+      getRequest.filters,
+    );
+    count = await this.dataMasterRepository.countSearchLayanan(
+      getRequest.search,
+    );
+
+    this.logger.debug('Layanan result', {
+      result,
+      count,
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: result,
+      pagination: {
+        currentPage: Number(page) || 1,
+        totalPage: Math.ceil(count / (Number(limit) || 10)),
+        totalData: count,
+      },
+    };
+  }
+
+  @Get('/kementerian')
+  @HttpCode(200)
+  // @RedisCache('badan-usaha-admin-transaksi-list', 60)
+  async getAllKementerian(
+    @Query('search') search: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('orderBy') orderBy: string,
+    @Query('filters') filters: string,
+    @Req() request: Request,
+  ): Promise<WebResponse<any[], Pagination>> {
+    let result;
+    let count;
+
+    let parsedFilters: Record<string, any> = {};
+    if (filters) {
+      try {
+        parsedFilters = JSON.parse(filters); // langsung jadi object
+      } catch (e) {
+        console.warn('Invalid filters JSON:', filters);
+      }
+    }
+
+    const queryWithParsedFilters = {
+      ...request.query,
+      filters: parsedFilters, // override jadi object
+    };
+
+    const getRequest = this.validationService.validate(
+      DataMasterValidation.GET_DATA_MASTER_WITHOUT_PAGINATION,
+      queryWithParsedFilters,
+    );
+
     result = await this.dataMasterRepository.findAllWithPaginationKementerian(
       getRequest.search,
       getRequest.page,
@@ -150,6 +212,68 @@ export class DataMasterController {
     );
 
     this.logger.debug('Kementerian result', {
+      result,
+      count,
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: result,
+      pagination: {
+        currentPage: Number(page) || 1,
+        totalPage: Math.ceil(count / (Number(limit) || 10)),
+        totalData: count,
+      },
+    };
+  }
+
+  @Get('/data-ppns')
+  @HttpCode(200)
+  // @RedisCache('badan-usaha-admin-transaksi-list', 60)
+  async getAllDataPpns(
+    @Query('search') search: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('orderBy') orderBy: string,
+    @Query('filters') filters: string,
+    @Req() request: Request,
+  ): Promise<WebResponse<any[], Pagination>> {
+    let result;
+    let count;
+
+    let parsedFilters: Record<string, any> = {};
+    if (filters) {
+      try {
+        parsedFilters = JSON.parse(filters); // langsung jadi object
+      } catch (e) {
+        console.warn('Invalid filters JSON:', filters);
+      }
+    }
+
+    const queryWithParsedFilters = {
+      ...request.query,
+      filters: parsedFilters, // override jadi object
+    };
+
+    const getRequest = this.validationService.validate(
+      DataMasterValidation.GET_DATA_MASTER_WITHOUT_PAGINATION,
+      queryWithParsedFilters,
+    );
+
+    result = await this.dataMasterRepository.findAllWithPaginationDataPpns(
+      getRequest.search,
+      getRequest.page,
+      getRequest.limit,
+      getRequest.orderBy,
+      getRequest.orderDirection,
+      getRequest.filters,
+    );
+    count = await this.dataMasterRepository.countSearchDataPpns(
+      getRequest.search,
+    );
+
+    this.logger.debug('Data PPNS  result', {
       result,
       count,
     });
@@ -195,7 +319,7 @@ export class DataMasterController {
     };
 
     const getRequest = this.validationService.validate(
-      DataMasterValidation.GET_DATA_MASTER,
+      DataMasterValidation.GET_DATA_MASTER_WITHOUT_PAGINATION,
       queryWithParsedFilters,
     );
 

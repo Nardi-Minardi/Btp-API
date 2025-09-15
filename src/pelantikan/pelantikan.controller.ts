@@ -14,15 +14,15 @@ import { Logger } from 'winston';
 import {
   CreateResponsePengangkatanPpnsDto,
   CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto,
-} from './dto/create.pengangkatan.dto';
-import { PengangkatanService } from './pengangkatan.service';
+} from './dto/create.pelantikan.dto';
+import { PelantikanService } from './pelantikan.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
-@Controller('/pengangkatan')
-export class PengangkatanController {
+@Controller('/pelantikan')
+export class PelantikanController {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private pengangkatanService: PengangkatanService,
+    private pelantikanService: PelantikanService
   ) {}
 
   @UseInterceptors(
@@ -50,7 +50,7 @@ export class PengangkatanController {
         files?.dok_tanda_terima_kejaksaan_agung?.[0] ?? null,
     };
 
-    const result = await this.pengangkatanService.storePengangkatanPpns(
+    const result = await this.pelantikanService.storePengangkatanPpns(
       request,
       authorization,
     );
@@ -92,7 +92,7 @@ export class PengangkatanController {
       foto: files?.foto?.[0] ?? null,
     };
 
-    const result = await this.pengangkatanService.storeUploadDokumen(
+    const result = await this.pelantikanService.storeUploadDokumen(
       request,
       authorization,
     );

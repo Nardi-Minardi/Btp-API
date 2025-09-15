@@ -68,34 +68,30 @@ export class SuratService {
     }
 
     let dataLayanan: any;
-    let noSurat: string;
     let namePrefixUpload: string;
 
     switch (createRequest.layanan) {
       case 'verifikasi':
         dataLayanan =
           await this.layananRepository.findLayananByNama('verifikasi');
-        noSurat = await generateUniqueString('PERMOHONAN-VERIFIKASI-SURAT-');
+       
         namePrefixUpload = 'verifikasi';
         break;
 
       case 'pengangkatan':
         dataLayanan =
           await this.layananRepository.findLayananByNama('pengangkatan');
-        noSurat = await generateUniqueString('PENGANGKATAN-SURAT-');
         namePrefixUpload = 'pengangkatan';
         break;
 
       case 'pelantikan':
         dataLayanan =
           await this.layananRepository.findLayananByNama('pelantikan');
-        noSurat = await generateUniqueString('PELANTIKAN-SURAT-');
         namePrefixUpload = 'pelantikan';
         break;
 
       case 'mutasi':
         dataLayanan = await this.layananRepository.findLayananByNama('mutasi');
-        noSurat = await generateUniqueString('MUTASI-SURAT-');
         namePrefixUpload = 'mutasi';
         break;
 
@@ -103,14 +99,12 @@ export class SuratService {
         dataLayanan = await this.layananRepository.findLayananByNama(
           'pengangkatan_kembali',
         );
-        noSurat = await generateUniqueString('PENGANGKATAN-KEMBALI-SURAT-');
         namePrefixUpload = 'pengangkatan-kembali';
         break;
 
       case 'perpanjang ktp':
         dataLayanan =
           await this.layananRepository.findLayananByNama('perpanjang ktp');
-        noSurat = await generateUniqueString('PERPANJANG-KTP-SURAT-');
         namePrefixUpload = 'perpanjang-ktp';
         break;
 
@@ -118,27 +112,23 @@ export class SuratService {
         dataLayanan = await this.layananRepository.findLayananByNama(
           'penerbitan kembali ktp',
         );
-        noSurat = await generateUniqueString('PENERBITAN-KEMBALI-KTP-SURAT-');
         namePrefixUpload = 'penerbitan-kembali-ktp';
         break;
 
       case 'undur diri':
         dataLayanan =
           await this.layananRepository.findLayananByNama('undur diri');
-        noSurat = await generateUniqueString('UNDUR-DIRI-SURAT-');
         namePrefixUpload = 'undur-diri';
         break;
 
       case 'pensiun':
         dataLayanan = await this.layananRepository.findLayananByNama('pensiun');
-        noSurat = await generateUniqueString('PENSIUN-SURAT-');
         namePrefixUpload = 'pensiun';
         break;
 
       case 'pemberhentian NTO':
         dataLayanan =
           await this.layananRepository.findLayananByNama('pemberhentian NTO');
-        noSurat = await generateUniqueString('PEMBERHENTIAN-NTO-SURAT-');
         namePrefixUpload = 'pemberhentian-nto';
         break;
 
@@ -174,7 +164,7 @@ export class SuratService {
       id_layanan: dataLayanan?.id,
       lembaga_kementerian: Number(createRequest.lembaga_kementerian),
       instansi: Number(createRequest.instansi),
-      no_surat: noSurat,
+      no_surat: createRequest.no_surat,
       tgl_surat: createRequest.tgl_surat
         ? dateOnlyToLocal(createRequest.tgl_surat)
         : null,
@@ -430,35 +420,35 @@ export class SuratService {
 
     let result;
 
-    if (existingPpnsDataPns) {
-      //update
-      result = await this.suratRepository.updatePpnsDataPns(
-        existingPpnsDataPns.id,
-        {
-          ...createData,
-          ppns_wilayah_kerja: {
-            deleteMany: {}, // delete all existing related wilayah kerja
-            create: createRequest.wilayah_kerja.map((w: any) => {
-              const [uu1, uu2, uu3] = w.uu_dikawal;
-              return {
-                id_surat: createRequest.id_surat,
-                id_layanan: surat?.id_layanan || null,
-                provinsi_penempatan: w.provinsi_penempatan,
-                kabupaten_penempatan: w.kabupaten_penempatan,
-                unit_kerja: w.unit_kerja,
-                penempatan_baru: w.penempatan_baru ? '1' : '0',
-                uu_dikawal_1: uu1 ?? null,
-                uu_dikawal_2: uu2 ?? null,
-                uu_dikawal_3: uu3 ?? null,
-              };
-            }),
-          },
-        },
-      );
-    } else {
-      // create data calon ppns
-      result = await this.suratRepository.savePpnsDataPns(createData);
-    }
+    // if (existingPpnsDataPns) {
+    //   //update
+    //   result = await this.suratRepository.updatePpnsDataPns(
+    //     existingPpnsDataPns.id,
+    //     {
+    //       ...createData,
+    //       ppns_wilayah_kerja: {
+    //         deleteMany: {}, // delete all existing related wilayah kerja
+    //         create: createRequest.wilayah_kerja.map((w: any) => {
+    //           const [uu1, uu2, uu3] = w.uu_dikawal;
+    //           return {
+    //             id_surat: createRequest.id_surat,
+    //             id_layanan: surat?.id_layanan || null,
+    //             provinsi_penempatan: w.provinsi_penempatan,
+    //             kabupaten_penempatan: w.kabupaten_penempatan,
+    //             unit_kerja: w.unit_kerja,
+    //             penempatan_baru: w.penempatan_baru ? '1' : '0',
+    //             uu_dikawal_1: uu1 ?? null,
+    //             uu_dikawal_2: uu2 ?? null,
+    //             uu_dikawal_3: uu3 ?? null,
+    //           };
+    //         }),
+    //       },
+    //     },
+    //   );
+    // } else {
+    // }
+    // create data calon ppns
+    result = await this.suratRepository.savePpnsDataPns(createData);
 
     //update id_ppns di ppns_upload yang id_ppns null dan id_surat sama dengan createRequest.id_surat
     await this.suratRepository.updatePpnsUploadIdPpns(
@@ -535,6 +525,8 @@ export class SuratService {
           ? item.verifikator_at.toISOString()
           : null,
         id_layanan: item.id_layanan ?? null,
+        nama_kementerian: item.ppns_kementerian ? item.ppns_kementerian.nama : null,
+        nama_instansi: item.ppns_instansi ? item.ppns_instansi.nama : null,
       })),
       pagination,
     };

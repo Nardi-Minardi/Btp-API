@@ -1,11 +1,33 @@
-import { Body, Controller, Headers, Inject, NotFoundException, Param, Post, Get, Query, HttpCode, UseInterceptors, UploadedFiles, BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  Inject,
+  NotFoundException,
+  Param,
+  Post,
+  Get,
+  Query,
+  HttpCode,
+  UseInterceptors,
+  UploadedFiles,
+  BadRequestException,
+} from '@nestjs/common';
 import { Pagination, WebResponse } from 'src/common/web.response';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { getUserFromToken } from 'src/common/utils/helper.util';
-import { ListSurat } from './dto/get.surat.dto';
-import {  CreateResponsePpnsDataPnsDto, CreateResponseSendVerifikatorDto, CreateResponseSuratDto } from './dto/create.surat.dto';
+import {
+  GetCalonPemohonPaginationDto,
+  ListCalonPemohon,
+  ListSurat,
+} from './dto/get.surat.dto';
+import {
+  CreateResponsePpnsDataPnsDto,
+  CreateResponseSendVerifikatorDto,
+  CreateResponseSuratDto,
+} from './dto/create.surat.dto';
 import { SuratRepository } from './surat.repository';
 import { SuratService } from './surat.service';
 
@@ -65,7 +87,7 @@ export class SuratController {
   async detailCalonPpns(
     @Param('idSurat') idSurat: string,
     @Headers() headers: Record<string, any>,
-  ): Promise<WebResponse<any>> {
+  ): Promise<WebResponse<ListCalonPemohon[]>> {
     const authorization = headers['authorization'] || '';
 
     const userLogin = await getUserFromToken(authorization);
@@ -80,14 +102,46 @@ export class SuratController {
       throw new BadRequestException('Ppns Surat not found');
     }
 
-    return { statusCode: 200, message: 'Success', data: item };
+    const mappedItem = item.map((calon) => ({
+      id: calon.id || null,
+      id_surat: calon.id_surat || null,
+      no_surat: calon.ppns_surat?.no_surat || null,
+      nama: calon.nama || null,
+      nip: calon.nip || null,
+      nama_gelar: calon.nama_gelar || null,
+      jabatan: calon.jabatan || null,
+      pangkat_atau_golongan: calon.pangkat_atau_golongan || null,
+      jenis_kelamin: calon.jenis_kelamin || null,
+      agama: calon.agama || null,
+      nama_sekolah: calon.nama_sekolah || null,
+      gelar_terakhir: calon.gelar_terakhir || null,
+      no_ijazah: calon.no_ijazah || null,
+      tgl_ijazah: calon.tgl_ijazah ? calon.tgl_ijazah.toISOString() : null,
+      tahun_lulus: calon.tahun_lulus || null,
+      ppns_wilayah_kerja: calon.ppns_wilayah_kerja.map((wilayah) => ({
+        id: wilayah.id || null,
+        id_ppns: wilayah.id_ppns || null,
+        id_surat: wilayah.id_surat || null,
+        id_provinsi: wilayah.id_provinsi || null,
+        id_kabkota: wilayah.id_kabkota || null,
+        id_kecamatan: wilayah.id_kecamatan || null,
+        uu_dikawal: [
+          wilayah.uu_dikawal_1,
+          wilayah.uu_dikawal_2,
+          wilayah.uu_dikawal_3,
+        ].filter((uu): uu is string => !!uu), // hanya ambil yang tidak null/undefined
+      })),
+    }));
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: mappedItem,
+    };
   }
 
   //create surat
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'dok_surat_pernyataan', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor([{ name: 'dok_surat_pernyataan', maxCount: 1 }]),
   )
   @Post('/create')
   @HttpCode(201)
@@ -105,10 +159,7 @@ export class SuratController {
       dok_surat_pernyataan: files?.dok_surat_pernyataan?.[0] ?? null,
     };
 
-    const result = await this.suratService.storeSurat(
-      request,
-      authorization,
-    );
+    const result = await this.suratService.storeSurat(request, authorization);
 
     return { statusCode: 201, message: 'Success', data: result };
   }
