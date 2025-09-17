@@ -239,6 +239,7 @@ export class SuratService {
       id: result.id || null,
       id_user: result.id_user || null,
       id_layanan: result.id_layanan || null,
+      nama_layanan: dataLayanan?.nama || null,
       lembaga_kementerian: result.lembaga_kementerian || null,
       instansi: result.instansi || null,
       no_surat: result.no_surat || null,
@@ -385,9 +386,10 @@ export class SuratService {
     });
 
     //validasi pangkat golongan
-    const pangkatGolongan = await this.dataMasterRepository.findPangkatGolonganById(
-      Number(createRequest.identitas_pns.pangkat_golongan),
-    );
+    const pangkatGolongan =
+      await this.dataMasterRepository.findPangkatGolonganById(
+        Number(createRequest.identitas_pns.pangkat_golongan),
+      );
 
     if (!pangkatGolongan) {
       throw new NotFoundException(
@@ -411,12 +413,15 @@ export class SuratService {
       nama: createRequest.identitas_pns.nama,
       nip: createRequest.identitas_pns.nip,
       nama_gelar: createRequest.identitas_pns.nama_gelar,
+      gelar_depan: createRequest.identitas_pns.gelar_depan,
       jabatan: createRequest.identitas_pns.jabatan,
       pangkat_golongan: createRequest.identitas_pns.pangkat_golongan,
       jenis_kelamin: this.mapJenisKelamin(
         createRequest.identitas_pns.jenis_kelamin,
       ),
       agama: createRequest.identitas_pns.agama,
+      nomor_hp: createRequest.identitas_pns.nomor_hp,
+      email: createRequest.identitas_pns.email,
       // nama_sekolah: createRequest.identitas_pns.nama_sekolah,
       // gelar_terakhir: createRequest.identitas_pns.gelar_terakhir,
       // no_ijazah: createRequest.identitas_pns.no_ijazah,
@@ -481,9 +486,12 @@ export class SuratService {
     // create data calon ppns
     result = await this.suratRepository.savePpnsDataPns({
       ...createData,
-      provinsi_penempatan: createRequest.lokasi_penempatan.provinsi_penempatan,
-      kabupaten_penempatan:
+      provinsi_penempatan: Number(
+        createRequest.lokasi_penempatan.provinsi_penempatan,
+      ),
+      kabupaten_penempatan: Number(
         createRequest.lokasi_penempatan.kabupaten_penempatan,
+      ),
       unit_kerja: createRequest.lokasi_penempatan.unit_kerja,
       created_by: userLogin.user_id,
     });
@@ -567,6 +575,9 @@ export class SuratService {
           ? item.ppns_kementerian.nama
           : null,
         nama_instansi: item.ppns_instansi ? item.ppns_instansi.nama : null,
+        ppns_instansi: item.ppns_instansi ? item.ppns_instansi : null,
+        ppns_kementerian: item.ppns_kementerian ? item.ppns_kementerian : null,
+        ppns_layanan: item.ppns_layanan ? item.ppns_layanan : null,
       })),
       pagination,
     };

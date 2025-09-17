@@ -101,23 +101,16 @@ model PpnsMutasi {
 }
 
 model PpnsPelantikan {
-  id               Int          @id @default(autoincrement())
-  id_surat         Int?         @db.Integer
-  id_data_ppns     Int?         @db.Integer
-  no_sk_induk      String?      @db.VarChar(255)
-  tgl_sk_induk     DateTime?    @db.Date
-  verifikator_1_by Int?         @db.Integer
-  verifikator_1_at DateTime?    @db.Timestamp(6)
-  status_1         status_enum?
-  verifikator_2_by Int?         @db.Integer
-  verifikator_2_at DateTime?    @db.Timestamp(6)
-  status_2         status_enum?
-  verifikator_3_by Int?         @db.Integer
-  verifikator_3_at DateTime?    @db.Timestamp(6)
-  status_3         status_enum?
-  verifikator_4_by Int?         @db.Integer
-  verifikator_4_at DateTime?    @db.Timestamp(6)
-  status_4         status_enum?
+  id                   Int       @id @default(autoincrement())
+  id_surat             Int?      @db.Integer
+  id_data_ppns         Int?      @db.Integer
+  no_sk_induk          String?   @db.VarChar(255)
+  tgl_sk_induk         DateTime? @db.Date
+  provinsi_penempatan  Int?      @db.Integer
+  kabupaten_penempatan Int?      @db.Integer
+  unit_kerja           String?   @db.VarChar(255)
+  created_at           DateTime? @default(now()) @db.Timestamp(6)
+  created_by           Int?      @db.Integer
 
   @@map("tr_ppns_pelantikan")
 }
@@ -353,6 +346,9 @@ model PpnsDataPns {
   tgl_ijazah       DateTime?           @db.Date
   tahun_lulus      String?             @db.VarChar(255)
   is_ppns          Boolean             @default(false)
+  nomor_hp         String?             @db.VarChar(20)
+  email            String?             @db.VarChar(255)
+  gelar_depan      String?             @db.VarChar(255)
 
   // Relasi
   ppns_surat           PpnsSurat?          @relation("PpnsDataToSurat", fields: [id_surat], references: [id])
@@ -414,26 +410,26 @@ model PpnsPengangkatan {
   id_data_ppns                     Int?      @db.Integer
   nama_sekolah                     String?   @db.VarChar(255)
   no_ijazah                        String?   @db.VarChar(255)
-  tahun_lulus                      Int?      @db.Integer
+  tgl_ijazah                       DateTime? @db.Date
+  tahun_lulus                      String?   @db.VarChar(255)
   no_sttpl                         String?   @db.VarChar(255)
   tgl_sttpl                        DateTime? @db.Date
-  tgl_ijazah                       DateTime? @db.Date
   tgl_verifikasi                   DateTime? @db.Timestamp(6)
-  cek_surat_polisi                 String?   @db.VarChar(255)
+  cek_surat_polisi                 Boolean   @default(false)
   no_surat_polisi                  String?   @db.VarChar(255)
   tgl_surat_polisi                 DateTime? @db.Date
   perihal_surat_polisi             String?   @db.VarChar(255)
-  cek_surat_kejaksaan_agung        String?   @db.VarChar(255)
+  cek_surat_kejaksaan_agung        Boolean   @default(false)
   no_surat_kejaksaan_agung         String?   @db.VarChar(255)
   tgl_surat_kejaksaan_agung        DateTime? @db.Date
   perihal_surat_kejaksaan_agung    String?   @db.VarChar(255)
-  teknis_operasional_penegak_hukum String?   @db.VarChar(255)
+  teknis_operasional_penegak_hukum Boolean   @default(false)
   jabatan                          String?   @db.VarChar(255)
   provinsi_penempatan              Int?      @db.Integer
   kabupaten_penempatan             Int?      @db.Integer
   unit_kerja                       String?   @db.VarChar(255)
-  created_by                       Int?      @db.Integer
   created_at                       DateTime? @default(now()) @db.Timestamp(6)
+  created_by                       Int?      @db.Integer
 
   @@map("tr_ppns_pengangkatan")
 }

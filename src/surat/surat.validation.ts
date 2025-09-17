@@ -103,6 +103,8 @@ export class SuratValidation {
       jenis_kelamin: z.enum(['Pria', 'Wanita'], {
         message: 'Jenis Kelamin must be Pria atau Wanita',
       }),
+      nomor_hp: z.string().optional(),
+      email: z.string().email('Email must be a valid email address').optional().nullable(),
       agama: z.number(),
       // agama: z.enum(
       //   [
@@ -126,8 +128,8 @@ export class SuratValidation {
           kab_kota: z.string().min(1, 'Kabupaten/kota is required'),
           kecamatan: z.string().min(1, 'Kecamatan is required'),
 
-          unit_kerja: z.string().min(1, 'Unit Kerja is required'),
-          penempatan_baru: z.boolean(),
+          // unit_kerja: z.string().min(1, 'Unit Kerja is required'),
+          // penempatan_baru: z.boolean(),
           uu_dikawal: z
             .array(z.string().min(1, 'UU Dikawal cannot be empty'))
             .min(1, 'UU Dikawal must have at least one entry')
@@ -136,8 +138,8 @@ export class SuratValidation {
       )
       .min(1, 'Minimal harus ada 1 wilayah kerja'),
     lokasi_penempatan: z.object({
-      provinsi_penempatan: z.number(),
-      kabupaten_penempatan: z.number(),
+      provinsi_penempatan: z.string().min(1, 'Provinsi Penempatan Kerja is required'),
+      kabupaten_penempatan: z.string().min(1, 'kabupaten Penempatan is required'),
       unit_kerja: z.string().min(1, 'Unit Kerja is required'),
     }),
   });

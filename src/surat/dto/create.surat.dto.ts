@@ -2,6 +2,7 @@ export class CreateResponseSuratDto {
   id: number | null;
   id_user:number | null;
   id_layanan: number | null;
+  nama_layanan: string | null;
   lembaga_kementerian: number | null;
   instansi: number | null;
   no_surat: string | null;

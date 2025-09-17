@@ -326,31 +326,79 @@ export class SuratRepository {
       kabupaten_penempatan?: number;
       unit_kerja?: string;
       gelar_depan?: string | null;
-      created_by: number |null
+      created_by: number | null;
     },
   ): Promise<CreateResponsePpnsDataPnsDto> {
+    // create data utama PNS (tanpa provinsi/kabupaten/unit_kerja, karena bukan field di tabel ini)
+    const {
+      provinsi_penempatan,
+      kabupaten_penempatan,
+      unit_kerja,
+      created_by,
+      ...ppnsData
+    } = data;
 
-     // create data utama PNS (tanpa provinsi/kabupaten/unit_kerja, karena bukan field di tabel ini)
-  const { provinsi_penempatan, kabupaten_penempatan, unit_kerja, created_by, ...ppnsData } = data;
-
-  const result = await this.prismaService.ppnsDataPns.create({
-    data: ppnsData,
-    include: {
-      ppns_wilayah_kerja: true,
-      ppns_verifikasi_ppns: true,
-    },
-  });
-
-    // create verifikasi PNS langsung setelahnya
-    await this.prismaService.ppnsVerifikasiPpns.create({
-      data: {
-        id_data_ppns: result.id,
-        provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
-        kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
-        unit_kerja: (data as any).unit_kerja ?? null,
-        created_by: (data as any).created_by ?? null, // kalau ada info user login
+    const result = await this.prismaService.ppnsDataPns.create({
+      data: ppnsData,
+      include: {
+        ppns_wilayah_kerja: true,
+        ppns_verifikasi_ppns: true,
       },
     });
+
+    //find data surat
+    const surat = await this.prismaService.ppnsSurat.findUnique({
+      where: { id: result.id_surat ?? undefined },
+    });
+
+    if (!surat) {
+      throw new NotFoundException('Surat not found');
+    }
+
+    //find layanan
+    const layanan = await this.prismaService.ppnsLayanan.findUnique({
+      where: { id: surat.id_layanan ?? undefined },
+    });
+
+    if (!layanan) {
+      throw new NotFoundException('Layanan not found');
+    }
+
+    //conditional create data by layanan
+    if (layanan.nama === 'verifikasi') {
+      // create verifikasi PNS langsung setelahnya
+      await this.prismaService.ppnsVerifikasiPpns.create({
+        data: {
+          id_data_ppns: result.id,
+          provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
+          kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
+          unit_kerja: (data as any).unit_kerja ?? null,
+          created_by: (data as any).created_by ?? null, // kalau ada info user login
+        },
+      });
+    } else if (layanan.nama === 'pengangkatan') {
+      //create pengangkatan PNS langsung setelahnya
+      await this.prismaService.ppnsPengangkatan.create({
+        data: {
+        id_data_ppns: result.id,
+          provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
+          kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
+          unit_kerja: (data as any).unit_kerja ?? null,
+          created_by: (data as any).created_by ?? null, // kalau ada info user login
+        },
+      });
+    } else if (layanan.nama === 'pelantikan') {
+      //create pelantikan PNS langsung setelahnya
+      await this.prismaService.ppnsPelantikan.create({
+        data: {
+          id_data_ppns: result.id,
+          provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
+          kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
+          unit_kerja: (data as any).unit_kerja ?? null,
+          created_by: (data as any).created_by ?? null, // kalau ada info user login
+        },
+      });
+    }
 
     // Mapping identitas_pns
     const identitasPns = {

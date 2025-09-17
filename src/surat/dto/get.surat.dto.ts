@@ -33,6 +33,9 @@ export class ListSurat {
   id_layanan: number | null;
   nama_kementerian: string | null;
   nama_instansi: string | null;
+  ppns_layanan: any | null;
+  ppns_instansi: any | null;
+  ppns_kementerian: any | null;
   // ppns_upload : any [];
   // ppns_data_pns : any [];
   // ppns_verifikasi_ppns : any [];

@@ -66,8 +66,6 @@ export class PengangkatanRepository {
       idSurat = d.id_surat ?? null;
     }
 
-    
-
     return {
       id: result.id ?? null,
       id_surat: idSurat,
@@ -85,14 +83,9 @@ export class PengangkatanRepository {
       tgl_verifikasi: result.tgl_verifikasi
         ? result.tgl_verifikasi.toISOString()
         : null,
-      teknis_operasional_penegak_hukum:
-        result.teknis_operasional_penegak_hukum !== null &&
-        result.teknis_operasional_penegak_hukum !== undefined &&
-        result.teknis_operasional_penegak_hukum === '1'
-          ? true
-          : result.teknis_operasional_penegak_hukum === '0'
-            ? false
-            : null,
+      teknis_operasional_penegak_hukum: result.teknis_operasional_penegak_hukum
+        ? true
+        : false,
       jabatan: result.jabatan ?? null,
 
       cek_surat_polisi:
@@ -131,7 +124,6 @@ export class PengangkatanRepository {
       perihal_tanda_terima_kejaksaan_agung:
         data.perihal_tanda_terima_kejaksaan_agung ?? null,
       // ✅ Ambil dari DB, bukan dari request
-     
     };
   }
 
@@ -171,7 +163,7 @@ export class PengangkatanRepository {
       (u) => u.file_type === 'dokumen-tanda-terima-polisi',
     );
     const dokKejaksaan = uploads.find(
-      (u) => u.file_type ===  'dokumen-tanda-terima-kejaksaan-agung',
+      (u) => u.file_type === 'dokumen-tanda-terima-kejaksaan-agung',
     );
 
     return {
@@ -191,14 +183,9 @@ export class PengangkatanRepository {
       tgl_verifikasi: result.tgl_verifikasi
         ? result.tgl_verifikasi.toISOString()
         : null,
-      teknis_operasional_penegak_hukum:
-        result.teknis_operasional_penegak_hukum !== null &&
-        result.teknis_operasional_penegak_hukum !== undefined &&
-        result.teknis_operasional_penegak_hukum === '1'
-          ? true
-          : result.teknis_operasional_penegak_hukum === '0'
-            ? false
-            : null,
+      teknis_operasional_penegak_hukum: result.teknis_operasional_penegak_hukum
+        ? true
+        : false,
       jabatan: result.jabatan ?? null,
 
       cek_surat_polisi:
@@ -245,7 +232,7 @@ export class PengangkatanRepository {
     });
   }
 
-  async createOrUpdateVerifikasiPpnsUpload(
+  async createOrUpdatePpnsUpload(
     idTransaksi: number,
     dataUpload: {
       id_surat: number;
@@ -257,6 +244,7 @@ export class PengangkatanRepository {
       mime_type?: string;
       file_size?: number;
       status?: string;
+      id_file_type?: number | null;
     }[],
   ) {
     for (const d of dataUpload) {
@@ -282,6 +270,7 @@ export class PengangkatanRepository {
             id_surat: d.id_surat,
             id_data_ppns: d.id_ppns,
             file_type: this.cleanString(d.file_type) ?? existing.file_type,
+            id_file_type: d.id_file_type ?? existing.id_file_type,
             original_name:
               this.cleanString(d.original_name) ?? existing.original_name,
             status: this.normalizeStatus(d.status) ?? existing.status,
@@ -299,6 +288,7 @@ export class PengangkatanRepository {
             id_surat: d.id_surat,
             id_data_ppns: d.id_ppns,
             file_type: this.cleanString(d.file_type) ?? '',
+            id_file_type: d.id_file_type ?? null,
             original_name: this.cleanString(d.original_name) ?? '',
             status: this.normalizeStatus(d.status),
             keterangan: this.cleanString(d.keterangan),

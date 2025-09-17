@@ -14,7 +14,6 @@ import {
 } from './dto/create.pengangkatan.dto';
 import {
   dateOnlyToLocal,
-  generateUniqueString,
   getUserFromToken,
 } from 'src/common/utils/helper.util';
 import { FileUploadService } from 'src/file-upload/file-upload.service';
@@ -93,7 +92,7 @@ export class PengangkatanService {
       // tgl_lulus: createRequest.tgl_lulus
       //   ? dateOnlyToLocal(createRequest.tgl_lulus)
       //   : null,
-      tahun_lulus: Number(createRequest.tahun_lulus),
+      tahun_lulus: createRequest.tahun_lulus,
       // gelar_terakhir: createRequest.gelar_terakhir,
       no_sttpl: createRequest.no_sttpl,
       tgl_sttpl: createRequest.tgl_sttpl
@@ -103,9 +102,9 @@ export class PengangkatanService {
         ? dateOnlyToLocal(createRequest.tgl_verifikasi)
         : null,
       teknis_operasional_penegak_hukum:
-        createRequest.teknis_operasional_penegak_hukum ? '1' : '0',
+        createRequest.teknis_operasional_penegak_hukum,
       jabatan: createRequest.jabatan,
-      cek_surat_polisi: createRequest.cek_surat_polisi ? '1' : '0',
+      cek_surat_polisi: createRequest.cek_surat_polisi,
       no_surat_polisi: createRequest.cek_surat_polisi
         ? createRequest.no_surat_polisi
         : createRequest.no_tanda_terima_polisi,
@@ -117,9 +116,7 @@ export class PengangkatanService {
       perihal_surat_polisi: createRequest.cek_surat_polisi
         ? createRequest.perihal_surat_polisi
         : createRequest.perihal_tanda_terima_polisi,
-      cek_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung
-        ? '1'
-        : '0',
+      cek_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung,
       no_surat_kejaksaan_agung: createRequest.cek_surat_kejaksaan_agung
         ? createRequest.no_surat_kejaksaan_agung
         : createRequest.no_tanda_terima_kejaksaan_agung,
@@ -147,12 +144,13 @@ export class PengangkatanService {
         existingPpnsPengangkatan.id,
         createData as unknown as PpnsPengangkatanUpdateInputWithExtra,
       );
-    } else {
-      // create data calon ppns
-      result = await this.pengangkatanRepository.savePpnsPengangkatan(
-        createData as unknown as PpnsPengangkatanCreateInputWithExtra,
-      );
-    }
+    } 
+    // else {
+    //   // create data calon ppns
+    //   result = await this.pengangkatanRepository.savePpnsPengangkatan(
+    //     createData as unknown as PpnsPengangkatanCreateInputWithExtra,
+    //   );
+    // }
 
     const dataUploadDB: PpnsUploadDto[] = [];
 
@@ -161,8 +159,12 @@ export class PengangkatanService {
 
     // jika ada dokumen tanda terima polisi
     if (request.dok_tanda_terima_polisi) {
+      const masterFile =
+        await this.fileUploadRepository.getMasterPpnsUploadByIdByName(
+          'dokumen_tanda_terima_polisi',
+        );
       const existingPolisi = await this.fileUploadRepository.findFilePpnsUpload(
-        'dokumen-tanda-terima-polisi',
+        'dokumen_tanda_terima_polisi',
         Number(existingPpnsDataPns.id_surat),
         Number(createRequest.id_data_ppns),
       );
@@ -175,12 +177,12 @@ export class PengangkatanService {
 
       const upload = await this.fileUploadService.handleUpload(
         request.dok_tanda_terima_polisi,
-        'dokumen-tanda-terima-polisi',
+        'dokumen_tanda_terima_polisi',
         existingPpnsDataPns.id_surat ?? 0,
         createData.id_data_ppns,
         'pengangkatan',
-        layanan ? layanan.id : null,
-        'dokumen-tanda-terima-polisi',
+        masterFile ? masterFile.id : null,
+        'dokumen_tanda_terima_polisi',
         status_upload_ii.pending,
       );
 
@@ -189,9 +191,13 @@ export class PengangkatanService {
 
     // jika ada dokumen tanda terima kejaksaan agung
     if (request.dok_tanda_terima_kejaksaan_agung) {
+      const masterFile =
+        await this.fileUploadRepository.getMasterPpnsUploadByIdByName(
+          'dokumen_tanda_terima_kejaksaan_agung',
+        );
       const existingKejaksaan =
         await this.fileUploadRepository.findFilePpnsUpload(
-          'dokumen-tanda-terima-kejaksaan-agung',
+          'dokumen_tanda_terima_kejaksaan_agung',
           Number(existingPpnsDataPns.id_surat),
           Number(createRequest.id_data_ppns),
         );
@@ -202,12 +208,12 @@ export class PengangkatanService {
       );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_tanda_terima_kejaksaan_agung,
-        'dokumen-tanda-terima-kejaksaan-agung',
+        'dokumen_tanda_terima_kejaksaan_agung',
         existingPpnsDataPns.id_surat ?? 0,
         createData.id_data_ppns,
         'pengangkatan',
-        layanan ? layanan.id : null,
-        'dokumen-tanda-terima-kejaksaan-agung',
+        masterFile ? masterFile.id : null,
+        'dokumen_tanda_terima_kejaksaan_agung',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -221,6 +227,7 @@ export class PengangkatanService {
           ...d,
           id_surat: existingPpnsDataPns.id_surat ?? 0,
           id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
+          id_file_type: d.master_file_id ?? null,
         })),
       );
     }
@@ -248,13 +255,13 @@ export class PengangkatanService {
     // ✅ ambil ulang file upload dari DB supaya data pasti sudah tersimpan
     const dok_tanda_terima_polisi =
       await this.fileUploadRepository.findFilePpnsUpload(
-        'dokumen-tanda-terima-polisi',
+        'dokumen_tanda_terima_polisi',
         Number(existingPpnsDataPns.id_surat),
         Number(createRequest.id_data_ppns),
       );
     const dok_tanda_terima_kejaksaan_agung =
       await this.fileUploadRepository.findFilePpnsUpload(
-        'dokumen-tanda-terima-kejaksaan-agung',
+        'dokumen_tanda_terima_kejaksaan_agung',
         Number(existingPpnsDataPns.id_surat),
         Number(createRequest.id_data_ppns),
       );
@@ -277,12 +284,9 @@ export class PengangkatanService {
     },
     authorization?: string,
   ): Promise<CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto> {
-    this.logger.debug(
-      'Request Creating permohonan verifikasi create upload dokumen',
-      {
-        request,
-      },
-    );
+    this.logger.debug('Request Creating Pengangkatan create upload dokumen', {
+      request,
+    });
     const createRequest = this.validationService.validate(
       PengangkatanValidation.CREATE_PENGANGKATAN_UPLOAD,
       request,
@@ -320,8 +324,12 @@ export class PengangkatanService {
     const dataUploadDB: PpnsUploadDto[] = [];
 
     if (request.dok_surat_permohonan_pengangkatan) {
+      const masterFile =
+        await this.fileUploadRepository.getMasterPpnsUploadByIdByName(
+          'pengangkatan_surat_permohonan',
+        );
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'dokumen-surat-permohonan-pengangkatan',
+        'pengangkatan_surat_permohonan',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
@@ -334,12 +342,12 @@ export class PengangkatanService {
 
       const upload = await this.fileUploadService.handleUpload(
         request.dok_surat_permohonan_pengangkatan,
-        'dokumen-surat-permohonan-pengangkatan',
+        'pengangkatan_surat_permohonan',
         existingSurat.id,
         existingPpnsDataPns.id,
         'pengangkatan',
-        existingSurat.id_layanan || null,
-        'dokumen-surat-permohonan-pengangkatan',
+        masterFile ? masterFile.id : null,
+        'pengangkatan_surat_permohonan',
         status_upload_ii.pending,
       );
 
@@ -347,8 +355,12 @@ export class PengangkatanService {
     }
 
     if (request.dok_fotokopi_tamat_pendidikan) {
+      const masterFile =
+        await this.fileUploadRepository.getMasterPpnsUploadByIdByName(
+          'pengangkatan_surat_tamat_pendidikan_ppns',
+        );
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'dokumen-fotokopi-tamat-pendidikan',
+        'pengangkatan_surat_tamat_pendidikan_ppns',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
@@ -359,20 +371,24 @@ export class PengangkatanService {
       );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_fotokopi_tamat_pendidikan,
-        'dokumen-fotokopi-tamat-pendidikan',
+        'pengangkatan_surat_tamat_pendidikan_ppns',
         existingSurat.id,
         existingPpnsDataPns.id,
         'pengangkatan',
-        existingSurat.id_layanan || null,
-        'dokumen-fotokopi-tamat-pendidikan',
+        masterFile ? masterFile.id : null,
+        'pengangkatan_surat_tamat_pendidikan_ppns',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
     }
 
     if (request.dok_surat_pertimbangan) {
+      const masterFile =
+        await this.fileUploadRepository.getMasterPpnsUploadByIdByName(
+          'pengangkatan_surat_pertimbangan_kepolisian',
+        );
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'dokumen-surat-pertimbangan',
+        'pengangkatan_surat_pertimbangan_kepolisian',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
@@ -383,20 +399,24 @@ export class PengangkatanService {
       );
       const upload = await this.fileUploadService.handleUpload(
         request.dok_surat_pertimbangan,
-        'dokumen-surat-pertimbangan',
+        'pengangkatan_surat_pertimbangan_kepolisian',
         existingSurat.id,
         existingPpnsDataPns.id,
         'pengangkatan',
-        existingSurat.id_layanan || null,
-        'dokumen-surat-pertimbangan',
+        masterFile ? masterFile.id : null,
+        'pengangkatan_surat_pertimbangan_kepolisian',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
     }
 
     if (request.foto) {
+      const masterFile =
+        await this.fileUploadRepository.getMasterPpnsUploadByIdByName(
+          'pengangatan_foto',
+        );
       const existing = await this.fileUploadRepository.findFilePpnsUpload(
-        'foto',
+        'pengangatan_foto',
         existingSurat.id,
         existingPpnsDataPns.id,
       );
@@ -407,12 +427,12 @@ export class PengangkatanService {
       );
       const upload = await this.fileUploadService.handleUpload(
         request.foto,
-        'foto',
+        'pengangatan_foto',
         existingSurat.id,
         existingPpnsDataPns.id,
         'pengangkatan',
-        existingSurat.id_layanan || null,
-        'foto',
+        masterFile ? masterFile.id : null,
+        'pengangatan_foto',
         status_upload_ii.pending,
       );
       dataUploadDB.push(upload);
@@ -420,12 +440,13 @@ export class PengangkatanService {
 
     // simpan file upload ke DB
     if (dataUploadDB.length > 0) {
-      await this.pengangkatanRepository.createOrUpdateVerifikasiPpnsUpload(
+      await this.pengangkatanRepository.createOrUpdatePpnsUpload(
         existingSurat.id,
         dataUploadDB.map((d) => ({
           ...d,
           id_surat: existingSurat.id,
           id_ppns: d.id_ppns ?? 0, // fallback to 0 if null
+          id_file_type: d.master_file_id ?? null,
         })),
       );
     }
