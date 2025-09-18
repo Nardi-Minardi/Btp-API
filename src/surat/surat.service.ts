@@ -409,10 +409,31 @@ export class SuratService {
       ),
     );
 
+    //gabung gelar depan dan gelar belakang dengan underscore jika ada
+    const gelarDepan = createRequest.identitas_pns.gelar_depan
+      ? createRequest.identitas_pns.gelar_depan
+          .split(',')
+          .map((g) => g.trim())
+          .join('_')
+      : '';
+
+    const gelarBelakang = createRequest.identitas_pns.gelar_belakang
+      ? createRequest.identitas_pns.gelar_belakang
+          .split(',')
+          .map((g) => g.trim())
+          .join('_')
+      : '';
+
+    // gabungkan dengan `;` hanya jika keduanya ada
+    const namaGelar =
+      gelarDepan && gelarBelakang
+        ? `${gelarDepan};${gelarBelakang}`
+        : gelarDepan || gelarBelakang;
+
     const createData = {
       nama: createRequest.identitas_pns.nama,
       nip: createRequest.identitas_pns.nip,
-      nama_gelar: createRequest.identitas_pns.nama_gelar,
+      nama_gelar: namaGelar,
       gelar_depan: createRequest.identitas_pns.gelar_depan,
       jabatan: createRequest.identitas_pns.jabatan,
       pangkat_golongan: createRequest.identitas_pns.pangkat_golongan,
@@ -454,37 +475,8 @@ export class SuratService {
         createRequest.id_surat,
       );
 
-    let result;
-
-    // if (existingPpnsDataPns) {
-    //   //update
-    //   result = await this.suratRepository.updatePpnsDataPns(
-    //     existingPpnsDataPns.id,
-    //     {
-    //       ...createData,
-    //       ppns_wilayah_kerja: {
-    //         deleteMany: {}, // delete all existing related wilayah kerja
-    //         create: createRequest.wilayah_kerja.map((w: any) => {
-    //           const [uu1, uu2, uu3] = w.uu_dikawal;
-    //           return {
-    //             id_surat: createRequest.id_surat,
-    //             id_layanan: surat?.id_layanan || null,
-    //             provinsi_penempatan: w.provinsi_penempatan,
-    //             kabupaten_penempatan: w.kabupaten_penempatan,
-    //             unit_kerja: w.unit_kerja,
-    //             penempatan_baru: w.penempatan_baru ? '1' : '0',
-    //             uu_dikawal_1: uu1 ?? null,
-    //             uu_dikawal_2: uu2 ?? null,
-    //             uu_dikawal_3: uu3 ?? null,
-    //           };
-    //         }),
-    //       },
-    //     },
-    //   );
-    // } else {
-    // }
-    // create data calon ppns
-    result = await this.suratRepository.savePpnsDataPns({
+    // savedata calon ppns
+    const result = await this.suratRepository.savePpnsDataPns({
       ...createData,
       provinsi_penempatan: Number(
         createRequest.lokasi_penempatan.provinsi_penempatan,
@@ -495,6 +487,7 @@ export class SuratService {
       unit_kerja: createRequest.lokasi_penempatan.unit_kerja,
       created_by: userLogin.user_id,
     });
+    // }
 
     //update id_ppns di ppns_upload yang id_ppns null dan id_surat sama dengan createRequest.id_surat
     // await this.suratRepository.updatePpnsUploadIdPpns(

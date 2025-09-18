@@ -329,7 +329,6 @@ export class SuratRepository {
       created_by: number | null;
     },
   ): Promise<CreateResponsePpnsDataPnsDto> {
-    // create data utama PNS (tanpa provinsi/kabupaten/unit_kerja, karena bukan field di tabel ini)
     const {
       provinsi_penempatan,
       kabupaten_penempatan,
@@ -338,73 +337,110 @@ export class SuratRepository {
       ...ppnsData
     } = data;
 
-    const result = await this.prismaService.ppnsDataPns.create({
-      data: ppnsData,
+    // ✅ 1. Cari apakah data sudah ada
+    let existing = await this.prismaService.ppnsDataPns.findFirst({
+      where: {
+        nip: ppnsData.nip, // atau pakai id_surat + nip kalau perlu
+      },
       include: {
         ppns_wilayah_kerja: true,
         ppns_verifikasi_ppns: true,
       },
     });
 
-    //find data surat
-    const surat = await this.prismaService.ppnsSurat.findUnique({
-      where: { id: result.id_surat ?? undefined },
-    });
+    let result;
 
-    if (!surat) {
-      throw new NotFoundException('Surat not found');
-    }
+    if (existing) {
+      // 🔥 Hapus dulu semua wilayah kerja lama
+      await this.prismaService.wilayahKerja.deleteMany({
+        where: { id_ppns: existing.id },
+      });
 
-    //find layanan
-    const layanan = await this.prismaService.ppnsLayanan.findUnique({
-      where: { id: surat.id_layanan ?? undefined },
-    });
-
-    if (!layanan) {
-      throw new NotFoundException('Layanan not found');
-    }
-
-    //conditional create data by layanan
-    if (layanan.nama === 'verifikasi') {
-      // create verifikasi PNS langsung setelahnya
-      await this.prismaService.ppnsVerifikasiPpns.create({
-        data: {
-          id_data_ppns: result.id,
-          provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
-          kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
-          unit_kerja: (data as any).unit_kerja ?? null,
-          created_by: (data as any).created_by ?? null, // kalau ada info user login
+      // ✅ 2. Update jika sudah ada
+      result = await this.prismaService.ppnsDataPns.update({
+        where: { id: existing.id },
+        data: ppnsData,
+        include: {
+          ppns_wilayah_kerja: true,
+          ppns_verifikasi_ppns: true,
         },
       });
-    } else if (layanan.nama === 'pengangkatan') {
-      //create pengangkatan PNS langsung setelahnya
-      await this.prismaService.ppnsPengangkatan.create({
-        data: {
-        id_data_ppns: result.id,
-          provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
-          kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
-          unit_kerja: (data as any).unit_kerja ?? null,
-          created_by: (data as any).created_by ?? null, // kalau ada info user login
+      // ✅ Insert ulang wilayah kerja baru kalau ada di input
+      if ((ppnsData as any).ppns_wilayah_kerja?.length) {
+        await this.prismaService.wilayahKerja.createMany({
+          data: (ppnsData as any).ppns_wilayah_kerja.map((w) => ({
+            ...w,
+            id_ppns: result.id,
+          })),
+        });
+
+        // refresh result biar return sudah include data terbaru
+        result = await this.prismaService.ppnsDataPns.findUnique({
+          where: { id: result.id },
+          include: { ppns_wilayah_kerja: true, ppns_verifikasi_ppns: true },
+        });
+      }
+    } else {
+      // ✅ 3. Create jika belum ada
+      result = await this.prismaService.ppnsDataPns.create({
+        data: ppnsData,
+        include: {
+          ppns_wilayah_kerja: true,
+          ppns_verifikasi_ppns: true,
         },
       });
-    } else if (layanan.nama === 'pelantikan') {
-      //create pelantikan PNS langsung setelahnya
-      await this.prismaService.ppnsPelantikan.create({
-        data: {
-          id_data_ppns: result.id,
-          provinsi_penempatan: (data as any).provinsi_penempatan ?? null,
-          kabupaten_penempatan: (data as any).kabupaten_penempatan ?? null,
-          unit_kerja: (data as any).unit_kerja ?? null,
-          created_by: (data as any).created_by ?? null, // kalau ada info user login
-        },
+
+      // ✅ 4. Tambahan create otomatis (hanya saat create pertama)
+      const surat = await this.prismaService.ppnsSurat.findUnique({
+        where: { id: result.id_surat ?? undefined },
       });
+
+      if (!surat) throw new NotFoundException('Surat not found');
+
+      const layanan = await this.prismaService.ppnsLayanan.findUnique({
+        where: { id: surat.id_layanan ?? undefined },
+      });
+
+      if (!layanan) throw new NotFoundException('Layanan not found');
+
+      if (layanan.nama === 'verifikasi') {
+        await this.prismaService.ppnsVerifikasiPpns.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      } else if (layanan.nama === 'pengangkatan') {
+        await this.prismaService.ppnsPengangkatan.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      } else if (layanan.nama === 'pelantikan') {
+        await this.prismaService.ppnsPelantikan.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      }
     }
 
-    // Mapping identitas_pns
+    // ✅ 5. Mapping response tetap sama
     const identitasPns = {
       nama: result.nama,
       nip: result.nip,
-      nama_gelar: result.nama_gelar,
+      // nama_gelar: result.nama_gelar,
       jabatan: result.jabatan,
       pangkat_golongan: result.pangkat_golongan,
       jenis_kelamin: result.jenis_kelamin,
@@ -419,14 +455,12 @@ export class SuratRepository {
       tahun_lulus: result.tahun_lulus,
     };
 
-    // Mapping lokasi_penempatan
     const lokasiPenempatan = {
-      provinsi_penempatan: (data as any).provinsi_penempatan,
-      kabupaten_penempatan: (data as any).kabupaten_penempatan,
-      unit_kerja: (data as any).unit_kerja,
+      provinsi_penempatan,
+      kabupaten_penempatan,
+      unit_kerja,
     };
 
-    // Mapping wilayah kerja
     const wilayahKerja = result.ppns_wilayah_kerja.map((w) => ({
       penempatan_baru: w.penempatan_baru,
       uu_dikawal: [w.uu_dikawal_1, w.uu_dikawal_2, w.uu_dikawal_3].filter(
@@ -456,6 +490,15 @@ export class SuratRepository {
   async findPpnsDataPnsById(id: number) {
     return this.prismaService.ppnsDataPns.findFirst({
       where: { id },
+      include: {
+        ppns_wilayah_kerja: true,
+      },
+    });
+  }
+
+  async findPpnsDataPnsByNip(nip: string) {
+    return this.prismaService.ppnsDataPns.findFirst({
+      where: { nip },
       include: {
         ppns_wilayah_kerja: true,
       },

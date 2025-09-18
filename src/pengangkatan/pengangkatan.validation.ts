@@ -17,7 +17,8 @@ const zBooleanFromFormData = z.preprocess(
 );
 
 export class PengangkatanValidation {
-  static readonly CREATE_PENGANGKATAN_PPNS: ZodType = z.object({
+  static readonly CREATE_PENGANGKATAN_PPNS: ZodType = z
+    .object({
       id_data_ppns: z.string().min(1, 'id_data_ppns is required'),
 
       nama_sekolah: z.string().min(1, 'Nama Sekolah is required'),
@@ -48,7 +49,7 @@ export class PengangkatanValidation {
         })
         .transform((val) => (val ? dayjs(val).toDate() : undefined)),
       teknis_operasional_penegak_hukum: zBooleanFromFormData,
-      jabatan: z.string().min(1, 'Jabatan is required'),
+      jabatan: z.string().optional(),
 
       // ======= SURAT POLISI =======
       cek_surat_polisi: zBooleanFromFormData,
@@ -122,30 +123,6 @@ export class PengangkatanValidation {
     .superRefine((data, ctx) => {
       // ====== VALIDASI SURAT POLISI ======
       if (data.cek_surat_polisi) {
-        if (!data.no_surat_polisi) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['no_surat_polisi'],
-            message: 'No Surat Polisi is required when cek_surat_polisi = true',
-          });
-        }
-        if (!data.tgl_surat_polisi) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['tgl_surat_polisi'],
-            message:
-              'Tanggal Surat Polisi is required when cek_surat_polisi = true',
-          });
-        }
-        if (!data.perihal_surat_polisi) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['perihal_surat_polisi'],
-            message:
-              'Perihal Surat Polisi is required when cek_surat_polisi = true',
-          });
-        }
-      } else {
         if (!data.no_tanda_terima_polisi) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -178,35 +155,34 @@ export class PengangkatanValidation {
               'Dok Tanda Terima Polisi is required when cek_surat_polisi = false',
           });
         }
+      } else {
+        if (!data.no_surat_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['no_surat_polisi'],
+            message: 'No Surat Polisi is required when cek_surat_polisi = true',
+          });
+        }
+        if (!data.tgl_surat_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tgl_surat_polisi'],
+            message:
+              'Tanggal Surat Polisi is required when cek_surat_polisi = true',
+          });
+        }
+        if (!data.perihal_surat_polisi) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['perihal_surat_polisi'],
+            message:
+              'Perihal Surat Polisi is required when cek_surat_polisi = true',
+          });
+        }
       }
 
       // ====== VALIDASI SURAT KEJAKSAAN ======
       if (data.cek_surat_kejaksaan_agung) {
-        if (!data.no_surat_kejaksaan_agung) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['no_surat_kejaksaan_agung'],
-            message:
-              'No Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
-          });
-        }
-        if (!data.tgl_surat_kejaksaan_agung) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['tgl_surat_kejaksaan_agung'],
-            message:
-              'Tanggal Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
-          });
-        }
-        if (!data.perihal_surat_kejaksaan_agung) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['perihal_surat_kejaksaan_agung'],
-            message:
-              'Perihal Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
-          });
-        }
-      } else {
         if (!data.no_tanda_terima_kejaksaan_agung) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -237,6 +213,31 @@ export class PengangkatanValidation {
             path: ['dok_tanda_terima_kejaksaan_agung'],
             message:
               'Dok Tanda Terima Kejaksaan Agung is required when cek_surat_kejaksaan_agung = false',
+          });
+        }
+      } else {
+        if (!data.no_surat_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['no_surat_kejaksaan_agung'],
+            message:
+              'No Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
+          });
+        }
+        if (!data.tgl_surat_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tgl_surat_kejaksaan_agung'],
+            message:
+              'Tanggal Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
+          });
+        }
+        if (!data.perihal_surat_kejaksaan_agung) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['perihal_surat_kejaksaan_agung'],
+            message:
+              'Perihal Surat Kejaksaan Agung is required when cek_surat_kejaksaan_agung = true',
           });
         }
       }
@@ -289,7 +290,13 @@ export class PengangkatanValidation {
       .optional()
       .refine(
         (file: Express.Multer.File | undefined) =>
-          !file || file.mimetype === 'jpeg' || file.mimetype === 'png' || file.mimetype === 'jpg' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg',
+          !file ||
+          file.mimetype === 'jpeg' ||
+          file.mimetype === 'png' ||
+          file.mimetype === 'jpg' ||
+          file.mimetype === 'image/jpeg' ||
+          file.mimetype === 'image/png' ||
+          file.mimetype === 'image/jpg',
         { message: 'foto harus berupa JPEG/PNG/JPG' },
       )
       .refine(

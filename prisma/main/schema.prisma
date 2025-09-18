@@ -349,6 +349,7 @@ model PpnsDataPns {
   nomor_hp         String?             @db.VarChar(20)
   email            String?             @db.VarChar(255)
   gelar_depan      String?             @db.VarChar(255)
+  id_lama          Int?                @db.Integer
 
   // Relasi
   ppns_surat           PpnsSurat?          @relation("PpnsDataToSurat", fields: [id_surat], references: [id])

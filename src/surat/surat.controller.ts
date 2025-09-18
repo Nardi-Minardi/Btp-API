@@ -30,11 +30,13 @@ import {
 } from './dto/create.surat.dto';
 import { SuratRepository } from './surat.repository';
 import { SuratService } from './surat.service';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Controller('/surat')
 export class SuratController {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly prismaService: PrismaService,
     private suratService: SuratService,
     private suratRepository: SuratRepository,
   ) {}
@@ -87,7 +89,7 @@ export class SuratController {
   async detailCalonPpns(
     @Param('idSurat') idSurat: string,
     @Headers() headers: Record<string, any>,
-  ): Promise<WebResponse<ListCalonPemohon[]>> {
+  ): Promise<WebResponse<ListCalonPemohon[], null> & {status_kirim_verifikator: boolean | null}> {
     const authorization = headers['authorization'] || '';
 
     const userLogin = await getUserFromToken(authorization);
@@ -98,6 +100,7 @@ export class SuratController {
     const item = await this.suratRepository.findPpnsDataPnsByIdSurat(
       Number(idSurat),
     );
+    console.log("item", item);
     if (!item) {
       throw new BadRequestException('Ppns Surat not found');
     }
@@ -132,6 +135,7 @@ export class SuratController {
     return {
       statusCode: 200,
       message: 'Success',
+      status_kirim_verifikator: item[0]?.ppns_surat?.status ? item[0]?.ppns_surat?.status : false,
       data: mappedItem,
     };
   }
@@ -190,4 +194,6 @@ export class SuratController {
 
     return { statusCode: 201, message: 'Success', data: result };
   }
+
+ 
 }

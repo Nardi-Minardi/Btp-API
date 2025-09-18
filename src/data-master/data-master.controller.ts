@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   Controller,
+  Headers,
   Inject,
   NotFoundException,
   Param,
@@ -19,13 +21,21 @@ import { KbliDto } from './dto/kbli.dto';
 import { DataMasterValidation } from './data-master.validation';
 import { ValidationService } from 'src/common/validation.service';
 import { Request } from 'express';
-import { ListInstansiDto } from './dto/data-master.dto';
+import {
+  ListInstansiDto,
+  ResponseListCalonPemohonDto,
+} from './dto/data-master.dto';
+import { SuratRepository } from 'src/surat/surat.repository';
+import { getUserFromToken } from 'src/common/utils/helper.util';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Controller('/data-master')
 export class DataMasterController {
   constructor(
     private dataMasterService: DataMasterService,
     private dataMasterRepository: DataMasterRepository,
+    private suratRepository: SuratRepository,
+    private prismaService: PrismaService,
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger, // perbaikan
   ) {}
@@ -104,7 +114,7 @@ export class DataMasterController {
     };
   }
 
-   @Get('/layanan')
+  @Get('/layanan')
   @HttpCode(200)
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
   async getAllLayanan(
@@ -261,14 +271,15 @@ export class DataMasterController {
       queryWithParsedFilters,
     );
 
-    result = await this.dataMasterRepository.findAllWithPaginationPangkatGolongan(
-      getRequest.search,
-      getRequest.page,
-      getRequest.limit,
-      getRequest.orderBy,
-      getRequest.orderDirection,
-      getRequest.filters,
-    );
+    result =
+      await this.dataMasterRepository.findAllWithPaginationPangkatGolongan(
+        getRequest.search,
+        getRequest.page,
+        getRequest.limit,
+        getRequest.orderBy,
+        getRequest.orderDirection,
+        getRequest.filters,
+      );
     count = await this.dataMasterRepository.countSearchPangkatGolongan(
       getRequest.search,
     );
@@ -442,6 +453,122 @@ export class DataMasterController {
       statusCode: 200,
       message: 'Success',
       data: results,
+    };
+  }
+
+  @Get('/calon-ppns/:layanan/:nip')
+  @HttpCode(200)
+  async getByNoSurat(
+    @Param('nip') nip: string,
+    @Param('layanan') layanan: string,
+    @Headers() headers: Record<string, any>,
+  ): Promise<{ statusCode: number; message: string; data: Object }> {
+    const authorization = headers['authorization'] || '';
+
+    const userLogin = await getUserFromToken(authorization);
+    if (!userLogin) {
+      throw new BadRequestException('Authorization is missing');
+    }
+
+    const validRequest = this.validationService.validate(
+      DataMasterValidation.GET_DATA_PPNS_BY_NIP,
+      { nip, layanan },
+    );
+
+    const result = await this.prismaService.ppnsDataPns.findFirst({
+      where: { nip: validRequest.nip },
+      include: {
+        ppns_wilayah_kerja: true,
+      },
+    });
+
+    if (!result) {
+      throw new NotFoundException(` Data PPNS with NIP ${nip} not found`);
+    }
+
+    const wilayahKerja = result.ppns_wilayah_kerja.map((w) => ({
+      penempatan_baru: w.penempatan_baru,
+      uu_dikawal: [w.uu_dikawal_1, w.uu_dikawal_2, w.uu_dikawal_3].filter(
+        (u): u is string => !!u,
+      ),
+    }));
+
+    let lokasi_penempatan: any = null;
+
+    // 'verifikasi',
+    // 'pengangkatan',
+    // 'pelantikan',
+    // 'mutasi',
+    // 'pengangkatan kembali',
+    // 'perpanjang ktp',
+    // 'penerbitan kembali ktp',
+    // 'undur diri',
+    // 'pensiun',
+    // 'pemberhentian NTO',
+
+    switch (validRequest.layanan) {
+      case 'verifikasi':
+        lokasi_penempatan = this.prismaService.ppnsVerifikasiPpns.findFirst({
+          where: {id_data_ppns: result.id},
+          select: { 
+            provinsi_penempatan: true,
+            kabupaten_penempatan: true, 
+            unit_kerja: true
+          },
+        });
+        break;
+      case 'pengangkatan':
+         lokasi_penempatan = this.prismaService.ppnsPengangkatan.findFirst({
+          where: {id_data_ppns: result.id},
+          select: { 
+            provinsi_penempatan: true,
+            kabupaten_penempatan: true, 
+            unit_kerja: true
+          },
+        });
+        break;
+      case 'pelantikan':
+         lokasi_penempatan = this.prismaService.ppnsPelantikan.findFirst({
+          where: {id_data_ppns: result.id},
+          select: { 
+            provinsi_penempatan: true,
+            kabupaten_penempatan: true, 
+            unit_kerja: true
+          },
+        });
+        break;
+      case 'mutasi':
+      case 'pengangkatan kembali':
+      case 'pemberhentian NTO':
+      case 'undur diri':
+      case 'pensiun':
+      case 'perpanjang ktp':
+    }
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: {
+        identitas_pns: {
+          id: result.id,
+          nama: result.nama,
+          nip: result.nip,
+          nama_gelar: result.nama_gelar,
+          jabatan: result.jabatan,
+          pangkat_golongan: result.pangkat_golongan,
+          jenis_kelamin: result.jenis_kelamin,
+          agama: result.agama,
+          nama_sekolah: result.nama_sekolah,
+          gelar_terakhir: result.gelar_terakhir,
+          no_ijazah: result.no_ijazah,
+          tgl_ijazah: result.tgl_ijazah
+            ? result.tgl_ijazah.toISOString()
+            : null,
+          tahun_lulus: result.tahun_lulus,
+        },
+        wilayah_kerja: wilayahKerja,
+        lokasi_penempatan: await lokasi_penempatan,
+      },
     };
   }
 }

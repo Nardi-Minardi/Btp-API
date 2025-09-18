@@ -34,4 +34,26 @@ export class DataMasterValidation {
     orderDirection: z.enum(['asc', 'desc']).optional(),
     filters: z.record(z.any()).optional(),
   });
+
+  static readonly GET_DATA_PPNS_BY_NIP: ZodType = z.object({
+    nip: z.string().min(1, 'NIP is required'),
+    layanan: z.enum(
+      [
+        'verifikasi',
+        'pengangkatan',
+        'pelantikan',
+        'mutasi',
+        'pengangkatan kembali',
+        'perpanjang ktp',
+        'penerbitan kembali ktp',
+        'undur diri',
+        'pensiun',
+        'pemberhentian NTO',
+      ],
+      {
+        message:
+          'Layanan must be one of (verifikasi, pengangkatan, pelantikan, mutasi, pengangkatan kembali, perpanjang ktp, penerbitan kembali ktp, undur diri, pensiun, pemberhentian NTO)',
+      },
+    ),
+  });
 }

@@ -1,3 +1,5 @@
+import { ListCalonPemohon } from "src/surat/dto/get.surat.dto";
+
 export class ListKementerianDto {
   id: number;
   nama: string | null;
@@ -42,3 +44,9 @@ export class ListDataPpnsDto {
   no_ijazah: string | null;
   tgl_ijazah: string | null;
 }
+
+export class ResponseListCalonPemohonDto {
+  countData: number;
+  list: ListCalonPemohon[];
+}
+

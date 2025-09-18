@@ -96,7 +96,7 @@ export class SuratValidation {
       nama: z.string().min(1, 'Nama is required'),
       nip: z.string().min(1, 'NIP is required'),
       nama_gelar: z.string().min(1, 'Nama Gelar is required'),
-      gelar_depan: z.string().min(1, 'Gelar Depan is required'),
+      gelar_depan: z.string().optional(),
       gelar_belakang: z.string().min(1, 'Gelar Belakang is required'),
       jabatan: z.string().min(1, 'Jabatan is required'),
       pangkat_golongan: z.string().min(1, 'Pangkat Golongan is required'),
