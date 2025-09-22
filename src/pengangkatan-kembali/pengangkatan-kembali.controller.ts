@@ -13,7 +13,6 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
   CreateResponsePengangkatanKembaliPpnsDto,
-  CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto,
 } from './dto/create.pengangkatan-kembali.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { PengangkatanKembaliService } from './pengangkatan-kembali.service';

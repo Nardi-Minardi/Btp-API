@@ -538,6 +538,17 @@ export class DataMasterController {
         });
         break;
       case 'pengangkatan kembali':
+        lokasi_penempatan =
+          this.prismaService.ppnsPengangkatanKembali.findFirst({
+            where: { id_data_ppns: result.id },
+            select: {
+              provinsi_penempatan: true,
+              kabupaten_penempatan: true,
+              unit_kerja: true,
+            },
+          });
+        break;
+      case 'pemberhentian':
       case 'pemberhentian NTO':
       case 'undur diri':
       case 'pensiun':
@@ -555,7 +566,7 @@ export class DataMasterController {
       wanita: 'Wanita',
     };
 
-    return { 
+    return {
       statusCode: 200,
       message: 'Success',
       data: {
@@ -568,7 +579,9 @@ export class DataMasterController {
           pangkat_golongan: result.pangkat_golongan,
           gelar_depan: gelarDepan,
           gelar_belakang: gelarBelakang,
-          jenis_kelamin: result.jenis_kelamin ? jenisKemalinEnumMap[result.jenis_kelamin] : '',
+          jenis_kelamin: result.jenis_kelamin
+            ? jenisKemalinEnumMap[result.jenis_kelamin]
+            : '',
           agama: result.agama,
           nama_sekolah: result.nama_sekolah,
           gelar_terakhir: result.gelar_terakhir,

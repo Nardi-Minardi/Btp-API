@@ -1,38 +1,37 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma.service';
+import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Prisma, status_upload_ii } from '.prisma/main-client/client';
 import { SuratRepository } from 'src/surat/surat.repository';
-import { CreateResponsePengangkatanKembaliPpnsDto } from './dto/create.pengangkatan-kembali.dto';
+import { CreateResponseMutasiPpnsDto } from './dto/create.perpanjang-ktp.dto';
 
-export type PpnsPengangkatanKembaliUpdateInputWithExtra =
-  Prisma.PpnsPengangkatanKembaliUpdateInput & {
-    id_data_ppns?: number;
-    no_sk_pemberhentian?: string | null;
-    tgl_sk_pemberhentian?: Date | null;
-    no_sk_terakhir?: string | null;
-    tgl_sk_terakhir?: Date | null;
-    tahun_dp3?: string | null;
-    nilai_dp3?: number | null;
-    tgl_skp?: Date | null;
-    nilai_skp?: number | null;
-    jabatan_baru?: string | null;
-    pangkat_golongan?: string | null;
-  };
+export type PpnsMutasiUpdateInputWithExtra = Prisma.PpnsMutasiUpdateInput & {
+  id_data_ppns?: number;
+  no_surat?: string;
+  tgl_surat?: Date;
+  no_keputusan_pangkat?: string;
+  tgl_keputusan_pangkat?: Date;
+  no_keputusan_kenaikan_pangkat?: string;
+  tgl_keputusan_kenaikan_pangkat?: Date;
+  no_sk_mutasi_wilayah_kerja?: string;
+  tgl_sk_mutasi_wilayah_kerja?: Date;
+};
 
 @Injectable()
-export class PengangkatanKembaliRepository {
+export class PerpanjangKtpRepository {
   constructor(
+    private readonly masterPrismaService: MasterPrismaService,
     private readonly prismaService: PrismaService,
     private readonly suratRepository: SuratRepository,
   ) {}
 
-  async savePpnsPengangkatanKembali(
+  async savePpnsPerpanjangKtp(
     id: number | null,
-    data: PpnsPengangkatanKembaliUpdateInputWithExtra,
-  ): Promise<CreateResponsePengangkatanKembaliPpnsDto> {
+    data: PpnsMutasiUpdateInputWithExtra,
+  ): Promise<CreateResponseMutasiPpnsDto> {
     // Cari id_surat lebih awal
     let idSurat: number | null = null;
     if (typeof data.id_data_ppns === 'number') {
@@ -46,85 +45,70 @@ export class PengangkatanKembaliRepository {
     // Jika id tidak ada → create, jika ada → update
     let result;
     if (id) {
-      result = await this.prismaService.ppnsPengangkatanKembali.update({
+      result = await this.prismaService.ppnsMutasi.update({
         where: { id },
         data: {
           id_data_ppns: data.id_data_ppns,
           id_surat: idSurat ?? undefined,
-          no_sk_pemberhentian: data.no_sk_pemberhentian,
-          tgl_sk_pemberhentian: data.tgl_sk_pemberhentian,
-          no_sk_terakhir: data.no_sk_terakhir,
-          tgl_sk_terakhir: data.tgl_sk_terakhir,
-          tahun_dp3: data.tahun_dp3,
-          nilai_dp3: data.nilai_dp3,
-          tgl_skp: data.tgl_skp,
-          nilai_skp: data.nilai_skp,
-          jabatan_baru: data.jabatan_baru,
-          pangkat_golongan: data.pangkat_golongan,
+          no_keputusan_pangkat: data.no_keputusan_pangkat,
+          tgl_keputusan_pangkat: data.tgl_keputusan_pangkat,
+          no_keputusan_kenaikan_pangkat: data.no_keputusan_kenaikan_pangkat,
+          tgl_keputusan_kenaikan_pangkat: data.tgl_keputusan_kenaikan_pangkat,
+          no_sk_mutasi_wilayah_kerja: data.no_sk_mutasi_wilayah_kerja,
+          tgl_sk_mutasi_wilayah_kerja: data.tgl_sk_mutasi_wilayah_kerja,
         },
       });
     } else {
-      result = await this.prismaService.ppnsPengangkatanKembali.create({
+      result = await this.prismaService.ppnsMutasi.create({
         data: {
-          id_data_ppns: data.id_data_ppns ?? 0,
+          id_data_ppns: data.id_data_ppns,
           id_surat: idSurat ?? undefined,
-          no_sk_pemberhentian: data.no_sk_pemberhentian,
-          tgl_sk_pemberhentian: data.tgl_sk_pemberhentian,
-          no_sk_terakhir: data.no_sk_terakhir,
-          tgl_sk_terakhir: data.tgl_sk_terakhir,
-          tahun_dp3: data.tahun_dp3,
-          nilai_dp3: data.nilai_dp3,
-          tgl_skp: data.tgl_skp,
-          nilai_skp: data.nilai_skp,
-          jabatan_baru: data.jabatan_baru,
-          pangkat_golongan: data.pangkat_golongan,
+          no_keputusan_pangkat: data.no_keputusan_pangkat,
+          tgl_keputusan_pangkat: data.tgl_keputusan_pangkat,
+          no_keputusan_kenaikan_pangkat: data.no_keputusan_kenaikan_pangkat,
+          tgl_keputusan_kenaikan_pangkat: data.tgl_keputusan_kenaikan_pangkat,
+          no_sk_mutasi_wilayah_kerja: data.no_sk_mutasi_wilayah_kerja,
+          tgl_sk_mutasi_wilayah_kerja: data.tgl_sk_mutasi_wilayah_kerja,
         },
       });
     }
 
+    // bentuk response DTO sesuai format kamu
     return {
-      id: result.id,
-      id_data_ppns: result.id_data_ppns,
+      id: result.id ?? null,
       id_surat: idSurat,
-      surat_sk_pemberhentian: {
-        no_sk_pemberhentian: result.no_sk_pemberhentian ?? null,
-        tgl_sk_pemberhentian: result.tgl_sk_pemberhentian
-          ? result.tgl_sk_terakhir.toISOString()
+      id_data_ppns: result.id_data_ppns ?? null,
+      surat_permohonan: {
+        no_surat: data.no_surat ?? null,
+        tgl_surat: data.tgl_surat
+          ? data.tgl_surat.toISOString().split('T')[0]
           : null,
       },
-      surat_sk_terakhir: {
-        no_sk_terakhir: result.no_sk_terakhir ?? null,
-        tgl_sk_terakhir: result.tgl_sk_terakhir
-          ? result.tgl_sk_terakhir.toISOString()
+      surat_keputusan_pangkat: {
+        no_keputusan_pangkat: data.no_keputusan_pangkat ?? null,
+        tgl_keputusan_pangkat: data.tgl_keputusan_pangkat
+          ? data.tgl_keputusan_pangkat.toISOString().split('T')[0]
           : null,
       },
-      dp3: {
-        tahun_dp3: result.tahun_dp3 ?? null,
-        nilai_dp3: result.nilai_dp3 ?? null,
+      surat_keputusan_kenaikan_pangkat: {
+        no_keputusan_kenaikan_pangkat:
+          data.no_keputusan_kenaikan_pangkat ?? null,
+        tgl_keputusan_kenaikan_pangkat: data.tgl_keputusan_kenaikan_pangkat
+          ? data.tgl_keputusan_kenaikan_pangkat.toISOString().split('T')[0]
+          : null,
       },
-      surat_skp: {
-        nilai_skp: result.nilai_skp ?? null,
-        tgl_skp: result.tgl_skp ? result.tgl_skp.toISOString() : null,
-      },
-      biodata_baru: {
-        jabatan_baru: result.jabatan_baru ?? null,
-        pangkat_golongan_baru: result.pangkat_golongan ?? null,
+      surat_sk_mutasi_wilayah_kerja: {
+        no_sk_mutasi_wilayah_kerja: data.no_sk_mutasi_wilayah_kerja ?? null,
+        tgl_sk_mutasi_wilayah_kerja: data.tgl_sk_mutasi_wilayah_kerja
+          ? data.tgl_sk_mutasi_wilayah_kerja.toISOString().split('T')[0]
+          : null,
       },
     };
   }
 
-  async findPpnsPengangkatanKembaliByIdDataPpns(id_data_ppns: number) {
-    return this.prismaService.ppnsPengangkatanKembali.findFirst({
+  async findPpnsPerpanjangKtpByIdDataPpns(id_data_ppns: number) {
+    return this.prismaService.ppnsMutasi.findFirst({
       where: { id_data_ppns: id_data_ppns },
-    });
-  }
-
-  async findPpnsDataPnsById(id: number) {
-    return this.prismaService.ppnsDataPns.findFirst({
-      where: { id },
-      include: {
-        ppns_wilayah_kerja: true,
-      },
     });
   }
 

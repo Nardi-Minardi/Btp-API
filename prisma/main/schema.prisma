@@ -181,31 +181,6 @@ model PpnsPenerbitanKembaliKtp {
   @@map("tr_ppns_penerbitan_kembali_ktp")
 }
 
-model PpnsPerpanjangKtp {
-  id                Int          @id @default(autoincrement())
-  id_surat          Int?         @db.Integer
-  id_data_ppns      Int?         @db.Integer
-  no_surat_petikan  String?      @db.VarChar(255)
-  tgl_surat_petikan DateTime?    @db.Date
-  no_ktp            String?      @db.VarChar(255)
-  tgl_ktp           DateTime?    @db.Date
-  tgl_berlaku_ktp   DateTime?    @db.Date
-  verifikator_1_by  Int?         @db.Integer
-  verifikator_1_at  DateTime?    @db.Timestamp(6)
-  status_1          status_enum?
-  verifikator_2_by  Int?         @db.Integer
-  verifikator_2_at  DateTime?    @db.Timestamp(6)
-  status_2          status_enum?
-  verifikator_3_by  Int?         @db.Integer
-  verifikator_3_at  DateTime?    @db.Timestamp(6)
-  status_3          status_enum?
-  verifikator_4_by  Int?         @db.Integer
-  verifikator_4_at  DateTime?    @db.Timestamp(6)
-  status_4          status_enum?
-
-  @@map("tr_ppns_perpanjang_ktp")
-}
-
 model PpnsSurat {
   id                  Int       @id @default(autoincrement())
   id_user             Int?      @db.Integer
@@ -288,6 +263,7 @@ model PpnsDataPns {
   ppns_pelantikan           PpnsPelantikan?          @relation("PpnsDataPnsToPelantikan")
   ppns_mutasi               PpnsMutasi?              @relation("PpnsDataPnsToMutasi")
   ppns_pengangkatan_kembali PpnsPengangkatanKembali? @relation("PpnsDataPnsToPengangkatanKembali")
+  ppns_perpanjang_ktp       PpnsPerpanjangKtp?       @relation("PpnsDataPnsToPerpanjangKtp")
 
   @@map("tr_data_ppns")
 }
@@ -435,6 +411,27 @@ model PpnsPengangkatanKembali {
   ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsToPengangkatanKembali", fields: [id_data_ppns], references: [id])
 
   @@map("tr_ppns_pengangkatan_kembali")
+}
+
+//perpanjang ktp
+model PpnsPerpanjangKtp {
+  id                Int          @id @default(autoincrement())
+  id_surat          Int?         @db.Integer
+  id_data_ppns      Int?         @unique @db.Integer
+  no_surat_petikan  String?      @db.VarChar(255)
+  tgl_surat_petikan DateTime?    @db.Date
+  no_ktp            String?      @db.VarChar(255)
+  tgl_ktp           DateTime?    @db.Date
+  tgl_berlaku_ktp   DateTime?    @db.Date
+  provinsi_penempatan Int?      @db.Integer
+  kabupaten_penempatan Int?     @db.Integer
+  unit_kerja       String?      @db.VarChar(255)
+  created_at       DateTime?    @default(now()) @db.Timestamp(6)
+  created_by       Int?         @db.Integer
+
+  ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsToPerpanjangKtp", fields: [id_data_ppns], references: [id])
+
+  @@map("tr_ppns_perpanjang_ktp")
 }
 
 model PpnsVerifikasiData {

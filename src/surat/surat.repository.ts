@@ -514,9 +514,10 @@ export class SuratRepository {
         });
       }
     } else if (layanan.nama === 'pengangkatan kembali') {
-      const existing = await this.prismaService.ppnsPengangkatanKembali.findUnique({
-        where: { id_data_ppns: result.id },
-      });
+      const existing =
+        await this.prismaService.ppnsPengangkatanKembali.findUnique({
+          where: { id_data_ppns: result.id },
+        });
 
       if (existing) {
         await this.prismaService.ppnsPengangkatanKembali.update({
@@ -529,6 +530,30 @@ export class SuratRepository {
         });
       } else {
         await this.prismaService.ppnsPengangkatanKembali.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      }
+    } else if (layanan.nama === 'perpanjang ktp') {
+      const existing = await this.prismaService.ppnsPerpanjangKtp.findUnique({
+        where: { id_data_ppns: result.id },
+      });
+      if (existing) {
+        await this.prismaService.ppnsPerpanjangKtp.update({
+          where: { id: existing.id },
+          data: {
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+          },
+        });
+      } else {
+        await this.prismaService.ppnsPerpanjangKtp.create({
           data: {
             id_data_ppns: result.id,
             provinsi_penempatan,
