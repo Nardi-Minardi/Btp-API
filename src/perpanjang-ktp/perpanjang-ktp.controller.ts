@@ -12,8 +12,8 @@ import { Pagination, WebResponse } from 'src/common/web.response';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
-  CreateResponseMutasiPpnsDto,
   CreateResponsePermohonanVerifikasiUploadDokumenPpnsDto,
+  CreateResponsePerpanjangKtpPpnsDto,
 } from './dto/create.perpanjang-ktp.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { PerpanjangKtpService } from './perpanjang-ktp.service';
@@ -30,7 +30,7 @@ export class PerpanjangKtpController {
   async createPerpanjangKtp(
     @Body() request,
     @Headers() headers: Record<string, any>,
-  ): Promise<WebResponse<CreateResponseMutasiPpnsDto>> {
+  ): Promise<WebResponse<CreateResponsePerpanjangKtpPpnsDto>> {
     const authorization = headers['authorization'] || '';
 
     const result = await this.mutasiService.storePerpanjangKtp(request, authorization);

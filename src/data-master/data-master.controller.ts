@@ -548,11 +548,20 @@ export class DataMasterController {
             },
           });
         break;
+      case 'perpanjang ktp':
+        lokasi_penempatan = this.prismaService.ppnsPerpanjangKtp.findFirst({
+          where: { id_data_ppns: result.id },
+          select: {
+            provinsi_penempatan: true,
+            kabupaten_penempatan: true,
+            unit_kerja: true,
+          },
+        });
+        break;
       case 'pemberhentian':
       case 'pemberhentian NTO':
       case 'undur diri':
       case 'pensiun':
-      case 'perpanjang ktp':
     }
 
     //gelar depan dan gelar belakang ambil dari nama gelar. dia dipisah pake ; misal Drs.;H

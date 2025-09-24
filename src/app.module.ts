@@ -9,6 +9,7 @@ import { PengangkatanModule } from './pengangkatan/pengangkatan.module';
 import { PelantikanModule } from './pelantikan/pelantikan.module';
 import { MutasiModule } from './mutasi/mutasi.module';
 import { PengangkatanKembaliModule } from './pengangkatan-kembali/pengangkatan-kembali.module';
+import { PerpanjangKtpModule } from './perpanjang-ktp/perpanjang-ktp.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { PengangkatanKembaliModule } from './pengangkatan-kembali/pengangkatan-k
     PengangkatanModule,
     PelantikanModule,
     MutasiModule,
-    PengangkatanKembaliModule
+    PengangkatanKembaliModule,
+    PerpanjangKtpModule
   ],
   controllers: [],
   providers: [],

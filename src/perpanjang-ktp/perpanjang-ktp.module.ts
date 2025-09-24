@@ -23,4 +23,4 @@ import { PerpanjangKtpRepository } from './perpanjang-ktp.repository';
     SuratRepository,
   ],
 })
-export class MutasiModule {}
+export class PerpanjangKtpModule {}

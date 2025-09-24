@@ -6,18 +6,15 @@ import {
 import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Prisma, status_upload_ii } from '.prisma/main-client/client';
 import { SuratRepository } from 'src/surat/surat.repository';
-import { CreateResponseMutasiPpnsDto } from './dto/create.perpanjang-ktp.dto';
+import { CreateResponsePerpanjangKtpPpnsDto } from './dto/create.perpanjang-ktp.dto';
 
-export type PpnsMutasiUpdateInputWithExtra = Prisma.PpnsMutasiUpdateInput & {
+export type PpnsPerpanjangKtpUpdateInputWithExtra = Prisma.PpnsMutasiUpdateInput & {
   id_data_ppns?: number;
-  no_surat?: string;
-  tgl_surat?: Date;
-  no_keputusan_pangkat?: string;
-  tgl_keputusan_pangkat?: Date;
-  no_keputusan_kenaikan_pangkat?: string;
-  tgl_keputusan_kenaikan_pangkat?: Date;
-  no_sk_mutasi_wilayah_kerja?: string;
-  tgl_sk_mutasi_wilayah_kerja?: Date;
+  no_surat_petikan?: string | null;
+  tgl_surat_petikan?: Date | null;
+  no_ktp?: string | null;
+  tgl_ktp?: Date | null;
+  tgl_berlaku_ktp?: Date | null;
 };
 
 @Injectable()
@@ -30,8 +27,8 @@ export class PerpanjangKtpRepository {
 
   async savePpnsPerpanjangKtp(
     id: number | null,
-    data: PpnsMutasiUpdateInputWithExtra,
-  ): Promise<CreateResponseMutasiPpnsDto> {
+    data: PpnsPerpanjangKtpUpdateInputWithExtra,
+  ): Promise<CreateResponsePerpanjangKtpPpnsDto> {
     // Cari id_surat lebih awal
     let idSurat: number | null = null;
     if (typeof data.id_data_ppns === 'number') {
@@ -45,30 +42,28 @@ export class PerpanjangKtpRepository {
     // Jika id tidak ada → create, jika ada → update
     let result;
     if (id) {
-      result = await this.prismaService.ppnsMutasi.update({
+      result = await this.prismaService.ppnsPerpanjangKtp.update({
         where: { id },
         data: {
           id_data_ppns: data.id_data_ppns,
           id_surat: idSurat ?? undefined,
-          no_keputusan_pangkat: data.no_keputusan_pangkat,
-          tgl_keputusan_pangkat: data.tgl_keputusan_pangkat,
-          no_keputusan_kenaikan_pangkat: data.no_keputusan_kenaikan_pangkat,
-          tgl_keputusan_kenaikan_pangkat: data.tgl_keputusan_kenaikan_pangkat,
-          no_sk_mutasi_wilayah_kerja: data.no_sk_mutasi_wilayah_kerja,
-          tgl_sk_mutasi_wilayah_kerja: data.tgl_sk_mutasi_wilayah_kerja,
+          no_surat_petikan: data.no_surat_petikan ?? undefined,
+          tgl_surat_petikan: data.tgl_surat_petikan ?? undefined,
+          no_ktp: data.no_ktp ?? undefined,
+          tgl_ktp: data.tgl_ktp ?? undefined,
+          tgl_berlaku_ktp: data.tgl_berlaku_ktp ?? undefined,
         },
       });
     } else {
-      result = await this.prismaService.ppnsMutasi.create({
+      result = await this.prismaService.ppnsPerpanjangKtp.create({
         data: {
           id_data_ppns: data.id_data_ppns,
           id_surat: idSurat ?? undefined,
-          no_keputusan_pangkat: data.no_keputusan_pangkat,
-          tgl_keputusan_pangkat: data.tgl_keputusan_pangkat,
-          no_keputusan_kenaikan_pangkat: data.no_keputusan_kenaikan_pangkat,
-          tgl_keputusan_kenaikan_pangkat: data.tgl_keputusan_kenaikan_pangkat,
-          no_sk_mutasi_wilayah_kerja: data.no_sk_mutasi_wilayah_kerja,
-          tgl_sk_mutasi_wilayah_kerja: data.tgl_sk_mutasi_wilayah_kerja,
+          no_surat_petikan: data.no_surat_petikan ?? undefined,
+          tgl_surat_petikan: data.tgl_surat_petikan ?? undefined,
+          no_ktp: data.no_ktp ?? undefined,
+          tgl_ktp: data.tgl_ktp ?? undefined,
+          tgl_berlaku_ktp: data.tgl_berlaku_ktp ?? undefined,
         },
       });
     }
@@ -78,36 +73,26 @@ export class PerpanjangKtpRepository {
       id: result.id ?? null,
       id_surat: idSurat,
       id_data_ppns: result.id_data_ppns ?? null,
-      surat_permohonan: {
-        no_surat: data.no_surat ?? null,
-        tgl_surat: data.tgl_surat
-          ? data.tgl_surat.toISOString().split('T')[0]
+      kartu_tanda_penyidik: {
+        no_ktp: data.no_ktp ?? null,
+        tgl_ktp: data.tgl_ktp
+          ? data.tgl_ktp.toISOString().split('T')[0]
+          : null,
+        tgl_berlaku_ktp: data.tgl_berlaku_ktp
+          ? data.tgl_berlaku_ktp.toISOString().split('T')[0]
           : null,
       },
-      surat_keputusan_pangkat: {
-        no_keputusan_pangkat: data.no_keputusan_pangkat ?? null,
-        tgl_keputusan_pangkat: data.tgl_keputusan_pangkat
-          ? data.tgl_keputusan_pangkat.toISOString().split('T')[0]
-          : null,
-      },
-      surat_keputusan_kenaikan_pangkat: {
-        no_keputusan_kenaikan_pangkat:
-          data.no_keputusan_kenaikan_pangkat ?? null,
-        tgl_keputusan_kenaikan_pangkat: data.tgl_keputusan_kenaikan_pangkat
-          ? data.tgl_keputusan_kenaikan_pangkat.toISOString().split('T')[0]
-          : null,
-      },
-      surat_sk_mutasi_wilayah_kerja: {
-        no_sk_mutasi_wilayah_kerja: data.no_sk_mutasi_wilayah_kerja ?? null,
-        tgl_sk_mutasi_wilayah_kerja: data.tgl_sk_mutasi_wilayah_kerja
-          ? data.tgl_sk_mutasi_wilayah_kerja.toISOString().split('T')[0]
+      surat_petikan: {
+        no_surat_petikan: data.no_surat_petikan ?? null,
+        tgl_surat_petikan: data.tgl_surat_petikan
+          ? data.tgl_surat_petikan.toISOString().split('T')[0]
           : null,
       },
     };
   }
 
   async findPpnsPerpanjangKtpByIdDataPpns(id_data_ppns: number) {
-    return this.prismaService.ppnsMutasi.findFirst({
+    return this.prismaService.ppnsPerpanjangKtp.findFirst({
       where: { id_data_ppns: id_data_ppns },
     });
   }

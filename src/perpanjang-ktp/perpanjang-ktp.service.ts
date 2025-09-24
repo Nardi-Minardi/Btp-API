@@ -22,7 +22,7 @@ import { PpnsUploadDto } from 'src/file-upload/dto/upload.dto';
 import { SuratRepository } from 'src/surat/surat.repository';
 import {
   PerpanjangKtpRepository,
-  PpnsMutasiUpdateInputWithExtra,
+  PpnsPerpanjangKtpUpdateInputWithExtra,
 } from './perpanjang-ktp.repository';
 import { PerpanjangKtpValidation } from './perpanjang-ktp.validation';
 
@@ -39,7 +39,7 @@ export class PerpanjangKtpService {
   ) {}
 
   async storePerpanjangKtp(request: any, authorization?: string): Promise<any> {
-    this.logger.debug('Request create new Mutasi PPNS', { request });
+    this.logger.debug('Request create new Perpanjang KTP PPNS', { request });
     // Handle if body is empty
     if (!request || Object.keys(request).length === 0) {
       this.logger.error('Request body is empty');
@@ -72,48 +72,32 @@ export class PerpanjangKtpService {
     const createData = {
       id_data_ppns: Number(createRequest.id_data_ppns),
       id_surat: existingPpnsDataPns.id_surat,
-      no_surat: createRequest.surat_permohonan.no_surat || null,
-      tgl_surat: createRequest.surat_permohonan.tgl_surat
-        ? dateOnlyToLocal(createRequest.surat_permohonan.tgl_surat)
+      tgl_berlaku_ktp: createRequest.kartu_tanda_penyidik.tgl_berlaku_ktp
+        ? dateOnlyToLocal(createRequest.kartu_tanda_penyidik.tgl_berlaku_ktp)
         : null,
-      no_keputusan_pangkat:
-        createRequest.surat_keputusan_pangkat.no_keputusan_pangkat,
-      tgl_keputusan_pangkat: createRequest.surat_keputusan_pangkat
-        .tgl_keputusan_pangkat
+      tgl_ktp: createRequest.kartu_tanda_penyidik.tgl_ktp
+        ? dateOnlyToLocal(createRequest.kartu_tanda_penyidik.tgl_ktp)
+        : null,
+      no_ktp:
+        createRequest.kartu_tanda_penyidik.no_ktp,
+      tgl_surat_petikan: createRequest.surat_petikan.tgl_surat_petikan
         ? dateOnlyToLocal(
-            createRequest.surat_keputusan_pangkat.tgl_keputusan_pangkat,
+            createRequest.surat_petikan.tgl_surat_petikan,
           )
         : null,
-      no_keputusan_kenaikan_pangkat:
-        createRequest.surat_keputusan_kenaikan_pangkat
-          .no_keputusan_kenaikan_pangkat,
-      tgl_keputusan_kenaikan_pangkat: createRequest
-        .surat_keputusan_kenaikan_pangkat.tgl_keputusan_kenaikan_pangkat
-        ? dateOnlyToLocal(
-            createRequest.surat_keputusan_kenaikan_pangkat
-              .tgl_keputusan_kenaikan_pangkat,
-          )
-        : null,
-      no_sk_mutasi_wilayah_kerja:
-        createRequest.surat_sk_mutasi_wilayah_kerja.no_sk_mutasi_wilayah_kerja,
-      tgl_sk_mutasi_wilayah_kerja: createRequest.surat_sk_mutasi_wilayah_kerja
-        .tgl_sk_mutasi_wilayah_kerja
-        ? dateOnlyToLocal(
-            createRequest.surat_sk_mutasi_wilayah_kerja
-              .tgl_sk_mutasi_wilayah_kerja,
-          )
-        : null,
+      no_surat_petikan:
+        createRequest.surat_petikan.no_surat_petikan,
     };
 
     //cek data
-    const existingMutasi =
+    const existingPerpanjangKtp =
       await this.perpanjangRepository.findPpnsPerpanjangKtpByIdDataPpns(
         Number(createRequest.id_data_ppns),
       );
 
     const result = await this.perpanjangRepository.savePpnsPerpanjangKtp(
-      existingMutasi?.id ?? null,
-      createData as PpnsMutasiUpdateInputWithExtra,
+      existingPerpanjangKtp?.id ?? null,
+      createData as PpnsPerpanjangKtpUpdateInputWithExtra,
     );
 
     // gabungkan uploads ke response
