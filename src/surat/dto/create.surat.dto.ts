@@ -24,6 +24,7 @@ export class CreateResponsePpnsDataPnsDto {
   identitas_pns: any | null;
   wilayah_kerja: any []; 
   lokasi_penempatan: any | null;
+  kartu_tanda_penyidik: any | null;
 }
 
 

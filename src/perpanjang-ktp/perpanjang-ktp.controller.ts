@@ -22,7 +22,7 @@ import { PerpanjangKtpService } from './perpanjang-ktp.service';
 export class PerpanjangKtpController {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private mutasiService: PerpanjangKtpService,
+    private perpanjangKtpService: PerpanjangKtpService,
   ) {}
 
   @Post('/create')
@@ -33,7 +33,7 @@ export class PerpanjangKtpController {
   ): Promise<WebResponse<CreateResponsePerpanjangKtpPpnsDto>> {
     const authorization = headers['authorization'] || '';
 
-    const result = await this.mutasiService.storePerpanjangKtp(request, authorization);
+    const result = await this.perpanjangKtpService.storePerpanjangKtp(request, authorization);
 
     return { statusCode: 201, message: 'Success', data: result };
   }
@@ -70,7 +70,7 @@ export class PerpanjangKtpController {
       perpanjangan_ktp_pas_foto: files?.perpanjangan_ktp_pas_foto?.[0] ?? null,
     };
 
-    const result = await this.mutasiService.storeUploadDokumen(
+    const result = await this.perpanjangKtpService.storeUploadDokumen(
       request,
       authorization,
     );

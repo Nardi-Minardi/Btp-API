@@ -6,9 +6,9 @@ import {
 import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Prisma, status_upload_ii } from '.prisma/main-client/client';
 import { SuratRepository } from 'src/surat/surat.repository';
-import { CreateResponsePerpanjangKtpPpnsDto } from './dto/create.perpanjang-ktp.dto';
+import { CreateResponsePenerbitanKembaliKtpPpnsDto } from './dto/create.penerbitan-kembali-ktp.dto';
 
-export type PpnsPerpanjangKtpUpdateInputWithExtra = Prisma.PpnsPerpanjangKtpUpdateInput & {
+export type PpnsPenerbitanKembaliKtpUpdateInputWithExtra = Prisma.PpnsPenerbitanKembaliKtpUpdateInput & {
   id_data_ppns?: number;
   no_surat_petikan?: string | null;
   tgl_surat_petikan?: Date | null;
@@ -18,7 +18,7 @@ export type PpnsPerpanjangKtpUpdateInputWithExtra = Prisma.PpnsPerpanjangKtpUpda
 };
 
 @Injectable()
-export class PerpanjangKtpRepository {
+export class PenerbitanKembaliKtpRepository {
   constructor(
     private readonly masterPrismaService: MasterPrismaService,
     private readonly prismaService: PrismaService,
@@ -27,8 +27,8 @@ export class PerpanjangKtpRepository {
 
   async savePpnsPerpanjangKtp(
     id: number | null,
-    data: PpnsPerpanjangKtpUpdateInputWithExtra,
-  ): Promise<CreateResponsePerpanjangKtpPpnsDto> {
+    data: PpnsPenerbitanKembaliKtpUpdateInputWithExtra,
+  ): Promise<CreateResponsePenerbitanKembaliKtpPpnsDto> {
     // Cari id_surat lebih awal
     let idSurat: number | null = null;
     if (typeof data.id_data_ppns === 'number') {

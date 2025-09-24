@@ -6,29 +6,34 @@ import {
 import { MasterPrismaService, PrismaService } from 'src/common/prisma.service';
 import { Prisma, status_upload_ii } from '.prisma/main-client/client';
 import { SuratRepository } from 'src/surat/surat.repository';
-import { CreateResponsePerpanjangKtpPpnsDto } from './dto/create.perpanjang-ktp.dto';
+import { CreateResponseUndurDiriPpnsDto } from './dto/create.pemberhentian-undur-diri.dto';
 
-export type PpnsPerpanjangKtpUpdateInputWithExtra = Prisma.PpnsPerpanjangKtpUpdateInput & {
+export type PpnsUndurDiriUpdateInputWithExtra = Prisma.PpnsPemberhentianUndurDiriUpdateInput & {
   id_data_ppns?: number;
-  no_surat_petikan?: string | null;
-  tgl_surat_petikan?: Date | null;
+  no_sk_pengangkatan_pns?: string | null;
+  tgl_sk_pengangkatan_pns?: Date | null;
+  no_sk_kenaikan_pangkat?: string | null;
+  tgl_sk_kenaikan_pangkat?: Date | null;
   no_ktp?: string | null;
-  tgl_ktp?: Date | null;
   tgl_berlaku_ktp?: Date | null;
+  no_sk_persetujuan?: string | null;
+  tgl_sk_persetujuan?: Date | null;
+  no_sk_pemberhentian?: string | null;
+  tgl_sk_pemberhentian?: Date | null;
 };
 
 @Injectable()
-export class PerpanjangKtpRepository {
+export class PemberhentianUndurDiriRepository {
   constructor(
     private readonly masterPrismaService: MasterPrismaService,
     private readonly prismaService: PrismaService,
     private readonly suratRepository: SuratRepository,
   ) {}
 
-  async savePpnsPerpanjangKtp(
+  async savePpnsUndurDiri(
     id: number | null,
-    data: PpnsPerpanjangKtpUpdateInputWithExtra,
-  ): Promise<CreateResponsePerpanjangKtpPpnsDto> {
+    data: PpnsUndurDiriUpdateInputWithExtra,
+  ): Promise<CreateResponseUndurDiriPpnsDto> {
     // Cari id_surat lebih awal
     let idSurat: number | null = null;
     if (typeof data.id_data_ppns === 'number') {
@@ -42,28 +47,38 @@ export class PerpanjangKtpRepository {
     // Jika id tidak ada → create, jika ada → update
     let result;
     if (id) {
-      result = await this.prismaService.ppnsPerpanjangKtp.update({
+      result = await this.prismaService.ppnsPemberhentianUndurDiri.update({
         where: { id },
         data: {
           id_data_ppns: data.id_data_ppns,
           id_surat: idSurat ?? undefined,
-          no_surat_petikan: data.no_surat_petikan ?? undefined,
-          tgl_surat_petikan: data.tgl_surat_petikan ?? undefined,
-          no_ktp: data.no_ktp ?? undefined,
-          tgl_ktp: data.tgl_ktp ?? undefined,
-          tgl_berlaku_ktp: data.tgl_berlaku_ktp ?? undefined,
+          no_sk_pengangkatan_pns: data.no_sk_pengangkatan_pns,
+          tgl_sk_pengangkatan_pns: data.tgl_sk_pengangkatan_pns,
+          no_sk_kenaikan_pangkat: data.no_sk_kenaikan_pangkat,
+          tgl_sk_kenaikan_pangkat: data.tgl_sk_kenaikan_pangkat,
+          no_ktp: data.no_ktp,
+          tgl_berlaku_ktp: data.tgl_berlaku_ktp,
+          no_sk_persetujuan: data.no_sk_persetujuan,
+          tgl_sk_persetujuan: data.tgl_sk_persetujuan,
+          no_sk_pemberhentian: data.no_sk_pemberhentian,
+          tgl_sk_pemberhentian: data.tgl_sk_pemberhentian,
         },
       });
     } else {
-      result = await this.prismaService.ppnsPerpanjangKtp.create({
+      result = await this.prismaService.ppnsPemberhentianUndurDiri.create({
         data: {
           id_data_ppns: data.id_data_ppns,
           id_surat: idSurat ?? undefined,
-          no_surat_petikan: data.no_surat_petikan ?? undefined,
-          tgl_surat_petikan: data.tgl_surat_petikan ?? undefined,
+          no_sk_pengangkatan_pns: data.no_sk_pengangkatan_pns ?? undefined,
+          tgl_sk_pengangkatan_pns: data.tgl_sk_pengangkatan_pns ?? undefined,
+          no_sk_kenaikan_pangkat: data.no_sk_kenaikan_pangkat ?? undefined,
+          tgl_sk_kenaikan_pangkat: data.tgl_sk_kenaikan_pangkat ?? undefined,
           no_ktp: data.no_ktp ?? undefined,
-          tgl_ktp: data.tgl_ktp ?? undefined,
           tgl_berlaku_ktp: data.tgl_berlaku_ktp ?? undefined,
+          no_sk_persetujuan: data.no_sk_persetujuan ?? undefined,
+          tgl_sk_persetujuan: data.tgl_sk_persetujuan ?? undefined,
+          no_sk_pemberhentian: data.no_sk_pemberhentian ?? undefined,
+          tgl_sk_pemberhentian: data.tgl_sk_pemberhentian ?? undefined,
         },
       });
     }
@@ -73,26 +88,41 @@ export class PerpanjangKtpRepository {
       id: result.id ?? null,
       id_surat: idSurat,
       id_data_ppns: result.id_data_ppns ?? null,
-      kartu_tanda_penyidik: {
-        no_ktp: data.no_ktp ?? null,
-        tgl_ktp: data.tgl_ktp
-          ? data.tgl_ktp.toISOString().split('T')[0]
-          : null,
-        tgl_berlaku_ktp: data.tgl_berlaku_ktp
-          ? data.tgl_berlaku_ktp.toISOString().split('T')[0]
+      sk_pengangkatan_pns: {
+        no_sk_pengangkatan_pns: result.no_sk_pengangkatan_pns ?? null,
+        tgl_sk_pengangkatan_pns: result.tgl_sk_pengangkatan_pns
+          ? result.tgl_sk_pengangkatan_pns.toISOString().split('T')[0]
           : null,
       },
-      surat_petikan: {
-        no_surat_petikan: data.no_surat_petikan ?? null,
-        tgl_surat_petikan: data.tgl_surat_petikan
-          ? data.tgl_surat_petikan.toISOString().split('T')[0]
+      sk_kenaikan_pangkat: {
+        tgl_sk_kenaikan_pangkat: result.tgl_sk_kenaikan_pangkat
+          ? result.tgl_sk_kenaikan_pangkat.toISOString().split('T')[0]
           : null,
+        no_sk_kenaikan_pangkat: result.no_sk_kenaikan_pangkat ?? null,
+      },
+      ktp_ppns: {
+        tgl_berlaku_ktp: result.tgl_berlaku_ktp
+          ? result.tgl_berlaku_ktp.toISOString().split('T')[0]
+          : null,
+        no_ktp: result.no_ktp ?? null,
+      },
+      sk_persetujuan: {
+        tgl_sk_persetujuan: result.tgl_sk_persetujuan
+          ? result.tgl_sk_persetujuan.toISOString().split('T')[0]
+          : null,
+        no_sk_persetujuan: result.no_sk_persetujuan ?? null,
+      },
+      sk_pemberhentian: {
+        tgl_sk_pemberhentian: result.tgl_sk_pemberhentian
+          ? result.tgl_sk_pemberhentian.toISOString().split('T')[0]
+          : null,
+        no_sk_pemberhentian: result.no_sk_pemberhentian ?? null,
       },
     };
   }
 
-  async findPpnsPerpanjangKtpByIdDataPpns(id_data_ppns: number) {
-    return this.prismaService.ppnsPerpanjangKtp.findFirst({
+  async findPpnsUndurDiriByIdDataPpns(id_data_ppns: number) {
+    return this.prismaService.ppnsPemberhentianUndurDiri.findFirst({
       where: { id_data_ppns: id_data_ppns },
     });
   }

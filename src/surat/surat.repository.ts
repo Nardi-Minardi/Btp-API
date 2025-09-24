@@ -334,6 +334,10 @@ export class SuratRepository {
       unit_kerja?: string;
       gelar_depan?: string | null;
       created_by: number | null;
+      kartu_tanda_penyidik_no_ktp?: string | null;
+      kartu_tanda_penyidik_tgl_ktp?: Date | null;
+      karta_tanda_penyidik_tgl_berlaku_ktp?: Date | null;
+      id_surat: number;
     },
   ): Promise<CreateResponsePpnsDataPnsDto> {
     const {
@@ -341,13 +345,16 @@ export class SuratRepository {
       kabupaten_penempatan,
       unit_kerja,
       created_by,
+      kartu_tanda_penyidik_no_ktp,
+      kartu_tanda_penyidik_tgl_ktp,
+      karta_tanda_penyidik_tgl_berlaku_ktp,
       ...ppnsData
     } = data;
 
     // ✅ 1. Cari apakah data sudah ada
     let existing = await this.prismaService.ppnsDataPns.findFirst({
       where: {
-        nip: ppnsData.nip, // atau pakai id_surat + nip kalau perlu
+        id_surat: data.id_surat,
       },
       include: {
         ppns_wilayah_kerja: true,
@@ -364,9 +371,11 @@ export class SuratRepository {
       });
 
       // ✅ 2. Update jika sudah ada
+      // Remove 'ppns_surat' if present, as update does not accept nested create inputs
+      const { ppns_surat, ...updateData } = ppnsData as any;
       result = await this.prismaService.ppnsDataPns.update({
         where: { id: existing.id },
-        data: ppnsData,
+        data: updateData,
         include: {
           ppns_wilayah_kerja: true,
           ppns_verifikasi_ppns: true,
@@ -390,7 +399,11 @@ export class SuratRepository {
     } else {
       // ✅ 3. Create jika belum ada
       result = await this.prismaService.ppnsDataPns.create({
-        data: ppnsData,
+        // Remove 'ppns_surat' if present, as create does not accept nested create inputs
+        data: (() => {
+          const { ppns_surat, ...rest } = ppnsData as any;
+          return rest;
+        })(),
         include: {
           ppns_wilayah_kerja: true,
           ppns_verifikasi_ppns: true,
@@ -563,7 +576,112 @@ export class SuratRepository {
           },
         });
       }
+    } else if (layanan.nama === 'penerbitan kembali ktp') {
+      const existing = await this.prismaService.ppnsPenerbitanKembaliKtp.findUnique({
+        where: { id_data_ppns: result.id },
+      });
+      if (existing) {
+        await this.prismaService.ppnsPenerbitanKembaliKtp.update({
+          where: { id: existing.id },
+          data: {
+            id_surat: result.id_surat,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            no_ktp: kartu_tanda_penyidik_no_ktp,
+            tgl_ktp: kartu_tanda_penyidik_tgl_ktp,
+            tgl_berlaku_ktp: karta_tanda_penyidik_tgl_berlaku_ktp,
+          },
+        });
+      } else {
+        await this.prismaService.ppnsPenerbitanKembaliKtp.create({
+          data: {
+            id_surat: result.id_surat,
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+            no_ktp: kartu_tanda_penyidik_no_ktp,
+            tgl_ktp: kartu_tanda_penyidik_tgl_ktp,
+            tgl_berlaku_ktp: karta_tanda_penyidik_tgl_berlaku_ktp,
+          },
+        });
+      }
+    } else if (layanan.nama === 'pensiun') {
+      const existing = await this.prismaService.ppnsPemberhentianPensiun.findUnique({
+        where: { id_data_ppns: result.id },
+      });
+      if (existing) {
+        await this.prismaService.ppnsPemberhentianPensiun.update({
+          where: { id: existing.id },
+          data: {
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+          },
+        });
+      } else {
+        await this.prismaService.ppnsPemberhentianPensiun.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      }
+    } else if (layanan.nama === 'undur diri') {
+      const existing = await this.prismaService.ppnsPemberhentianUndurDiri.findUnique({
+        where: { id_data_ppns: result.id },
+      });
+      if (existing) {
+        await this.prismaService.ppnsPemberhentianUndurDiri.update({
+          where: { id: existing.id },
+          data: {
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+          },
+        });
+      } else {
+        await this.prismaService.ppnsPemberhentianUndurDiri.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      }
+    } else if (layanan.nama === 'pemberhentian NTO') {
+      const existing = await this.prismaService.ppnsPemberhentianNto.findUnique({
+        where: { id_data_ppns: result.id },
+      });
+      if (existing) {
+        await this.prismaService.ppnsPemberhentianNto.update({
+          where: { id: existing.id },
+          data: {
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+          },
+        });
+      } else {
+        await this.prismaService.ppnsPemberhentianNto.create({
+          data: {
+            id_data_ppns: result.id,
+            provinsi_penempatan,
+            kabupaten_penempatan,
+            unit_kerja,
+            created_by,
+          },
+        });
+      }
     }
+    
 
     // ✅ 5. Mapping response tetap sama
     const identitasPns = {
@@ -597,12 +715,23 @@ export class SuratRepository {
       ),
     }));
 
+    const kartuTandaPenyidik = {
+      no_ktp: kartu_tanda_penyidik_no_ktp || null,
+      tgl_ktp: kartu_tanda_penyidik_tgl_ktp
+        ? kartu_tanda_penyidik_tgl_ktp.toISOString().split('T')[0]
+        : null,
+      tgl_berlaku_ktp: karta_tanda_penyidik_tgl_berlaku_ktp
+        ? karta_tanda_penyidik_tgl_berlaku_ktp.toISOString().split('T')[0]
+        : null,
+    };
+
     return {
       id: result.id,
       id_surat: result.id_surat,
       identitas_pns: identitasPns,
       wilayah_kerja: wilayahKerja,
       lokasi_penempatan: lokasiPenempatan,
+      kartu_tanda_penyidik: kartuTandaPenyidik,
     };
   }
 
@@ -680,12 +809,27 @@ export class SuratRepository {
       ),
     }));
 
+    const kartuTandaPenyidik = {
+      no_ktp: (data as any).kartu_tanda_penyidik_no_ktp || null,
+      tgl_ktp: (data as any).kartu_tanda_penyidik_tgl_ktp
+        ? (data as any).kartu_tanda_penyidik_tgl_ktp
+            .toISOString()
+            .split('T')[0]
+        : null,
+      tgl_berlaku_ktp: (data as any).karta_tanda_penyidik_tgl_berlaku_ktp
+        ? (data as any).karta_tanda_penyidik_tgl_berlaku_ktp
+            .toISOString()
+            .split('T')[0]
+        : null,
+    };
+
     return {
       id: result.id,
       id_surat: result.id_surat,
       identitas_pns: identitasPns,
       wilayah_kerja: wilayahKerja,
       lokasi_penempatan: lokasiPenempatan,
+      kartu_tanda_penyidik: kartuTandaPenyidik,
     };
   }
 

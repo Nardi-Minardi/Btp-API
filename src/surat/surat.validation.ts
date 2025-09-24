@@ -168,6 +168,39 @@ export class SuratValidation {
         .min(1, 'kabupaten Penempatan is required'),
       unit_kerja: z.string().min(1, 'Unit Kerja is required'),
     }),
+    kartu_tanda_penyidik: z
+      .object({
+        no_ktp: z.string().optional(),
+        tgl_ktp: z
+          .string()
+          .trim()
+          .optional()
+          .refine(
+            (val) => {
+              if (!val) return true; // kosong → valid (nanti dicek di refine level root)
+              return !isNaN(Date.parse(val));
+            },
+            {
+              message: 'Tanggal KTP must be a valid date string',
+            },
+          )
+          .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+        tgl_berlaku_ktp: z
+          .string()
+          .trim()
+          .optional()
+          .refine(
+            (val) => {
+              if (!val) return true; // kosong → valid (nanti dicek di refine level root)
+              return !isNaN(Date.parse(val));
+            },
+            {
+              message: 'Tanggal Berlaku KTP must be a valid date string',
+            },
+          )
+          .transform((val) => (val ? dayjs(val).toDate() : undefined)),
+      })
+      .optional(),
   });
 
   static readonly CREATE_CALON_PPNS_STEP2: ZodType = z.object({

@@ -546,6 +546,7 @@ export class SuratService {
     // savedata calon ppns
     const result = await this.suratRepository.savePpnsDataPns({
       ...createData,
+      id_surat: createRequest.id_surat,
       provinsi_penempatan: Number(
         createRequest.lokasi_penempatan.provinsi_penempatan,
       ),
@@ -554,6 +555,10 @@ export class SuratService {
       ),
       unit_kerja: createRequest.lokasi_penempatan.unit_kerja,
       created_by: userLogin.user_id,
+      kartu_tanda_penyidik_no_ktp: createRequest.kartu_tanda_penyidik?.no_ktp ?? null,
+      kartu_tanda_penyidik_tgl_ktp: createRequest.kartu_tanda_penyidik?.tgl_ktp ?? null,
+      karta_tanda_penyidik_tgl_berlaku_ktp:
+        createRequest.kartu_tanda_penyidik?.tgl_berlaku_ktp ?? null,
     });
     // }
 

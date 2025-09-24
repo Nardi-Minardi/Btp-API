@@ -10,6 +10,8 @@ import { PelantikanModule } from './pelantikan/pelantikan.module';
 import { MutasiModule } from './mutasi/mutasi.module';
 import { PengangkatanKembaliModule } from './pengangkatan-kembali/pengangkatan-kembali.module';
 import { PerpanjangKtpModule } from './perpanjang-ktp/perpanjang-ktp.module';
+import { PenerbitanKembaliKtpModule } from './penerbitan-kembali-ktp/penerbitan-kembali-ktp.module';
+import { PemberhentianUndurDiriModule } from './pemberhentian-undur-diri/pemberhentian-undur-diri.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { PerpanjangKtpModule } from './perpanjang-ktp/perpanjang-ktp.module';
     PelantikanModule,
     MutasiModule,
     PengangkatanKembaliModule,
-    PerpanjangKtpModule
+    PerpanjangKtpModule,
+    PenerbitanKembaliKtpModule,
+    PemberhentianUndurDiriModule
   ],
   controllers: [],
   providers: [],
