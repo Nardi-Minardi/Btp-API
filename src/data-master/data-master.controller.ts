@@ -125,7 +125,7 @@ export class DataMasterController {
   @ApiOperation({ summary: 'Get all Layanan' })
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
   async getAllLayanan(
-    @Query('search') search: string | null,
+    @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('orderBy') orderBy: string | null,
@@ -188,7 +188,7 @@ export class DataMasterController {
   @ApiOperation({ summary: 'Get all Kementerian' })
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
   async getAllKementerian(
-    @Query('search') search: string | null,
+    @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('orderBy') orderBy: string | null,
@@ -251,7 +251,7 @@ export class DataMasterController {
   @ApiOperation({ summary: 'Get all Pangkat Golongan' })
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
   async getAllPangkatGolongan(
-    @Query('search') search: string | null,
+    @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('orderBy') orderBy: string | null,
@@ -315,7 +315,7 @@ export class DataMasterController {
   @ApiOperation({ summary: 'Get all Data PPNS' })
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
   async getAllDataPpns(
-    @Query('search') search: string | null,
+    @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('orderBy') orderBy: string | null,
@@ -378,7 +378,7 @@ export class DataMasterController {
   @ApiOperation({ summary: 'Get all Instansi' })
   // @RedisCache('badan-usaha-admin-transaksi-list', 60)
   async getAllInstansi(
-    @Query('search') search: string | null,
+    @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('orderBy') orderBy: string | null,

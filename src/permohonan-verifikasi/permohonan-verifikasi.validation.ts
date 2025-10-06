@@ -39,7 +39,7 @@ export class PermohonanVerifikasiValidation {
       tahun_lulus:  z.string().min(1, 'Tahun Lulus is required'),
     }),
     teknis_operasional_penegak_hukum: z.boolean(),
-    jabatan: z.string().min(1, 'Jabatan is required'),
+    jabatan: z.string().optional(),
     surat_sehat_jasmani_rohani: z.object({
       nama_rs: z.string().min(1, 'Nama RS is required'),
       tgl_surat_rs: z
@@ -56,9 +56,9 @@ export class PermohonanVerifikasiValidation {
     }),
     dp3: z.object({
       tahun_1: z.string().min(1, 'Tahun 1 is required'),
-      nilai_1: z.number().min(0),
+      nilai_1: z.enum(['SANGAT BAIK', 'BAIK', 'CUKUP']),
       tahun_2: z.string().min(1, 'Tahun 2 is required'),
-      nilai_2: z.number().min(0),
+      nilai_2: z.enum(['SANGAT BAIK', 'BAIK', 'CUKUP']),
     }),
   });
 

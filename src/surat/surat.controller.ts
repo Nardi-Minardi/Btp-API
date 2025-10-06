@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
+  Delete,
 } from '@nestjs/common';
 import { Pagination, WebResponse } from 'src/common/web.response';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -50,7 +51,7 @@ export class SuratController {
   // @RedisCache('badan-usaha-perubahan-cv-list', 60)
   async getAllSurat(
     @Query('layanan') layanan: string,
-    @Query('search') search: string | null,
+    @Query('search') search: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('orderBy') orderBy: string | null,
@@ -345,5 +346,57 @@ export class SuratController {
     );
 
     return { statusCode: 201, message: 'Success', data: result };
+  }
+
+  @Delete('/delete/:id')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Surat - Delete' })
+  async deleteSurat(
+    @Param('id') id: number,
+    @Headers() headers: Record<string, any>,
+  ): Promise<WebResponse<{ message: string }>> {
+    const authorization = headers['authorization'] || '';
+    if (!id) {
+      throw new BadRequestException('id is required');
+    }
+
+    //get boLaporan by id pm
+    const pmCv = await this.suratRepository.findPpnSuratById(Number(id));
+    if (!pmCv) {
+      throw new NotFoundException('Surat tidak ditemukan');
+    }
+
+    await this.suratRepository.deletePpnsSurat(Number(id));
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: { message: 'Surat berhasil dihapus' },
+    };
+  }
+
+  @Delete('/calon-pppns/delete/:id_ppns')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Calon PPNS - Delete' })
+  async deleteCalonPpns(
+    @Param('id_ppns') id_ppns: number,
+    @Headers() headers: Record<string, any>,
+  ): Promise<WebResponse<{ message: string }>> {
+    const authorization = headers['authorization'] || '';
+    if (!id_ppns) {
+      throw new BadRequestException('id_ppns is required');
+    }
+
+    //get boLaporan by id pm
+    const pmCv = await this.suratRepository.findPpnsDataPnsById(Number(id_ppns));
+    if (!pmCv) {
+      throw new NotFoundException('Calon Pemohon tidak ditemukan');
+    }
+
+    await this.suratRepository.deleteDataPpns(Number(id_ppns));
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: { message: 'Calon Pemohon berhasil dihapus' },
+    };
   }
 }

@@ -194,9 +194,9 @@ model PpnsVerifikasiPpns {
   nama_rs                          String?   @db.VarChar(255)
   tgl_surat_rs                     DateTime? @db.Date
   tahun_1                          String?   @db.VarChar(255)
-  nilai_1                          Int?      @db.Integer
+  nilai_1                          String?   @db.VarChar(255)
   tahun_2                          String?   @db.VarChar(255)
-  nilai_2                          Int?      @db.Integer
+  nilai_2                          String?   @db.VarChar(255)
   provinsi_penempatan              Int?      @db.Integer
   kabupaten_penempatan             Int?      @db.Integer
   unit_kerja                       String?   @db.VarChar(255)
@@ -292,9 +292,9 @@ model PpnsPengangkatanKembali {
   no_sk_terakhir       String?   @db.VarChar(255)
   tgl_sk_terakhir      DateTime? @db.Date
   tahun_dp3            String?   @db.VarChar(4)
-  nilai_dp3            Int?      @db.Integer
+  nilai_dp3            String?   @db.VarChar(255)
   tgl_skp              DateTime? @db.Date
-  nilai_skp            Int?      @db.Integer
+  nilai_skp            String?   @db.VarChar(255)
   jabatan_baru         String?   @db.VarChar(255)
   pangkat_golongan     String?   @db.VarChar(255)
   provinsi_penempatan  Int?      @db.Integer

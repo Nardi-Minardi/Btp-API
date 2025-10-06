@@ -70,7 +70,7 @@ export class SuratValidation {
       .transform((val) => (val ? dayjs(val).toDate() : undefined)),
     perihal: z.string().min(1, 'Perihal is required'),
     nama_pengusul: z.string().min(1, 'Nama Pengusul is required'),
-    jabatan_pengusul: z.string().min(1, 'Jabatan Pengusul is required'),
+    jabatan_pengusul: z.string().optional(),
     dok_surat_pernyataan: z
       .any()
       .optional()
@@ -117,7 +117,7 @@ export class SuratValidation {
       nama_gelar: z.string().min(1, 'Nama Gelar is required'),
       gelar_depan: z.string().optional(),
       gelar_belakang: z.string().min(1, 'Gelar Belakang is required'),
-      jabatan: z.string().min(1, 'Jabatan is required'),
+      jabatan: z.string().optional(),
       pangkat_golongan: z.string().min(1, 'Pangkat Golongan is required'),
       jenis_kelamin: z.enum(['Pria', 'Wanita'], {
         message: 'Jenis Kelamin must be Pria atau Wanita',
@@ -244,7 +244,7 @@ export class SuratValidation {
         .max(new Date().getFullYear(), 'Tahun Lulus cannot be in the future'),
     }),
     teknis_operasional_penegak_hukum: z.boolean(),
-    jabatan: z.string().min(1, 'Jabatan is required'),
+    jabatan: z.string().optional(),
     surat_sehat_jasmani_rohani: z.object({
       nama_rs: z.string().min(1, 'Nama RS is required'),
       tgl_surat_rs: z

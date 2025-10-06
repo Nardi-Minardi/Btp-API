@@ -41,7 +41,7 @@ export class PengangkatanKembaliValidation {
         .string()
         .min(1, 'No keputusan kenaikan pangkat is required')
         .max(4, 'Tahun dp3 max 4 characters'),
-      nilai_dp3: z.number().min(1, 'Nilai dp3 is required'),
+      nilai_dp3: z.enum(['SANGAT BAIK', 'BAIK', 'CUKUP']),
     }),
     surat_skp: z.object({
       tgl_skp: z

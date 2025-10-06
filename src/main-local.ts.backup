@@ -67,7 +67,7 @@ async function bootstrap() {
           data-configuration='{
             "theme": "kepler",
             "layout": "modern",
-            "customCss": ".scalar-app { font-family: Inter, sans-serif; --scalar-color-1: #b91db2ff; --scalar-color-2: #b723caff; }"
+            "customCss": ".scalar-app { font-family: Inter, sans-serif; --scalar-color-1: #b6921dff; --scalar-color-2: #c98c1bff; }"
           }'></script>
         <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@latest"></script>
       </body>
@@ -76,10 +76,6 @@ async function bootstrap() {
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
   });
-
-  console.log('✅ Swagger UI available at /api');
-  console.log('✅ Scalar UI available at /docs');
-  console.log('✅ OpenAPI JSON available at /api-json');
 
   await app.listen(process.env.PORT || 3013, '0.0.0.0');
   console.log(

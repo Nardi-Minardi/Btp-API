@@ -858,10 +858,7 @@ export class SuratRepository {
     };
   }
 
-  async updatePpnsUploadIdPpns(
-    id_surat: number,
-    id_ppns: number,
-  ) {
+  async updatePpnsUploadIdPpns(id_surat: number, id_ppns: number) {
     console.log('DEBUG updatePpnsUploadIdPpns:', { id_surat, id_ppns });
 
     const updated = await this.prismaService.ppnsUpload.updateMany({
@@ -974,6 +971,114 @@ export class SuratRepository {
     if (!status || !allowed.includes(status as status_upload_ii))
       return 'pending';
     return status as status_upload_ii;
+  }
+
+  async deletePpnsSurat(id: number) {
+    return this.prismaService.$transaction(async (tx) => {
+      // Hapus semua upload terkait
+      await tx.ppnsUpload.deleteMany({
+        where: { id_surat: id },
+      });
+
+      // Ambil semua data_pns terkait surat
+      const dataPnsList = await tx.ppnsDataPns.findMany({
+        where: { id_surat: id },
+        select: { id: true },
+      });
+
+      const ids = dataPnsList.map((d) => d.id);
+
+      if (ids.length > 0) {
+        // Hapus semua relasi turunan per data_pns
+        await tx.wilayahKerja.deleteMany({
+          where: { id_ppns: { in: ids } },
+        });
+        await tx.ppnsUpload.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsVerifikasiPpns.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPengangkatan.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPelantikan.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsMutasi.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPemberhentianUndurDiri.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPemberhentianPensiun.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPemberhentianNto.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPengangkatanKembali.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPerpanjangKtp.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+        await tx.ppnsPenerbitanKembaliKtp.deleteMany({
+          where: { id_data_ppns: { in: ids } },
+        });
+
+        // Terakhir hapus data_pns-nya sendiri
+        await tx.ppnsDataPns.deleteMany({ where: { id: { in: ids } } });
+      }
+
+      // Baru hapus suratnya
+      return tx.ppnsSurat.delete({
+        where: { id },
+      });
+    });
+  }
+
+  async deleteDataPpns(id: number) {
+    const prisma = this.prismaService;
+
+    return prisma.$transaction(async (tx) => {
+      // Pastikan data PNS ada
+      const dataPns = await tx.ppnsDataPns.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+
+      if (!dataPns) {
+        throw new Error('Data PNS tidak ditemukan');
+      }
+
+      // Hapus semua relasi turunan berdasarkan id_data_pns
+      await tx.wilayahKerja.deleteMany({ where: { id_ppns: id } });
+      await tx.ppnsUpload.deleteMany({ where: { id_data_ppns: id } });
+      await tx.ppnsVerifikasiPpns.deleteMany({ where: { id_data_ppns: id } });
+      await tx.ppnsPengangkatan.deleteMany({ where: { id_data_ppns: id } });
+      await tx.ppnsPelantikan.deleteMany({ where: { id_data_ppns: id } });
+      await tx.ppnsMutasi.deleteMany({ where: { id_data_ppns: id } });
+      await tx.ppnsPengangkatanKembali.deleteMany({
+        where: { id_data_ppns: id },
+      });
+      await tx.ppnsPerpanjangKtp.deleteMany({ where: { id_data_ppns: id } });
+      await tx.ppnsPenerbitanKembaliKtp.deleteMany({
+        where: { id_data_ppns: id },
+      });
+      await tx.ppnsPemberhentianUndurDiri.deleteMany({
+        where: { id_data_ppns: id },
+      });
+      await tx.ppnsPemberhentianPensiun.deleteMany({
+        where: { id_data_ppns: id },
+      });
+      await tx.ppnsPemberhentianNto.deleteMany({ where: { id_data_ppns: id } });
+
+      // Terakhir hapus data PNS
+      return tx.ppnsDataPns.delete({
+        where: { id },
+      });
+    });
   }
 
   private cleanString(value?: string | null): string | null {

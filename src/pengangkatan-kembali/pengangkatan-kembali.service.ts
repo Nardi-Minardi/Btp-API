@@ -85,7 +85,7 @@ export class PengangkatanKembaliService {
       tgl_skp: createRequest.surat_skp.tgl_skp
         ? dateOnlyToLocal(createRequest.surat_skp.tgl_skp)
         : null,
-      nilai_dp3: Number(createRequest.dp3.nilai_dp3),
+      nilai_dp3: createRequest.dp3.nilai_dp3,
       tahun_dp3: createRequest.dp3.tahun_dp3,
       jabatan_baru: createRequest.biodata_baru.jabatan_baru,
       pangkat_golongan: createRequest.biodata_baru.pangkat_golongan_baru,
