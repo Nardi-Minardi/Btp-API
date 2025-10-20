@@ -14,6 +14,7 @@ import { PenerbitanKembaliKtpModule } from './penerbitan-kembali-ktp/penerbitan-
 import { PemberhentianUndurDiriModule } from './pemberhentian-undur-diri/pemberhentian-undur-diri.module';
 import { PemberhentianPensiunModule } from './pemberhentian-pensiun/pemberhentian-pensiun.module';
 import { PemberhentianNtoModule } from './pemberhentian-nto/pemberhentian-nto.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PemberhentianNtoModule } from './pemberhentian-nto/pemberhentian-nto.mo
     PemberhentianPensiunModule,
     PemberhentianNtoModule,
     DataMasterModule,
+    AdminModule,
     UserModule,
     AuthModule,
   ],

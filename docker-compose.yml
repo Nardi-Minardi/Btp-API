@@ -16,8 +16,8 @@ services:
       - NOTARIS_DATABASE_URL=postgresql://adminixtrator:s1P4ling-zYuLlit@192.168.14.16:5432/notaris
       - JWT_SECRET='yGNRT6tBAbKTyJ5p'
       - S3_ENDPOINT=http://192.168.14.17:9000
-      - S3_ACCESS_KEY=minioadmin
-      - S3_SECRET_KEY=minioadmin
+      - S3_ACCESS_KEY=admin
+      - S3_SECRET_KEY=53mV4cKb3zZs1
       - S3_BUCKET=development
     volumes:
       - ./logs:/app/logs   # logs akan keluar ke folder host ./logs

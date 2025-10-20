@@ -376,76 +376,77 @@ model PpnsPemberhentianUndurDiri {
 
 // Pemberhentian Pensiun
 model PpnsPemberhentianPensiun {
-  id                      Int          @id @default(autoincrement())
-  id_surat                Int?         @db.Integer
-  id_data_ppns            Int?         @unique @db.Integer
-  no_sk_pengangkatan_pns  String?      @db.VarChar(255)
-  tgl_sk_pengangkatan_pns DateTime?    @db.Date
-  no_sk_kenaikan_pangkat  String?      @db.VarChar(255)
-  tgl_sk_kenaikan_pangkat DateTime?    @db.Date
-  no_ktp                  String?      @db.VarChar(255)
-  tgl_berlaku_ktp         DateTime?    @db.Date
-  no_sk_bkn               String?      @db.VarChar(255)
-  tgl_sk_bkn              DateTime?    @db.Date
-  provinsi_penempatan     Int?         @db.Integer
-  kabupaten_penempatan    Int?         @db.Integer
-  unit_kerja              String?      @db.VarChar(255)
-  created_at              DateTime?    @default(now()) @db.Timestamp(6)
-  created_by              Int?         @db.Integer
+  id                      Int       @id @default(autoincrement())
+  id_surat                Int?      @db.Integer
+  id_data_ppns            Int?      @unique @db.Integer
+  no_sk_pengangkatan_pns  String?   @db.VarChar(255)
+  tgl_sk_pengangkatan_pns DateTime? @db.Date
+  no_sk_kenaikan_pangkat  String?   @db.VarChar(255)
+  tgl_sk_kenaikan_pangkat DateTime? @db.Date
+  no_ktp                  String?   @db.VarChar(255)
+  tgl_berlaku_ktp         DateTime? @db.Date
+  no_sk_bkn               String?   @db.VarChar(255)
+  tgl_sk_bkn              DateTime? @db.Date
+  provinsi_penempatan     Int?      @db.Integer
+  kabupaten_penempatan    Int?      @db.Integer
+  unit_kerja              String?   @db.VarChar(255)
+  created_at              DateTime? @default(now()) @db.Timestamp(6)
+  created_by              Int?      @db.Integer
 
-  ppns_data_pns           PpnsDataPns? @relation("PpnsDataPnsToPemberhentianPensiun", fields: [id_data_ppns], references: [id])
+  ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsToPemberhentianPensiun", fields: [id_data_ppns], references: [id])
 
   @@map("tr_ppns_pemberhentian_pensiun")
 }
 
 // Pemberhentian NTO (Non-Tenaga Operasional)
 model PpnsPemberhentianNto {
-  id                      Int          @id @default(autoincrement())
-  id_surat                Int?         @db.Integer
-  id_data_ppns            Int?         @unique @db.Integer
-  no_sk_pengangkatan_pns  String?      @db.VarChar(255)
-  tgl_sk_pengangkatan_pns DateTime?    @db.Date
-  no_sk_kenaikan_pangkat  String?      @db.VarChar(255)
-  tgl_sk_kenaikan_pangkat DateTime?    @db.Date
-  no_ktp                  String?      @db.VarChar(255)
-  tgl_berlaku_ktp         DateTime?    @db.Date
-  no_sk_pemberhentian     String?      @db.VarChar(255)
-  tgl_sk_pemberhentian    DateTime?    @db.Date
-  provinsi_penempatan     Int?         @db.Integer
-  kabupaten_penempatan    Int?         @db.Integer
-  unit_kerja              String?      @db.VarChar(255)
-  created_at              DateTime?    @default(now()) @db.Timestamp(6)
-  created_by              Int?         @db.Integer
+  id                      Int       @id @default(autoincrement())
+  id_surat                Int?      @db.Integer
+  id_data_ppns            Int?      @unique @db.Integer
+  no_sk_pengangkatan_pns  String?   @db.VarChar(255)
+  tgl_sk_pengangkatan_pns DateTime? @db.Date
+  no_sk_kenaikan_pangkat  String?   @db.VarChar(255)
+  tgl_sk_kenaikan_pangkat DateTime? @db.Date
+  no_ktp                  String?   @db.VarChar(255)
+  tgl_berlaku_ktp         DateTime? @db.Date
+  no_sk_pemberhentian     String?   @db.VarChar(255)
+  tgl_sk_pemberhentian    DateTime? @db.Date
+  provinsi_penempatan     Int?      @db.Integer
+  kabupaten_penempatan    Int?      @db.Integer
+  unit_kerja              String?   @db.VarChar(255)
+  created_at              DateTime? @default(now()) @db.Timestamp(6)
+  created_by              Int?      @db.Integer
 
-  ppns_data_pns           PpnsDataPns? @relation("PpnsDataPnsToPemberhentianNto", fields: [id_data_ppns], references: [id])
+  ppns_data_pns PpnsDataPns? @relation("PpnsDataPnsToPemberhentianNto", fields: [id_data_ppns], references: [id])
 
   @@map("tr_ppns_pemberhentian_nto")
 }
 
 //buat admin
 model PpnsVerifikasiData {
-  id                    Int            @id @default(autoincrement())
-  id_surat              Int?           @db.Integer
-  id_data_ppns          Int?           @db.Integer
-  verifikasi_data       status_upload?
-  keterangan_data       String?        @db.Text
-  verifikasi_wilayah    String?        @db.VarChar(255)
-  keterangan_wilayah    String?        @db.Text
-  status_a              status_upload?
-  keterangan_a          String?        @db.Text
-  status_b              status_upload?
-  keterangan_b          String?        @db.Text
-  status_c              status_upload?
-  keterangan_c          String?        @db.Text
-  status_d              status_upload?
-  keterangan_d          String?        @db.Text
-  status_e              status_upload?
-  keterangan_e          String?        @db.Text
-  status_f              status_upload?
-  keterangan_f          String?        @db.Text
-  keterangan_verifikasi String?        @db.VarChar(255)
-  verifikator_by        Int?           @db.Integer
-  verifikator_at        DateTime?      @db.Timestamp(6)
+  id                     Int          @id @default(autoincrement())
+  id_surat               Int?         @db.Integer
+  id_data_ppns           Int?         @db.Integer
+  verifikasi_data        verifikasi_enum?
+  keterangan_data        String?      @db.Text
+  verifikasi_wilayah     verifikasi_enum?
+  keterangan_wilayah     String?      @db.Text
+  status_a               verifikasi_enum?
+  keterangan_a           String?      @db.Text
+  status_b               verifikasi_enum?
+  keterangan_b           String?      @db.Text
+  status_c               verifikasi_enum?
+  keterangan_c           String?      @db.Text
+  status_d               verifikasi_enum?
+  keterangan_d           String?      @db.Text
+  status_e               verifikasi_enum?
+  keterangan_e           String?      @db.Text
+  status_f               verifikasi_enum?
+  keterangan_f           String?      @db.Text
+  keterangan_verifikasi String?      @db.Text
+  verifikator_by         Int?         @db.Integer
+  verifikator_at         DateTime?    @db.Timestamp(6)
+  status                 status_enum?
 
   @@map("tr_ppns_verifikasi_data")
 }
@@ -453,6 +454,12 @@ model PpnsVerifikasiData {
 enum status_enum {
   diterima @map("Diterima")
   dataBaru @map("Data Baru")
+}
+
+enum verifikasi_enum {
+  sesuai @map("sesuai")
+  tidakSesuai @map("tidak sesuai")
+  tolak @map("tolak")
 }
 
 enum status_upload {

@@ -759,15 +759,27 @@ export class SuratRepository {
     };
   }
 
-  async findPpnsDataPnsByIdSurat(id_surat: number) {
+  async countPpnsDataPnsByIdSurat(id_surat: number): Promise<number> {
+    return this.prismaService.ppnsDataPns.count({
+      where: { id_surat },
+    });
+  }
+
+  async findPpnsDataPnsByIdSurat(
+    id_surat: number,
+    limit?: number,
+    offset?: number,
+  ) {
     if (!id_surat) {
       throw new BadRequestException('id_surat is required');
     }
     return this.prismaService.ppnsDataPns.findMany({
       where: { id_surat },
+      skip: offset,
+      take: limit,
       include: {
-        ppns_wilayah_kerja: true,
         ppns_surat: true,
+        ppns_wilayah_kerja: true,
       },
     });
   }

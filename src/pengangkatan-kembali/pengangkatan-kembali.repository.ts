@@ -15,9 +15,9 @@ export type PpnsPengangkatanKembaliUpdateInputWithExtra =
     no_sk_terakhir?: string | null;
     tgl_sk_terakhir?: Date | null;
     tahun_dp3?: string | null;
-    nilai_dp3?: number | null;
+    nilai_dp3?: string | null;
     tgl_skp?: Date | null;
-    nilai_skp?: number | null;
+    nilai_skp?: string | null;
     jabatan_baru?: string | null;
     pangkat_golongan?: string | null;
   };

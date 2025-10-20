@@ -350,13 +350,41 @@ export class SuratService {
         key: 'ppns_verifikasi_ppns',
         message: 'data verifikasi ppns',
       },
+       pengangkatan: {
+        key: 'ppns_pengangkatan',
+        message: 'data pengangkatan',
+      },
       pelantikan: {
         key: 'ppns_pelantikan',
         message: 'data pelantikan',
       },
-      pengangkatan: {
-        key: 'ppns_pengangkatan',
-        message: 'data pengangkatan',
+      mutasi: {
+        key: 'ppns_mutasi',
+        message: 'data mutasi',
+      },
+      'pengangkatan kembali': {
+        key: 'ppns_pengangkatan_kembali',
+        message: 'data pengangkatan kembali',
+      },
+      'perpanjang ktp': {
+        key: 'ppns_perpanjang_ktp',
+        message: 'data perpanjang ktp',
+      },
+      'penerbitan kembali ktp': {
+        key: 'ppns_penerbitan_kembali_ktp',
+        message: 'data penerbitan kembali ktp',
+      },
+      'undur diri': {
+        key: 'ppns_undur_diri',
+        message: 'data undur diri',
+      },
+      pensiun: {
+        key: 'ppns_pensiun',
+        message: 'data pensiun',
+      },
+      'pemberhentian NTO': {
+        key: 'ppns_pemberhentian_nto',
+        message: 'data pemberhentian NTO',
       },
     } as const;
 

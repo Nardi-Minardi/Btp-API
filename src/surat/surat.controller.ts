@@ -95,24 +95,32 @@ export class SuratController {
   async detailCalonPpns(
     @Param('id_surat') id_surat: string,
     @Headers() headers: Record<string, any>,
-  ): Promise<
-    WebResponse<ListCalonPemohon[], null> & {
-      status_kirim_verifikator: boolean | null;
-    }
-  > {
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ): Promise<any> {  // ✅ ubah ke any
     const authorization = headers['authorization'] || '';
-
     const userLogin = await getUserFromToken(authorization);
     if (!userLogin) {
       throw new BadRequestException('Authorization is missing');
     }
 
-    const item = await this.suratRepository.findPpnsDataPnsByIdSurat(
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const offset = (pageNum - 1) * limitNum;
+
+    // Ambil total data dulu
+    const totalData = await this.suratRepository.countPpnsDataPnsByIdSurat(
       Number(id_surat),
     );
 
-    // console.log("item", item);
-    if (!item) {
+    // Ambil data berdasarkan pagination
+    const item = await this.suratRepository.findPpnsDataPnsByIdSurat(
+      Number(id_surat),
+      limitNum,
+      offset,
+    );
+
+    if (!item || item.length === 0) {
       throw new BadRequestException('Ppns Surat not found');
     }
 
@@ -129,6 +137,7 @@ export class SuratController {
               : undefined,
           },
         });
+
       mappedItem.push({
         id: calon.id || null,
         id_surat: calon.id_surat || null,
@@ -155,10 +164,13 @@ export class SuratController {
             wilayah.uu_dikawal_1,
             wilayah.uu_dikawal_2,
             wilayah.uu_dikawal_3,
-          ].filter((uu): uu is string => !!uu), // hanya ambil yang tidak null/undefined
+          ].filter((uu): uu is string => !!uu),
         })),
       });
     }
+
+    const totalPage = Math.ceil(totalData / limitNum);
+
     return {
       statusCode: 200,
       message: 'Success',
@@ -166,6 +178,11 @@ export class SuratController {
         ? item[0]?.ppns_surat?.status
         : false,
       data: mappedItem,
+      pagination: {
+        currentPage: pageNum,
+        totalPage,
+        totalData,
+      },
     };
   }
 
@@ -387,7 +404,9 @@ export class SuratController {
     }
 
     //get boLaporan by id pm
-    const pmCv = await this.suratRepository.findPpnsDataPnsById(Number(id_ppns));
+    const pmCv = await this.suratRepository.findPpnsDataPnsById(
+      Number(id_ppns),
+    );
     if (!pmCv) {
       throw new NotFoundException('Calon Pemohon tidak ditemukan');
     }
