@@ -75,15 +75,33 @@ export class PengangkatanService {
     }
 
     //cek data pppns
-    const existingPpnsDataPns = await this.prismaService.ppnsDataPns.findFirst(
+    const existingPpnsDataPnsBySurat = await this.prismaService.ppnsDataPns.findFirst(
       {
-        where: { id_surat: Number(createRequest.id_surat) },
+        where: { 
+          // id: Number(createRequest.id_data_ppns),
+          id_surat: Number(createRequest.id_surat)
+         },
       },
     );
 
-    if (!existingPpnsDataPns) {
+    if (!existingPpnsDataPnsBySurat) {
       throw new NotFoundException(
-        `Data calon ppns dengan ID ${createRequest.id_data_ppns} tidak ditemukan`,
+        `Data calon ppns dengan  ID surat ${createRequest.id_surat} tidak ditemukan`,
+      );
+    }
+
+    const existingPpnsDataPnsById = await this.prismaService.ppnsDataPns.findFirst(
+      {
+        where: { 
+          id: Number(createRequest.id_data_ppns),
+          // id_surat: Number(createRequest.id_surat)
+         },
+      },
+    );
+
+    if (!existingPpnsDataPnsById) {
+      throw new NotFoundException(
+        `Data calon ppns dengan  ID ${createRequest.id_data_ppns} tidak ditemukan`,
       );
     }
 
@@ -100,7 +118,7 @@ export class PengangkatanService {
     }
 
     const createData = {
-      id_data_ppns: existingPpnsDataPns.id,
+      id_data_ppns: createRequest.id_data_ppns ? Number(createRequest.id_data_ppns) : null,
       id_surat: createRequest.id_surat ? Number(createRequest.id_surat) : null,
       nama_sekolah: createRequest.nama_sekolah,
       no_ijazah: createRequest.no_ijazah,
@@ -149,24 +167,11 @@ export class PengangkatanService {
     };
 
     //cek data pengangkatan
-    const existingPpnsData = await this.prismaService.ppnsDataPns.findFirst({
-      where: { id_surat: Number(createRequest.id_surat) },
-    });
-
-    console.log('existingPpnsData', existingPpnsData);
-
-    if (!existingPpnsData) {
-      throw new NotFoundException(
-        `Data calon ppns dengan ID surat ${createRequest.id_surat} tidak ditemukan`,
-      );
-    }
-
     const existingPpnsPengangkatan =
       await this.pengangkatanRepository.findPpnsPengangkatanByIdSurat(
         Number(createRequest.id_surat),
       );
 
-    console.log('existingPpnsPengangkatan', existingPpnsPengangkatan);
 
     let result;
 
@@ -258,7 +263,7 @@ export class PengangkatanService {
         dataUploadDB.map((d) => ({
           ...d,
           id_surat: createRequest.id_surat ?? 0,
-          id_ppns: existingPpnsDataPns.id,
+          id_ppns: Number(createRequest.id_data_ppns),
           id_file_type: d.master_file_id ?? null,
         })),
       );
@@ -274,7 +279,7 @@ export class PengangkatanService {
         : null,
       tahun_lulus: createRequest.tahun_lulus,
     });
-    await this.suratRepository.updatePpnsDataPns(existingPpnsData.id, {
+    await this.suratRepository.updatePpnsDataPns(Number(createRequest.id_data_ppns), {
       nama_sekolah: createRequest.nama_sekolah,
       gelar_terakhir: createRequest.gelar_terakhir,
       no_ijazah: createRequest.no_ijazah,
@@ -289,13 +294,13 @@ export class PengangkatanService {
       await this.fileUploadRepository.findFilePpnsUpload(
         'dokumen_tanda_terima_polisi',
         Number(createRequest.id_surat),
-        existingPpnsDataPns.id,
+        Number(createRequest.id_data_ppns),
       );
     const dok_tanda_terima_kejaksaan_agung =
       await this.fileUploadRepository.findFilePpnsUpload(
         'dokumen_tanda_terima_kejaksaan_agung',
         Number(createRequest.id_surat),
-        existingPpnsDataPns.id,
+        Number(createRequest.id_data_ppns),
       );
 
     // gabungkan uploads ke response

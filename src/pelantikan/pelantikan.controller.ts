@@ -38,6 +38,11 @@ export class PelantikanController {
           description: 'ID calon PPNS',
           example: 12345,
         },
+        id_surat: {
+          type: 'number',
+          description: 'ID surat pelantikan',
+          example: 12345,
+        },
         surat_permohonan: {
           type: 'object',
           description: 'Data surat permohonan',

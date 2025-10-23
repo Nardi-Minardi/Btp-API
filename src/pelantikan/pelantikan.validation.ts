@@ -19,6 +19,7 @@ const zBooleanFromFormData = z.preprocess(
 export class PelantikanValidation {
   static readonly CREATE_PELANTIKAN_PPNS: ZodType = z.object({
     id_data_ppns: z.number(),
+    id_surat: z.number(),
     surat_permohonan: z.object({
       tgl_surat: z
         .string()

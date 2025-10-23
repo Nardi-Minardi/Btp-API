@@ -26,6 +26,7 @@ import {
 } from './pelantikan.repository';
 import { LayananRepository } from 'src/layanan/layanan.repository';
 import { PelantikanValidation } from './pelantikan.validation';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class PelantikanService {
@@ -38,6 +39,7 @@ export class PelantikanService {
     private suratRepository: SuratRepository,
     private layananRepository: LayananRepository,
     private s3Service: S3Service,
+     private prismaService: PrismaService,
   ) {}
 
   async storePelantikan(request: any, authorization?: string): Promise<any> {
@@ -61,19 +63,39 @@ export class PelantikanService {
     }
 
     //cek data pppns
-    const existingPpnsDataPns = await this.suratRepository.findPpnsDataPnsById(
-      Number(createRequest.id_data_ppns),
+    const existingPpnsDataPnsBySurat = await this.prismaService.ppnsDataPns.findFirst(
+      {
+        where: { 
+          // id: Number(createRequest.id_data_ppns),
+          id_surat: Number(createRequest.id_surat)
+         },
+      },
     );
 
-    if (!existingPpnsDataPns) {
+    if (!existingPpnsDataPnsBySurat) {
       throw new NotFoundException(
-        `Data calon ppns dengan ID ${createRequest.id_data_ppns} tidak ditemukan`,
+        `Data calon ppns dengan  ID surat ${createRequest.id_surat} tidak ditemukan`,
+      );
+    }
+
+    const existingPpnsDataPnsById = await this.prismaService.ppnsDataPns.findFirst(
+      {
+        where: { 
+          id: Number(createRequest.id_data_ppns),
+          // id_surat: Number(createRequest.id_surat)
+         },
+      },
+    );
+
+    if (!existingPpnsDataPnsById) {
+      throw new NotFoundException(
+        `Data calon ppns dengan  ID ${createRequest.id_data_ppns} tidak ditemukan`,
       );
     }
 
     const createData = {
-      id_data_ppns: Number(createRequest.id_data_ppns),
-      id_surat: existingPpnsDataPns.id_surat,
+      id_data_ppns: createRequest.id_data_ppns ? Number(createRequest.id_data_ppns) : null,
+      id_surat: createRequest.id_surat ? Number(createRequest.id_surat) : null,
       no_surat: createRequest.surat_permohonan.no_surat || null,
       tgl_surat: createRequest.surat_permohonan.tgl_surat
         ? dateOnlyToLocal(createRequest.surat_permohonan.tgl_surat)
@@ -86,11 +108,16 @@ export class PelantikanService {
 
     //cek data pelantikan
     const existingPpnsPelantikan =
-      await this.pelantikanRepository.findPpnsPelantikanByIdDataPpns(
-        Number(createRequest.id_data_ppns),
-      );
+      await this.prismaService.ppnsPelantikan.findFirst({
+        where: {
+          id_data_ppns: Number(createRequest.id_data_ppns),
+          id_surat: Number(createRequest.id_surat),
+        },
+      });
 
-    const result = await this.pelantikanRepository.savePpnsPelantikan(
+    let result;
+
+    result = await this.pelantikanRepository.savePpnsPelantikan(
       existingPpnsPelantikan?.id ?? null,
       createData as PpnsPelantikanUpdateInputWithExtra,
     );

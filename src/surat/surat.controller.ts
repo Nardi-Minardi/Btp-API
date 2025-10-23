@@ -271,11 +271,11 @@ export class SuratController {
     schema: {
       type: 'object',
       properties: {
-        id: {
-          type: 'number',
-          description: 'ID calon PNS (optional, hanya untuk update)',
-          example: 12345,
-        },
+        // id: {
+        //   type: 'number',
+        //   description: 'ID calon PNS (optional, hanya untuk update)',
+        //   example: 12345,
+        // },
         id_surat: {
           type: 'number',
           description: 'ID surat terkait',

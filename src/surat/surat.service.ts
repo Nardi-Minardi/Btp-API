@@ -318,35 +318,35 @@ export class SuratService {
           await this.layananRepository.findLayananByNama('pengangkatan');
 
         for (const ppnsDataPns of existingPpnsDataPns) {
-          // const createPengangkatan = {
-          //   id_surat: result.id,
-          //   id_data_ppns: ppnsDataPns.id,
-          //   nama_sekolah: null,
-          //   no_ijazah: null,
-          //   tgl_ijazah: null,
-          //   tahun_lulus: null,
-          //   no_sttpl: null,
-          //   tgl_sttpl: null,
-          //   tgl_verifikasi: null,
-          //   cek_surat_polisi: false,
-          //   no_surat_polisi: null,
-          //   tgl_surat_polisi: null,
-          //   perihal_surat_polisi: null,
-          //   cek_surat_kejaksaan_agung: false,
-          //   no_surat_kejaksaan_agung: null,
-          //   tgl_surat_kejaksaan_agung: null,
-          //   perihal_surat_kejaksaan_agung: null,
-          //   teknis_operasional_penegak_hukum: false,
-          //   jabatan: null,
-          //   provinsi_penempatan: null,
-          //   kabupaten_penempatan: null,
-          //   unit_kerja: null,
-          //   created_at: new Date(),
-          //   created_by: userLogin.user_id,
-          // };
-          // await this.prismaService.ppnsPengangkatan.create({
-          //   data: createPengangkatan,
-          // });
+          const createPengangkatan = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            nama_sekolah: null,
+            no_ijazah: null,
+            tgl_ijazah: null,
+            tahun_lulus: null,
+            no_sttpl: null,
+            tgl_sttpl: null,
+            tgl_verifikasi: null,
+            cek_surat_polisi: false,
+            no_surat_polisi: null,
+            tgl_surat_polisi: null,
+            perihal_surat_polisi: null,
+            cek_surat_kejaksaan_agung: false,
+            no_surat_kejaksaan_agung: null,
+            tgl_surat_kejaksaan_agung: null,
+            perihal_surat_kejaksaan_agung: null,
+            teknis_operasional_penegak_hukum: false,
+            jabatan: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPengangkatan.create({
+            data: createPengangkatan,
+          });
 
           const createCalonPpns = {
             id_surat: result.id,
