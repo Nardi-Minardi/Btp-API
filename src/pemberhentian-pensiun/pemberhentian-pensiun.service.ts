@@ -22,6 +22,7 @@ import { SuratRepository } from 'src/surat/surat.repository';
 import { PemberhentianPensiunValidation } from './pemberhentian-pensiun.validation';
 import { PemberhentianPensiunRepository, PpnsPensiunUpdateInputWithExtra } from './pemberhentian-pensiun.repository';
 import { CreateResponseUploadDokumenPpnsDto } from './dto/create.pemberhentian-pensiun.dto';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class PemberhentianPensiunService {
@@ -33,6 +34,7 @@ export class PemberhentianPensiunService {
     private pemberhentianPensiunRepository: PemberhentianPensiunRepository,
     private suratRepository: SuratRepository,
     private s3Service: S3Service,
+    private prismaService: PrismaService,
   ) {}
 
   async storePensiun(request: any, authorization?: string): Promise<any> {
@@ -56,19 +58,37 @@ export class PemberhentianPensiunService {
     }
 
     //cek data pppns
-    const existingPpnsDataPns = await this.suratRepository.findPpnsDataPnsById(
-      Number(createRequest.id_data_ppns),
-    );
+    const existingPpnsDataPnsBySurat =
+      await this.prismaService.ppnsDataPns.findFirst({
+        where: {
+          // id: Number(createRequest.id_data_ppns),
+          id_surat: Number(createRequest.id_surat),
+        },
+      });
 
-    if (!existingPpnsDataPns) {
+    if (!existingPpnsDataPnsBySurat) {
       throw new NotFoundException(
-        `Data calon ppns dengan ID ${createRequest.id_data_ppns} tidak ditemukan`,
+        `Data calon ppns dengan  ID surat ${createRequest.id_surat} tidak ditemukan`,
+      );
+    }
+
+    const existingPpnsDataPnsById =
+      await this.prismaService.ppnsDataPns.findFirst({
+        where: {
+          id: Number(createRequest.id_data_ppns),
+          // id_surat: Number(createRequest.id_surat)
+        },
+      });
+
+    if (!existingPpnsDataPnsById) {
+      throw new NotFoundException(
+        `Data calon ppns dengan  ID ${createRequest.id_data_ppns} tidak ditemukan`,
       );
     }
 
     const createData = {
-      id_data_ppns: Number(createRequest.id_data_ppns),
-      id_surat: existingPpnsDataPns.id_surat,
+      id_data_ppns: createRequest.id_data_ppns ? Number(createRequest.id_data_ppns) : null,
+      id_surat: createRequest.id_surat ? Number(createRequest.id_surat) : null,
       tgl_sk_pengangkatan_pns: createRequest.sk_pengangkatan_pns.tgl_sk_pengangkatan_pns
         ? dateOnlyToLocal(createRequest.sk_pengangkatan_pns.tgl_sk_pengangkatan_pns)
         : null,

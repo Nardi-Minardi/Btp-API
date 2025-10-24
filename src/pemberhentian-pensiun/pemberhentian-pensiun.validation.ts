@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 export class PemberhentianPensiunValidation {
   static readonly CREATE_PENSIUN_PPNS: ZodType = z.object({
     id_data_ppns: z.number(),
+    id_surat: z.number(),
     sk_pengangkatan_pns: z.object({
       tgl_sk_pengangkatan_pns: z
         .string()

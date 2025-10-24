@@ -31,6 +31,11 @@ export class PemberhentianNtoController {
     schema: {
       type: 'object',
       properties: {
+        id_surat: {
+          type: 'number',
+          description: 'ID surat yang wajib diisi',
+          example: 12345,
+        },
         id_data_ppns: {
           type: 'number',
           description: 'ID calon PPNS yang wajib diisi',

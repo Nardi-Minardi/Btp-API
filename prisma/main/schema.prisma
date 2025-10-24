@@ -423,7 +423,6 @@ model PpnsPemberhentianNto {
 
   @@map("tr_ppns_pemberhentian_nto")
 }
-
 //buat admin
 model PpnsVerifikasiData {
   id                    Int              @id @default(autoincrement())
@@ -433,6 +432,16 @@ model PpnsVerifikasiData {
   keterangan_data       String?          @db.Text
   verifikasi_wilayah    verifikasi_enum?
   keterangan_wilayah    String?          @db.Text
+  verifikasi_masa_kerja  verifikasi_enum?
+  keterangan_masa_kerja  String?          @db.Text
+  verifikasi_pendidikan_terakhir verifikasi_enum?
+  keterangan_pendidikan_terakhir String? @db.Text
+  verifikasi_teknis_operasional   verifikasi_enum?
+  keterangan_teknis_operasional   String?          @db.Text
+  verifikasi_surat_sehat          verifikasi_enum?
+  keterangan_surat_sehat          String?          @db.Text
+  verifikasi_dp3                 verifikasi_enum?
+  keterangan_dp3                 String?          @db.Text
   status_a              verifikasi_enum?
   keterangan_a          String?          @db.Text
   status_b              verifikasi_enum?

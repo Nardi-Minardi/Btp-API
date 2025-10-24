@@ -500,37 +500,628 @@ export class SuratService {
 
       case 'mutasi':
         dataLayanan = await this.layananRepository.findLayananByNama('mutasi');
+
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createMutasi = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            jumlah_mutasi: null,
+            no_keputusan_pangkat: null,
+            tgl_keputusan_pangkat: null,
+            no_keputusan_kenaikan_pangkat: null,
+            tgl_keputusan_kenaikan_pangkat: null,
+            no_sk_mutasi_wilayah_kerja: null,
+            tgl_sk_mutasi_wilayah_kerja: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsMutasi.create({
+            data: createMutasi,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       case 'pengangkatan kembali':
         dataLayanan = await this.layananRepository.findLayananByNama(
           'pengangkatan kembali',
         );
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createPengangkatanKembali = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            no_sk_pemberhentian: null,
+            tgl_sk_pemberhentian: null,
+            no_sk_terakhir: null,
+            tgl_sk_terakhir: null,
+            tahun_dp3: null,
+            nilai_dp3: null,
+            tgl_skp: null,
+            nilai_skp: null,
+            jabatan_baru: null,
+            pangkat_golongan: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPengangkatanKembali.create({
+            data: createPengangkatanKembali,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       case 'perpanjang ktp':
         dataLayanan =
           await this.layananRepository.findLayananByNama('perpanjang ktp');
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createPerpanjangKtp = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            no_surat_petikan: null,
+            tgl_surat_petikan: null,
+            no_ktp: null,
+            tgl_ktp: null,
+            tgl_berlaku_ktp: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPerpanjangKtp.create({
+            data: createPerpanjangKtp,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       case 'penerbitan kembali ktp':
         dataLayanan = await this.layananRepository.findLayananByNama(
           'penerbitan kembali ktp',
         );
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createPenerbitanKembaliKtp = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            no_ktp: null,
+            tgl_ktp: null,
+            tgl_berlaku_ktp: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPenerbitanKembaliKtp.create({
+            data: createPenerbitanKembaliKtp,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       case 'undur diri':
         dataLayanan =
           await this.layananRepository.findLayananByNama('undur diri');
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createUndurDiri = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            no_sk_pengangkatan_pns: null,
+            tgl_sk_pengangkatan_pns: null,
+            no_sk_kenaikan_pangkat: null,
+            tgl_sk_kenaikan_pangkat: null,
+            no_ktp: null,
+            tgl_berlaku_ktp: null,
+            no_sk_persetujuan: null,
+            tgl_sk_persetujuan: null,
+            no_sk_pemberhentian: null,
+            tgl_sk_pemberhentian: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPemberhentianUndurDiri.create({
+            data: createUndurDiri,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       case 'pensiun':
         dataLayanan = await this.layananRepository.findLayananByNama('pensiun');
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createPensiun = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            no_sk_pengangkatan_pns: null,
+            tgl_sk_pengangkatan_pns: null,
+            no_sk_kenaikan_pangkat: null,
+            tgl_sk_kenaikan_pangkat: null,
+            no_ktp: null,
+            tgl_berlaku_ktp: null,
+            no_sk_bkn: null,
+            tgl_sk_bkn: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPemberhentianPensiun.create({
+            data: createPensiun,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       case 'pemberhentian NTO':
         dataLayanan =
           await this.layananRepository.findLayananByNama('pemberhentian NTO');
+        for (const ppnsDataPns of existingPpnsDataPns) {
+          const createNto = {
+            id_surat: result.id,
+            id_data_ppns: ppnsDataPns.id,
+            no_sk_pengangkatan_pns: null,
+            tgl_sk_pengangkatan_pns: null,
+            no_sk_kenaikan_pangkat: null,
+            tgl_sk_kenaikan_pangkat: null,
+            no_ktp: null,
+            tgl_berlaku_ktp: null,
+            no_sk_pemberhentian: null,
+            tgl_sk_pemberhentian: null,
+            provinsi_penempatan: null,
+            kabupaten_penempatan: null,
+            unit_kerja: null,
+            created_at: new Date(),
+            created_by: userLogin.user_id,
+          };
+          await this.prismaService.ppnsPemberhentianNto.create({
+            data: createNto,
+          });
+
+          const createCalonPpns = {
+            id_surat: result.id,
+            nama: ppnsDataPns.nama,
+            nip: ppnsDataPns.nip,
+            nama_gelar: ppnsDataPns.nama_gelar,
+            jabatan: ppnsDataPns.jabatan,
+            pangkat_golongan: ppnsDataPns.pangkat_golongan,
+            jenis_kelamin: ppnsDataPns.jenis_kelamin,
+            agama: ppnsDataPns.agama,
+            nama_sekolah: ppnsDataPns.nama_sekolah,
+            gelar_terakhir: ppnsDataPns.gelar_terakhir,
+            no_ijazah: ppnsDataPns.no_ijazah,
+            tgl_ijazah: ppnsDataPns.tgl_ijazah,
+            tahun_lulus: ppnsDataPns.tahun_lulus,
+            is_ppns: ppnsDataPns.is_ppns,
+            nomor_hp: ppnsDataPns.nomor_hp,
+            email: ppnsDataPns.email,
+            gelar_depan: ppnsDataPns.gelar_depan,
+            id_lama: ppnsDataPns.id_lama,
+          };
+          const newCalonPpns = await this.prismaService.ppnsDataPns.create({
+            data: createCalonPpns,
+            include: {
+              ppns_upload: true,
+              ppns_wilayah_kerja: true,
+            },
+          });
+
+          //copy wilayah kerja
+          for (const wilayahKerja of ppnsDataPns.ppns_wilayah_kerja) {
+            await this.prismaService.wilayahKerja.create({
+              data: {
+                id_layanan: wilayahKerja.id_layanan,
+                id_ppns: newCalonPpns.id,
+                id_surat: result.id,
+                penempatan_baru: wilayahKerja.penempatan_baru,
+                uu_dikawal_1: wilayahKerja.uu_dikawal_1,
+                uu_dikawal_2: wilayahKerja.uu_dikawal_2,
+                uu_dikawal_3: wilayahKerja.uu_dikawal_3,
+              },
+            });
+          }
+          //copy upload
+          for (const upload of ppnsDataPns.ppns_upload) {
+            await this.prismaService.ppnsUpload.create({
+              data: {
+                id_surat: result.id,
+                id_data_ppns: newCalonPpns.id,
+                id_file_type: upload.id_file_type,
+                file_type: upload.file_type,
+                original_name: upload.original_name,
+                status: upload.status,
+                keterangan: upload.keterangan,
+                s3_key: upload.s3_key,
+                mime_type: upload.mime_type,
+                file_size: upload.file_size,
+                uploaded_at: upload.uploaded_at,
+                verifikator_by: upload.verifikator_by,
+                verifikator_at: upload.verifikator_at,
+              },
+            });
+          }
+        }
         break;
 
       default:

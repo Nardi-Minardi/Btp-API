@@ -131,6 +131,16 @@ export class AdminController {
     };
   }
 
+//   verifikasi_masa_kerja type (verifikasi_enum)
+// keterangan_masa_kerja type (text)
+// verifikasi_pendidikan_terakhir type (verifikasi_enum)
+// keterangan_pendidikan_terakhir type (text)
+// verifikasi_teknis_operasional type (verifikasi_enum)
+// keterangan_teknis_operasional type (text)
+// verifikasi_surat_sehat type (verifikasi_enum)
+// keterangan_surat_sehat type (text)
+// verifikasi_verifikasi_dp3 type (verifikasi_enum)
+// keterangan_verifikasi_dp3 type (text)
   //do verification
   @ApiOperation({ summary: 'Verifikasi Data PPNS' })
   @Post('/verifikasi-data')
@@ -151,6 +161,18 @@ export class AdminController {
           enum: ['sesuai', 'tidak sesuai', 'tolak'],
         },
         keterangan_wilayah: { type: 'string', nullable: true },
+        verifikasi_masa_kerja: {
+          type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'],
+        },
+        keterangan_masa_kerja: { type: 'string', nullable: true },
+        verifikasi_pendidikan_terakhir: { type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'] },
+        keterangan_pendidikan_terakhir: { type: 'string', nullable: true },
+        verifikasi_teknis_operasional: { type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'] },
+        keterangan_teknis_operasional: { type: 'string', nullable: true },
+        verifikasi_surat_sehat: { type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'] },
+        keterangan_surat_sehat: { type: 'string', nullable: true },
+        verifikasi_dp3: { type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'] },
+        keterangan_dp3: { type: 'string', nullable: true },
         status_a: { type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'] },
         keterangan_a: { type: 'string', nullable: true },
         status_b: { type: 'string', enum: ['sesuai', 'tidak sesuai', 'tolak'] },
@@ -234,6 +256,16 @@ export class AdminController {
         keterangan_data: body.keterangan_data,
         verifikasi_wilayah: body.verifikasi_wilayah,
         keterangan_wilayah: body.keterangan_wilayah,
+        verifikasi_masa_kerja: body.verifikasi_masa_kerja,
+        keterangan_masa_kerja: body.keterangan_masa_kerja,
+        verifikasi_pendidikan_terakhir: body.verifikasi_pendidikan_terakhir,
+        keterangan_pendidikan_terakhir: body.keterangan_pendidikan_terakhir,
+        verifikasi_teknis_operasional: body.verifikasi_teknis_operasional,
+        keterangan_teknis_operasional: body.keterangan_teknis_operasional,
+        verifikasi_surat_sehat: body.verifikasi_surat_sehat,
+        keterangan_surat_sehat: body.keterangan_surat_sehat,
+        verifikasi_dp3: body.verifikasi_dp3,
+        keterangan_dp3: body.keterangan_dp3,
         status_a: body.status_a,
         keterangan_a: body.keterangan_a,
         status_b: body.status_b,

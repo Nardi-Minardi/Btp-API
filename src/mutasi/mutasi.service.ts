@@ -26,6 +26,7 @@ import {
 } from './mutasi.repository';
 import { LayananRepository } from 'src/layanan/layanan.repository';
 import { MutasiValidation } from './mutasi.validation';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class MutasiService {
@@ -38,6 +39,7 @@ export class MutasiService {
     private suratRepository: SuratRepository,
     private layananRepository: LayananRepository,
     private s3Service: S3Service,
+    private prismaService: PrismaService,
   ) {}
 
   async storeMutasi(request: any, authorization?: string): Promise<any> {
@@ -61,19 +63,37 @@ export class MutasiService {
     }
 
     //cek data pppns
-    const existingPpnsDataPns = await this.suratRepository.findPpnsDataPnsById(
-      Number(createRequest.id_data_ppns),
-    );
+    const existingPpnsDataPnsBySurat =
+      await this.prismaService.ppnsDataPns.findFirst({
+        where: {
+          // id: Number(createRequest.id_data_ppns),
+          id_surat: Number(createRequest.id_surat),
+        },
+      });
 
-    if (!existingPpnsDataPns) {
+    if (!existingPpnsDataPnsBySurat) {
       throw new NotFoundException(
-        `Data calon ppns dengan ID ${createRequest.id_data_ppns} tidak ditemukan`,
+        `Data calon ppns dengan  ID surat ${createRequest.id_surat} tidak ditemukan`,
+      );
+    }
+
+    const existingPpnsDataPnsById =
+      await this.prismaService.ppnsDataPns.findFirst({
+        where: {
+          id: Number(createRequest.id_data_ppns),
+          // id_surat: Number(createRequest.id_surat)
+        },
+      });
+
+    if (!existingPpnsDataPnsById) {
+      throw new NotFoundException(
+        `Data calon ppns dengan  ID ${createRequest.id_data_ppns} tidak ditemukan`,
       );
     }
 
     const createData = {
-      id_data_ppns: Number(createRequest.id_data_ppns),
-      id_surat: existingPpnsDataPns.id_surat,
+      id_data_ppns: createRequest.id_data_ppns ? Number(createRequest.id_data_ppns) : null,
+      id_surat: createRequest.id_surat ? Number(createRequest.id_surat) : null,
       no_surat: createRequest.surat_permohonan.no_surat || null,
       tgl_surat: createRequest.surat_permohonan.tgl_surat
         ? dateOnlyToLocal(createRequest.surat_permohonan.tgl_surat)

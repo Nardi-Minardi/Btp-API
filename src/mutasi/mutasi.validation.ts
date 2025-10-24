@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 export class MutasiValidation {
   static readonly CREATE_MUTASI_PPNS: ZodType = z.object({
     id_data_ppns: z.number(),
+    id_surat: z.number(),
     surat_permohonan: z.object({
       tgl_surat: z
         .string()

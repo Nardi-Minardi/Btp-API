@@ -19,9 +19,13 @@ import { S3Service } from 'src/common/s3.service';
 import { status_upload_ii, Prisma } from '.prisma/main-client';
 import { PpnsUploadDto } from 'src/file-upload/dto/upload.dto';
 import { SuratRepository } from 'src/surat/surat.repository';
-import { PemberhentianUndurDiriRepository, PpnsUndurDiriUpdateInputWithExtra } from './pemberhentian-undur-diri.repository';
+import {
+  PemberhentianUndurDiriRepository,
+  PpnsUndurDiriUpdateInputWithExtra,
+} from './pemberhentian-undur-diri.repository';
 import { PemberhentianUndurDiriValidation } from './pemberhentian-undur-diri.validation';
 import { CreateResponseUploadDokumenPpnsDto } from './dto/create.pemberhentian-undur-diri.dto';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class PemberhentianUndurDiriService {
@@ -33,6 +37,7 @@ export class PemberhentianUndurDiriService {
     private pemberhentianUndurDiriRepository: PemberhentianUndurDiriRepository,
     private suratRepository: SuratRepository,
     private s3Service: S3Service,
+    private prismaService: PrismaService,
   ) {}
 
   async storeUndurDiri(request: any, authorization?: string): Promise<any> {
@@ -56,25 +61,50 @@ export class PemberhentianUndurDiriService {
     }
 
     //cek data pppns
-    const existingPpnsDataPns = await this.suratRepository.findPpnsDataPnsById(
-      Number(createRequest.id_data_ppns),
-    );
+    const existingPpnsDataPnsBySurat =
+      await this.prismaService.ppnsDataPns.findFirst({
+        where: {
+          // id: Number(createRequest.id_data_ppns),
+          id_surat: Number(createRequest.id_surat),
+        },
+      });
 
-    if (!existingPpnsDataPns) {
+    if (!existingPpnsDataPnsBySurat) {
       throw new NotFoundException(
-        `Data calon ppns dengan ID ${createRequest.id_data_ppns} tidak ditemukan`,
+        `Data calon ppns dengan  ID surat ${createRequest.id_surat} tidak ditemukan`,
+      );
+    }
+
+    const existingPpnsDataPnsById =
+      await this.prismaService.ppnsDataPns.findFirst({
+        where: {
+          id: Number(createRequest.id_data_ppns),
+          // id_surat: Number(createRequest.id_surat)
+        },
+      });
+
+    if (!existingPpnsDataPnsById) {
+      throw new NotFoundException(
+        `Data calon ppns dengan  ID ${createRequest.id_data_ppns} tidak ditemukan`,
       );
     }
 
     const createData = {
-      id_data_ppns: Number(createRequest.id_data_ppns),
-      id_surat: existingPpnsDataPns.id_surat,
-      tgl_sk_pengangkatan_pns: createRequest.sk_pengangkatan_pns.tgl_sk_pengangkatan_pns
-        ? dateOnlyToLocal(createRequest.sk_pengangkatan_pns.tgl_sk_pengangkatan_pns)
+      id_data_ppns: createRequest.id_data_ppns ? Number(createRequest.id_data_ppns) : null,
+      id_surat: createRequest.id_surat ? Number(createRequest.id_surat) : null,
+      tgl_sk_pengangkatan_pns: createRequest.sk_pengangkatan_pns
+        .tgl_sk_pengangkatan_pns
+        ? dateOnlyToLocal(
+            createRequest.sk_pengangkatan_pns.tgl_sk_pengangkatan_pns,
+          )
         : null,
-      no_sk_pengangkatan_pns: createRequest.sk_pengangkatan_pns.no_sk_pengangkatan_pns,
-      tgl_sk_kenaikan_pangkat: createRequest.sk_kenaikan_pangkat.tgl_sk_kenaikan_pangkat
-        ? dateOnlyToLocal(createRequest.sk_kenaikan_pangkat.tgl_sk_kenaikan_pangkat)
+      no_sk_pengangkatan_pns:
+        createRequest.sk_pengangkatan_pns.no_sk_pengangkatan_pns,
+      tgl_sk_kenaikan_pangkat: createRequest.sk_kenaikan_pangkat
+        .tgl_sk_kenaikan_pangkat
+        ? dateOnlyToLocal(
+            createRequest.sk_kenaikan_pangkat.tgl_sk_kenaikan_pangkat,
+          )
         : null,
       no_sk_kenaikan_pangkat:
         createRequest.sk_kenaikan_pangkat.no_sk_kenaikan_pangkat,
@@ -83,11 +113,11 @@ export class PemberhentianUndurDiriService {
         : null,
       no_ktp: createRequest.ktp_ppns.no_ktp,
       tgl_sk_persetujuan: createRequest.sk_persetujuan.tgl_sk_persetujuan
-      ? dateOnlyToLocal(createRequest.sk_persetujuan.tgl_sk_persetujuan)
+        ? dateOnlyToLocal(createRequest.sk_persetujuan.tgl_sk_persetujuan)
         : null,
       no_sk_persetujuan: createRequest.sk_persetujuan.no_sk_persetujuan,
       tgl_sk_pemberhentian: createRequest.sk_pemberhentian.tgl_sk_pemberhentian
-      ? dateOnlyToLocal(createRequest.sk_pemberhentian.tgl_sk_pemberhentian)
+        ? dateOnlyToLocal(createRequest.sk_pemberhentian.tgl_sk_pemberhentian)
         : null,
       no_sk_pemberhentian: createRequest.sk_pemberhentian.no_sk_pemberhentian,
     };
@@ -98,10 +128,11 @@ export class PemberhentianUndurDiriService {
         Number(createRequest.id_data_ppns),
       );
 
-    const result = await this.pemberhentianUndurDiriRepository.savePpnsUndurDiri(
-      existing?.id ?? null,
-      createData as PpnsUndurDiriUpdateInputWithExtra,
-    );
+    const result =
+      await this.pemberhentianUndurDiriRepository.savePpnsUndurDiri(
+        existing?.id ?? null,
+        createData as PpnsUndurDiriUpdateInputWithExtra,
+      );
 
     // gabungkan uploads ke response
     return result;
