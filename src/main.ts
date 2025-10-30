@@ -36,7 +36,7 @@ async function bootstrap() {
 
   // Setup OpenAPI config
   const config = new DocumentBuilder()
-    .setTitle('AHU PPNS API')
+    .setTitle('FEWS')
     .setDescription('API documentation for AHU PPNS application')
     .setVersion('1.0')
     .addBearerAuth()
@@ -53,7 +53,7 @@ async function bootstrap() {
     <!doctype html>
     <html>
       <head>
-        <title>AHU PPNS API Documentation</title>
+        <title>FEWS Documentation</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
