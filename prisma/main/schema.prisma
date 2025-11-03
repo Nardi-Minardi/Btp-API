@@ -8,32 +8,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
-// model m_das {
-// }
-
 model m_kab_kota {
-  id         Int       @id @default(autoincrement())
-  code       String?   @db.VarChar(10)
-  name       String?   @db.VarChar(100)
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  id            Int       @id @default(autoincrement())
+  code          String?   @db.VarChar(10)
+  name          String?   @db.VarChar(100)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  provinsi_code String?   @db.VarChar(10)
 }
 
 model m_kecamatan {
-  id         Int       @id @default(autoincrement())
-  code       String?   @db.VarChar(10)
-  name       String?   @db.VarChar(100)
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  id            Int       @id @default(autoincrement())
+  code          String?   @db.VarChar(10)
+  name          String?   @db.VarChar(100)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  kab_kota_code String?   @db.VarChar(10)
 }
 
 model m_kel_des {
-  id         Int       @id @default(autoincrement())
-  code       String?   @db.VarChar(10)
-  name       String?   @db.VarChar(100)
-  created_at DateTime? @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  id             Int       @id @default(autoincrement())
+  code           String?   @db.VarChar(10)
+  name           String?   @db.VarChar(100)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @default(now()) @db.Timestamp(6)
+  kecamatan_code String?   @db.VarChar(10)
 }
 
 model m_provinsi {
@@ -42,4 +41,105 @@ model m_provinsi {
   name       String?   @db.VarChar(100)
   created_at DateTime? @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model m_das {
+  id            Int                      @id @default(autoincrement())
+  sungai_id     Int?
+  das_uid       String?                  @db.VarChar(100)
+  kode_das      String?                  @db.VarChar(100)
+  name          String?                  @db.VarChar(255)
+  luas          Float?
+  ws_uid        String?                  @db.VarChar(100)
+  color         String?                  @db.VarChar(100)
+  geom          Unsupported("geometry")?
+  created_at    DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?                @default(now()) @db.Timestamp(6)
+  provinsi_code String?                  @db.VarChar(20)
+}
+
+model m_users {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique @db.VarChar(100)
+  email         String    @unique @db.VarChar(150)
+  password      String    @db.VarChar(255)
+  full_name     String?   @db.VarChar(150)
+  jabatan       String?   @db.VarChar(100)
+  role          user_role
+  instansi      String?   @db.VarChar(150)
+  wilayah_kerja String[]
+  is_active     Boolean?  @default(true)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  last_login    DateTime? @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model m_device {
+  id                Int       @id @default(autoincrement())
+  device_uid        String?   @db.VarChar(255)
+  device_tag_id     Int[]
+  das_id            Int?
+  sungai_id         Int?
+  owner             String?   @db.VarChar(255)
+  name              String    @db.VarChar(255)
+  device_status     String?   @db.VarChar(50)
+  last_sending_data DateTime? @db.Timestamptz(6)
+  last_battery      Decimal?  @db.Decimal(5, 2)
+  last_signal       Decimal?  @db.Decimal(5, 2)
+  lat               Float?
+  long              Float?
+  cctv_url          String?
+  value             Decimal?  @db.Decimal(10, 2)
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model m_device_tag {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique @db.VarChar(100)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model m_criteria {
+  id            Int       @id @default(autoincrement())
+  device_tag_id Int?
+  name          String    @db.VarChar(255)
+  criteria      Json?
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model tr_sensor {
+  id                Int       @id @default(autoincrement())
+  device_id         Int
+  sensor_uid        String?   @db.VarChar(255)
+  device_uid        String?   @db.VarChar(255)
+  name              String    @db.VarChar(255)
+  unit              String    @db.VarChar(100)
+  sensor_type       String?   @db.VarChar(255)
+  criteria_id       Int?
+  criteria_status   Int?
+  value             Decimal?  @db.Decimal(10, 2)
+  value_change      Decimal?  @db.Decimal(10, 2)
+  debit             Decimal?  @db.Decimal(10, 2)
+  last_sending_data DateTime? @db.Timestamp(6)
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+}
+
+enum user_role {
+  SUPERADMIN
+  ADMIN
+  OPERATOR
+  USER
 }

@@ -1,7 +1,8 @@
 export enum UserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  USER = 'user',
+  SUPERADMIN = 'SUPERADMIN',
+  ADMIN = 'ADMIN',
+  OPERATOR = 'OPERATOR',
+  USER = 'USER',
 }
 
 export interface User {
@@ -21,7 +22,7 @@ export interface User {
 }
 
 export interface JwtPayload {
-  sub: string; // user id
+  sub: number; // user id
   username: string;
   email: string;
   role: UserRole;
@@ -36,7 +37,7 @@ export interface LoginResponse {
   access_token: string;
   refresh_token: string;
   user: {
-    id: string;
+    id: number;
     username: string;
     email: string;
     full_name: string;

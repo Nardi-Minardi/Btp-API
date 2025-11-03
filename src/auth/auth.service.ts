@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  HttpException,
-} from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import {
@@ -10,17 +7,16 @@ import {
   LoginResponse,
   UserRole,
 } from './interface/auth.interface';
-import {
-  AuthValidation,
-} from './auth.validation';
-import { UserRepository, StoredUser } from '../data/users.data';
+import { AuthValidation } from './auth.validation';
 import { ValidationService } from 'src/common/validation.service';
+import { AuthRepository } from './auth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly validationService: ValidationService,
+    private readonly repo: AuthRepository,
   ) {}
 
   async login(request: any): Promise<LoginResponse> {
@@ -29,7 +25,7 @@ export class AuthService {
       AuthValidation.loginSchema,
       request,
     );
-    const user = await UserRepository.findByUsername(createRequest.email);
+    const user = await this.repo.findByEmail(createRequest.email);
     if (!user) {
       throw new HttpException('Invalid username or password', 401);
     }
@@ -37,20 +33,19 @@ export class AuthService {
     if (!match) {
       throw new HttpException('Invalid username or password', 401);
     }
-    if (!user.isActive) {
+    if (user.is_active === false) {
       throw new HttpException('User account is disabled', 400);
     }
-
-    await UserRepository.updateLastLogin(user.id);
+    await this.repo.updateLastLogin(user.id);
 
     const payload: JwtPayload = {
       sub: user.id,
       username: user.username,
       email: user.email,
-      role: user.role,
-      jabatan: user.jabatan,
-      instansi: user.instansi,
-      wilayah_kerja: user.wilayahKerja,
+      role: user.role as any as UserRole,
+      jabatan: user.jabatan ?? '',
+      instansi: user.instansi ?? '',
+      wilayah_kerja: user.wilayah_kerja ?? undefined,
     };
     const jwtSecret = process.env.JWT_SECRET || 'ItgdFVuiX2Kn7F6hLlYT';
     const accessToken = this.jwtService.sign(payload, {
@@ -69,11 +64,11 @@ export class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
-        full_name: user.fullName,
-        role: user.role,
-        jabatan: user.jabatan,
-        instansi: user.instansi,
-        wilayah_kerja: user.wilayahKerja,
+        full_name: (user as any).full_name ?? '',
+        role: user.role as any as UserRole,
+        jabatan: user.jabatan ?? '',
+        instansi: user.instansi ?? '',
+        wilayah_kerja: user.wilayah_kerja ?? undefined,
       },
     };
   }
@@ -84,43 +79,40 @@ export class AuthService {
       request,
     );
 
-    const existingUser = await UserRepository.findByUsername(
-      createRequest.username,
-    );
+    const existingUser = await this.repo.findByUsername(createRequest.username);
     if (existingUser) {
       throw new HttpException('Username already exists', 400);
     }
-    const existingEmail = await UserRepository.findByEmail(createRequest.email);
+    const existingEmail = await this.repo.findByEmail(createRequest.email);
     if (existingEmail) {
       throw new HttpException('Email already exists', 400);
     }
 
     const hashedPassword = await bcrypt.hash(createRequest.password, 10);
-    const newUser = await UserRepository.createUser({
+    const newUser = await this.repo.createUser({
       username: createRequest.username,
       email: createRequest.email,
       password: hashedPassword,
-      fullName: createRequest.full_name,
+      full_name: createRequest.full_name,
       jabatan: createRequest.jabatan,
-      role: UserRole.USER,
+      role: 'USER',
       instansi: createRequest.instansi,
-      wilayahKerja: createRequest.wilayah_kerja,
-      isActive: true,
+      wilayah_kerja: createRequest.wilayah_kerja ?? [],
+      is_active: true,
     });
-    const { password: _pwd, ...u } = newUser;
     return {
-      id: u.id,
-      username: u.username,
-      email: u.email,
-      full_name: u.fullName,
-      jabatan: u.jabatan,
-      role: u.role,
-      instansi: u.instansi,
-      wilayah_kerja: u.wilayahKerja,
-      is_active: u.isActive,
-      created_at: u.createdAt,
-      updated_at: u.updatedAt,
-      last_login: u.lastLogin,
+      id: newUser.id as any,
+      username: newUser.username,
+      email: newUser.email,
+      full_name: (newUser as any).full_name,
+      jabatan: newUser.jabatan ?? '',
+      role: newUser.role as any as UserRole,
+      instansi: newUser.instansi ?? '',
+      wilayah_kerja: (newUser as any).wilayah_kerja ?? [],
+      is_active: (newUser as any).is_active ?? true,
+      created_at: (newUser as any).created_at,
+      updated_at: (newUser as any).updated_at,
+      last_login: (newUser as any).last_login,
     } as any;
   }
 
@@ -135,18 +127,18 @@ export class AuthService {
       const decoded = this.jwtService.verify(createRequest.refresh_token, {
         secret: jwtSecret,
       });
-      const user = await UserRepository.findById(decoded.sub);
-      if (!user || !user.isActive) {
+      const user = await this.repo.findById(decoded.sub);
+      if (!user || user.is_active === false) {
         throw new HttpException('Invalid refresh token', 401);
       }
       const payload: JwtPayload = {
         sub: user.id,
         username: user.username,
         email: user.email,
-        role: user.role,
-        jabatan: user.jabatan,
-        instansi: user.instansi,
-        wilayah_kerja: user.wilayahKerja,
+        role: user.role as any as UserRole,
+        jabatan: user.jabatan ?? '',
+        instansi: user.instansi ?? '',
+        wilayah_kerja: user.wilayah_kerja ?? undefined,
       };
       return {
         access_token: this.jwtService.sign(payload, {
@@ -159,69 +151,65 @@ export class AuthService {
     }
   }
 
-  async getProfile(userId: string): Promise<Omit<User, 'password'>> {
-    const user = await UserRepository.findById(userId);
+  async getProfile(userId: number): Promise<Omit<User, 'password'>> {
+    const user = await this.repo.findById(userId);
     if (!user) {
       throw new HttpException('User not found', 404);
     }
-    const { password, ...profile } = user as StoredUser;
     return {
-      id: profile.id,
-      username: profile.username,
-      email: profile.email,
-      full_name: profile.fullName,
-      jabatan: profile.jabatan,
-      role: profile.role,
-      instansi: profile.instansi,
-      wilayah_kerja: profile.wilayahKerja,
-      is_active: profile.isActive,
-      created_at: profile.createdAt,
-      updated_at: profile.updatedAt,
-      last_login: profile.lastLogin,
+      id: user.id as any,
+      username: user.username,
+      email: user.email,
+      full_name: (user as any).full_name ?? '',
+      jabatan: user.jabatan ?? '',
+      role: user.role as any as UserRole,
+      instansi: user.instansi ?? '',
+      wilayah_kerja: user.wilayah_kerja ?? undefined,
+      is_active: (user as any).is_active ?? true,
+      created_at: (user as any).created_at,
+      updated_at: (user as any).updated_at,
+      last_login: (user as any).last_login,
     } as any;
   }
 
   async getAllUsers(): Promise<Omit<User, 'password'>[]> {
-    const users = await UserRepository.findAll();
+    const users = await this.repo.findAllActive();
     return users.map((u) => {
-      const { password: _pwd, ...user } = u;
       return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        full_name: user.fullName,
-        jabatan: user.jabatan,
-        role: user.role,
-        instansi: user.instansi,
-        wilayah_kerja: user.wilayahKerja,
-        is_active: user.isActive,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt,
-        last_login: user.lastLogin,
+        id: u.id as any,
+        username: u.username,
+        email: u.email,
+        full_name: (u as any).full_name ?? '',
+        jabatan: u.jabatan ?? '',
+        role: u.role as any as UserRole,
+        instansi: u.instansi ?? '',
+        wilayah_kerja: u.wilayah_kerja ?? undefined,
+        is_active: (u as any).is_active ?? true,
+        created_at: (u as any).created_at,
+        updated_at: (u as any).updated_at,
+        last_login: (u as any).last_login,
       } as any;
     });
   }
 
   async getUsersByRole(role: UserRole): Promise<Omit<User, 'password'>[]> {
-    const users = await UserRepository.findAll();
-    return users
-      .filter((u) => u.role === role)
-      .map((u) => {
-        const { password: _pwd, ...user } = u;
-        return {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          full_name: user.fullName,
-          jabatan: user.jabatan,
-          role: user.role,
-          instansi: user.instansi,
-          wilayah_kerja: user.wilayahKerja,
-          is_active: user.isActive,
-          created_at: user.createdAt,
-          updated_at: user.updatedAt,
-          last_login: user.lastLogin,
-        } as any;
-      });
+    const users = await this.repo.findByRoleActive(role as any);
+    return users.map(
+      (u) =>
+        ({
+          id: u.id as any,
+          username: u.username,
+          email: u.email,
+          full_name: (u as any).full_name ?? '',
+          jabatan: u.jabatan ?? '',
+          role: u.role as any as UserRole,
+          instansi: u.instansi ?? '',
+          wilayah_kerja: u.wilayah_kerja ?? undefined,
+          is_active: (u as any).is_active ?? true,
+          created_at: (u as any).created_at,
+          updated_at: (u as any).updated_at,
+          last_login: (u as any).last_login,
+        }) as any,
+    );
   }
 }

@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  HttpStatus,
-  HttpCode,
-} from '@nestjs/common';
+import { Controller, Get, Query, HttpStatus, HttpCode } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -18,19 +8,14 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import {
-  DAS_DATA,
-  getDasByProvinsi,
-  DEVICE_DATA,
-  topologyData,
-} from '../data';
 import { Public } from 'src/common/decorators/public.decorator';
+import { DashboardService } from './dashboard.service';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
 @ApiBearerAuth()
 export class DashboardController {
-  constructor() {}
+  constructor(private readonly dashboardService: DashboardService) {}
 
   // DAS endpoints
   @Get('das')
@@ -42,17 +27,14 @@ export class DashboardController {
       'Mengambil daftar DAS (Daerah Aliran Sungai). Bisa difilter berdasarkan provinsi.',
   })
   @ApiQuery({
-    name: 'provinsi_id',
+    name: 'provinsi_code',
     required: false,
     description: 'ID provinsi untuk filter DAS',
-    example: 'jabar',
+    example: '11',
   })
-  getDas(@Query('provinsi_id') provinsiId?: string) {
-    const data = provinsiId ? getDasByProvinsi(provinsiId) : DAS_DATA;
-    return {
-      success: true,
-      data: data,
-    };
+  async getDas(@Query('provinsi_code') provinsi_code?: string) {
+    const data = await this.dashboardService.getDas(provinsi_code);
+    return { success: true, data };
   }
 
   // Devices endpoints
@@ -64,24 +46,8 @@ export class DashboardController {
     description:
       'Mengambil daftar device (ARR/AWLR/AWS) beserta status dan sensor terakhir.',
   })
-  getDevices() {
-    // DEVICE_DATA sudah snake_case, cukup return apa adanya
-    return {
-      success: true,
-      data: DEVICE_DATA,
-    };
-  }
-
-  // Topology endpoint (TopoJSON)
-  @Get('topology')
-  @HttpCode(HttpStatus.OK)
-  @Public()
-  @ApiOperation({
-    summary: 'Get Topology (TopoJSON)',
-    description:
-      'Mengambil data TopoJSON wilayah Jawa Barat. FE dapat mengonversinya menjadi GeoJSON menggunakan topojson-client untuk digunakan di Leaflet.',
-  })
-  getTopology() {
-    return topologyData; // return raw TopoJSON
+  async getDevices() {
+    const data = await this.dashboardService.getDevices();
+    return { success: true, data };
   }
 }

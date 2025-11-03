@@ -162,7 +162,7 @@ export class LoginResponseDto {
     type: () => UserResponseDto,
   })
   user: {
-    id: string;
+    id: number;
     username: string;
     email: string;
     full_name: string;
