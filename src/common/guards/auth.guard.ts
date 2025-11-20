@@ -26,9 +26,20 @@ export class AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<Request>();
 
+    // OPTIONS untuk CORS preflight
     if (request.method === 'OPTIONS') return true;
 
-    const token = this.extractTokenFromHeader(request);
+    // Ambil token dari cookie dulu
+    const tokenFromCookie = request.cookies?.auth_token;
+    console.log('AuthGuard - token from cookie:', tokenFromCookie);
+
+    // Fallback: ambil token dari Authorization header
+    const tokenFromHeader = this.extractTokenFromHeader(request);
+    console.log('AuthGuard - token from header:', tokenFromHeader);
+
+    // Pilih yang ada
+    const token = tokenFromCookie || tokenFromHeader;
+
     if (!token) {
       throw new HttpException('Unauthorized: Token missing', 401);
     }
@@ -37,7 +48,7 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      // simpan payload ke request
+
       (request as any).user = payload;
     } catch (error) {
       throw new HttpException('Unauthorized: Invalid token', 401);
@@ -47,7 +58,10 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    const authHeader = request.headers.authorization;
+    if (!authHeader) return undefined;
+
+    const [type, token] = authHeader.split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }

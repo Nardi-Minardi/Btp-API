@@ -7,21 +7,20 @@ import {
   Request,
   Query,
   HttpCode,
+  Res,
   HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
-  ApiBearerAuth,
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { RolesGuard, RequirePermission } from '../common/guards/roles.guard';
 import { UserRole, AuthRequest } from './interface/auth.interface';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
-import { LoginResponseDto, UserResponseDto } from './dto/auth.dto';
 import { WebResponse } from 'src/common/web.response';
 
 @ApiTags('Authentication')
@@ -42,65 +41,37 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        email: { type: 'string', example: 'admin@fews-cs7.id' },
-        password: { type: 'string', example: 'admin123' },
+        email: { type: 'string', example: 'superadmin@fews-cs7.id' },
+        password: { type: 'string', example: 'superadmin123' },
       },
       required: ['email', 'password'],
     },
   })
-  async login(@Body() body: any): Promise<WebResponse<LoginResponseDto>> {
+  async login(
+    @Body() body: any,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<WebResponse<any>> {
     const request = {
       ...body,
     };
 
     const result = await this.authService.login(request);
 
-    return { status_code: HttpStatus.OK, message: 'Success', data: result };
-  }
+    const isProd = process.env.NODE_ENV === 'production';
+    const maxAgeMs = process.env.EXPIRED_JWT_DAYS
+      ? parseInt(process.env.EXPIRED_JWT_DAYS, 10) * 24 * 60 * 60 * 1000
+      : 24 * 60 * 60 * 1000; // 1 day default
 
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  @Public()
-  @ApiOperation({
-    summary: 'Register New User',
-    description: 'Registrasi user baru (default role: user)',
-  })
-  @ApiBody({
-    description: 'Register payload',
-    schema: {
-      type: 'object',
-      properties: {
-        username: { type: 'string', example: 'minardi_dev' },
-        email: { type: 'string', example: 'minardi@example.com' },
-        password: { type: 'string', example: 'securePass123' },
-        full_name: { type: 'string', example: 'Minardi Pratama' },
-        jabatan: { type: 'string', example: 'Engineer' },
-        instansi: { type: 'string', example: 'Dinas SDA Jawa Barat' },
-        wilayah_kerja: {
-          type: 'array',
-          items: { type: 'string', example: 'Citarum Hulu' },
-          example: ['Citarum Hulu', 'Cimanuk Hilir'],
-        },
-      },
-      required: [
-        'username',
-        'email',
-        'password',
-        'full_name',
-        'jabatan',
-        'instansi',
-      ],
-    },
-  })
-  async register(
-    @Body() registerDto: any,
-  ): Promise<WebResponse<UserResponseDto>> {
-    const result = await this.authService.register(registerDto);
-    return {
-      status_code: HttpStatus.CREATED,
-      message: 'Created',
-      data: result,
-    };
+    res.cookie('auth_token', result.access_token, {
+      httpOnly: true,
+      secure: isProd ? true : false,
+      sameSite: (isProd ? 'none' : 'lax') as any,
+      domain: isProd ? process.env.COOKIE_DOMAIN || undefined : undefined,
+      maxAge: maxAgeMs,
+      path: '/',
+    });
+
+    return { status_code: HttpStatus.OK, message: 'Success', data: result };
   }
 
   @Post('refresh')
@@ -132,45 +103,37 @@ export class AuthController {
   }
 
   @Get('profile')
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get User Profile',
     description: 'Mendapatkan profil user yang sedang login',
   })
-  async getProfile(
-    @Request() req: AuthRequest,
-  ): Promise<WebResponse<UserResponseDto>> {
+  async getProfile(@Request() req: AuthRequest): Promise<WebResponse<any>> {
     const result = await this.authService.getProfile(req.user.sub);
     return { status_code: HttpStatus.OK, message: 'Success', data: result };
   }
 
-  @Get('users')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.OPERATOR)
-  @RequirePermission('users', 'read')
-  @ApiBearerAuth()
+  //logout by removing cookie
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get All Users',
-    description: 'Mendapatkan daftar semua user (hanya admin dan operator)',
+    summary: 'User Logout',
+    description: 'Logout user dengan menghapus cookie auth_token',
   })
-  @ApiQuery({
-    name: 'role',
-    required: false,
-    enum: UserRole,
-    description: 'Filter berdasarkan role user',
-  })
-  async getAllUsers(@Query('role') role?: UserRole) {
-    let users;
-    if (role) {
-      users = await this.authService.getUsersByRole(role);
-    } else {
-      users = await this.authService.getAllUsers();
-    }
-
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<WebResponse<null>> {
+    const isProd = process.env.NODE_ENV === 'production';
+    res.clearCookie('auth_token', {
+      httpOnly: true,
+      secure: isProd ? true : false,
+      sameSite: (isProd ? 'none' : 'lax') as any,
+      domain: isProd ? process.env.COOKIE_DOMAIN || undefined : undefined,
+      path: '/',
+    });
     return {
       status_code: HttpStatus.OK,
-      message: 'Success',
-      data: users,
+      message: 'Logout successful',
+      data: null,
     };
   }
 }

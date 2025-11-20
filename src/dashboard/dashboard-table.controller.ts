@@ -13,7 +13,6 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { DashboardService } from './dashboard.service';
@@ -23,7 +22,6 @@ import { WebResponse } from 'src/common/web.response';
 
 @ApiTags('Dashboard Table')
 @Controller('dashboard-table')
-@ApiBearerAuth()
 export class DashboardTableController {
   constructor(
     private readonly dashboardService: DashboardService,

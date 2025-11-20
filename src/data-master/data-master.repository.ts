@@ -119,4 +119,11 @@ export class DataMasterRepository {
     ]);
     return { data, total };
   }
+
+  //find instansi by id
+  async findInstansiById(id: number) {
+    return this.prisma.m_instansi.findUnique({
+      where: { id },
+    });
+  }
 }

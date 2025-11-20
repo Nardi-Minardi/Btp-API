@@ -1,19 +1,16 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import {
-  User,
-  JwtPayload,
-  LoginResponse,
-  UserRole,
-} from './interface/auth.interface';
+import { User, JwtPayload, LoginResponse } from './interface/auth.interface';
 import { AuthValidation } from './auth.validation';
 import { ValidationService } from 'src/common/validation.service';
 import { AuthRepository } from './auth.repository';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly validationService: ValidationService,
     private readonly authRepository: AuthRepository,
@@ -42,78 +39,40 @@ export class AuthService {
       sub: user.id,
       username: user.username,
       email: user.email,
-      role: user.role as any as UserRole,
-      jabatan: user.jabatan ?? '',
-      instansi_id: user.instansi_id ?? null,
-      wilayah_kerja: user.wilayah_kerja ?? undefined,
+      role_id: user.role_id,
+      jabatan_id: user.jabatan_id,
+      instansi_id: user.instansi_id,
     };
     const jwtSecret = process.env.JWT_SECRET || 'ItgdFVuiX2Kn7F6hLlYT';
+    const jwtExpSeconds = (Number(process.env.EXPIRED_JWT_DAYS) || 1) * 24 * 60 * 60;
+    const refreshExpSeconds = (Number(process.env.EXPIRED_REFRESH_DAYS) || 7) * 24 * 60 * 60;
+
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: jwtExpSeconds,
       secret: jwtSecret,
     });
     const refreshToken = this.jwtService.sign(
-      { sub: user.id, username: user.username },
-      { expiresIn: '7d', secret: jwtSecret },
+      { sub: user.id, username: user.username, email: user.email },
+      {
+        expiresIn: refreshExpSeconds,
+        secret: jwtSecret,
+      },
     );
+
+    //convert expired_in to seconds
+    const expiredInSeconds = jwtExpSeconds;
 
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
+      expired_at: expiredInSeconds,
       user: {
-        id: user.id,
+        id: user.id as any,
         username: user.username,
         email: user.email,
         full_name: (user as any).full_name ?? '',
-        role: user.role as any as UserRole,
-        jabatan: user.jabatan ?? '',
-        instansi_id: user.instansi_id ?? null,
-        wilayah_kerja: user.wilayah_kerja ?? undefined,
       },
     };
-  }
-
-  async register(request: any): Promise<Omit<User, 'password'>> {
-    const createRequest = this.validationService.validate(
-      AuthValidation.registerSchema,
-      request,
-    );
-
-    const existingUser = await this.authRepository.findByUsername(createRequest.username);
-    if (existingUser) {
-      throw new HttpException('Username already exists', 400);
-    }
-    const existingEmail = await this.authRepository.findByEmail(createRequest.email);
-    if (existingEmail) {
-      throw new HttpException('Email already exists', 400);
-    }
-
-    const hashedPassword = await bcrypt.hash(createRequest.password, 10);
-    const newUser = await this.authRepository.createUser({
-      username: createRequest.username,
-      email: createRequest.email,
-      password: hashedPassword,
-      full_name: createRequest.full_name,
-      jabatan: createRequest.jabatan,
-      role: 'USER',
-      instansi_id: createRequest.instansi_id ?? null,
-      wilayah_kerja: createRequest.wilayah_kerja ?? [],
-      is_active: true,
-    });
-    return {
-      id: newUser.id as any,
-      username: newUser.username,
-      email: newUser.email,
-      full_name: (newUser as any).full_name,
-      jabatan: newUser.jabatan ?? '',
-      role: newUser.role as any as UserRole,
-      instansi_id: newUser.instansi_id ?? null,
-      wilayah_kerja: (newUser as any).wilayah_kerja ?? [],
-      is_active: (newUser as any).is_active ?? true,
-      created_at: (newUser as any).created_at,
-      updated_at: (newUser as any).updated_at,
-      last_login: (newUser as any).last_login,
-    } as any;
   }
 
   async refreshToken(request: any): Promise<{ access_token: string }> {
@@ -135,18 +94,19 @@ export class AuthService {
         sub: user.id,
         username: user.username,
         email: user.email,
-        role: user.role as any as UserRole,
-        jabatan: user.jabatan ?? '',
-        instansi_id: user.instansi_id ?? null,
-        wilayah_kerja: user.wilayah_kerja ?? undefined,
+        role_id: user.role_id,
+        jabatan_id: user.jabatan_id,
+        instansi_id: user.instansi_id,
       };
+      const jwtExp = `${process.env.EXPIRED_JWT_DAYS || 1}d`;
+      const jwtExpSeconds = (Number(process.env.EXPIRED_JWT_DAYS) || 1) * 24 * 60 * 60;
       return {
         access_token: this.jwtService.sign(payload, {
-          expiresIn: '1d',
+          expiresIn: jwtExpSeconds,
           secret: jwtSecret,
         }),
       };
-    } catch (e) {
+    } catch (err) {
       throw new HttpException('Invalid refresh token', 401);
     }
   }
@@ -154,62 +114,46 @@ export class AuthService {
   async getProfile(userId: number): Promise<Omit<User, 'password'>> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
-      throw new HttpException('User not found', 404);
+      throw new HttpException('User tidak ditemukan', 404);
     }
+
+    //get menu dan menu permissionnya
+    const menus = await this.prisma.$queryRaw<any[]>`
+      SELECT 
+        m_menus.id,
+        m_menus.title,
+        m_menus.value,
+        m_menus.path,
+        m_menus.icon,
+        m_menus.is_active,
+        m_modules.id AS module_id,
+        m_modules.name AS module_name,
+        COALESCE(m_menu_permissions.permissions, ARRAY[]::text[]) AS permissions
+      FROM m_menus
+      INNER JOIN m_modules 
+        ON m_menus.module_id = m_modules.id
+      LEFT JOIN m_menu_permissions 
+        ON m_menu_permissions.menu_id = m_menus.id
+        AND m_menu_permissions.user_id = ${userId}
+      WHERE m_modules.instansi_id = ${user.instansi_id}
+      ORDER BY m_modules.id, m_menus.id ASC
+    `;
+    (user as any).menus = menus;
+
     return {
       id: user.id as any,
       username: user.username,
       email: user.email,
       full_name: (user as any).full_name ?? '',
-      jabatan: user.jabatan ?? '',
-      role: user.role as any as UserRole,
-      instansi_id: user.instansi_id ?? null,
+      jabatan: user.m_jabatan?.name ?? '',
+      role: user.m_roles?.name,
+      instansi: user.m_instansi?.name ?? '',
       wilayah_kerja: user.wilayah_kerja ?? undefined,
       is_active: (user as any).is_active ?? true,
       created_at: (user as any).created_at,
       updated_at: (user as any).updated_at,
       last_login: (user as any).last_login,
+      menus: (user as any).menus,
     } as any;
-  }
-
-  async getAllUsers(): Promise<Omit<User, 'password'>[]> {
-    const users = await this.authRepository.findAllActive();
-    return users.map((u) => {
-      return {
-        id: u.id as any,
-        username: u.username,
-        email: u.email,
-        full_name: (u as any).full_name ?? '',
-        jabatan: u.jabatan ?? '',
-        role: u.role as any as UserRole,
-        instansi_id: u.instansi_id ?? null,
-        wilayah_kerja: u.wilayah_kerja ?? undefined,
-        is_active: (u as any).is_active ?? true,
-        created_at: (u as any).created_at,
-        updated_at: (u as any).updated_at,
-        last_login: (u as any).last_login,
-      } as any;
-    });
-  }
-
-  async getUsersByRole(role: UserRole): Promise<Omit<User, 'password'>[]> {
-    const users = await this.authRepository.findByRoleActive(role as any);
-    return users.map(
-      (u) =>
-        ({
-          id: u.id as any,
-          username: u.username,
-          email: u.email,
-          full_name: (u as any).full_name ?? '',
-          jabatan: u.jabatan ?? '',
-          role: u.role as any as UserRole,
-          instansi_id: u.instansi_id ?? null,
-          wilayah_kerja: u.wilayah_kerja ?? undefined,
-          is_active: (u as any).is_active ?? true,
-          created_at: (u as any).created_at,
-          updated_at: (u as any).updated_at,
-          last_login: (u as any).last_login,
-        }) as any,
-    );
   }
 }

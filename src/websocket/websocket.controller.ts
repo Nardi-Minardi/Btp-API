@@ -17,7 +17,6 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { RedisCache } from 'src/common/decorators/redis-cache.decorator';
@@ -26,7 +25,6 @@ import { WebsocketGateway } from 'src/websocket/websocket.gateway';
 
 @ApiTags('WebSocket')
 @Controller('web-socket')
-@ApiBearerAuth()
 export class WebSocketController {
   constructor(
     private readonly webSocketGateway: WebsocketGateway,

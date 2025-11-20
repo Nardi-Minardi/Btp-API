@@ -1,6 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -11,7 +10,6 @@ import { DataMasterRepository } from './data-master.repository';
 
 @ApiTags('Data Master')
 @Controller('data-master')
-@ApiBearerAuth()
 export class DataMasterController {
   constructor(
     private readonly dataMasterService: DataMasterService,
@@ -35,27 +33,36 @@ export class DataMasterController {
   })
   @ApiQuery({ name: 'parent_code', required: false })
   @ApiQuery({ name: 'search', required: false })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'offset', required: false, example: 0 })
   @ApiQuery({ name: 'limit', required: false, example: 50 })
   async listWilayah(
     @Query('level') level: 'provinsi' | 'kab_kota' | 'kecamatan' | 'kel_des',
     @Query('parent_code') parentCode?: string,
     @Query('search') search?: string,
-    @Query('page') page = '1',
+    @Query('offset') offset = '0',
     @Query('limit') limit = '50',
   ) {
-    const pageNum = Math.max(parseInt(page || '1', 10) || 1, 1);
+    const pageNum = Math.max(parseInt(offset || '0', 10) || 0, 0) + 1;
     const limitNum = Math.min(
       Math.max(parseInt(limit || '50', 10) || 50, 1),
       200,
     );
-    return this.dataMasterService.listWilayah({
+    const { data: result, total } = await this.dataMasterRepository.listWilayah({
       level,
       parentCode,
       search,
       page: pageNum,
       limit: limitNum,
     });
+
+    return {
+      status_code: 200,
+      message: 'success',
+      limit: limitNum,
+      offset: (pageNum - 1) * limitNum,
+      total_data: total,
+      data: result,
+    };
   }
 
   @Get('criteria')
@@ -67,14 +74,14 @@ export class DataMasterController {
       'Ambil data master kriteria',
   })
   @ApiQuery({ name: 'search', required: false })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'offset', required: false, example: 0 })
   @ApiQuery({ name: 'limit', required: false, example: 50 })
   async listCriteria(
     @Query('search') search?: string,
-    @Query('page') page = '1',
+    @Query('offset') offset = '0',
     @Query('limit') limit = '50',
   ) {
-    const pageNum = Math.max(parseInt(page || '1', 10) || 1, 1);
+    const pageNum = Math.max(parseInt(offset || '0', 10) || 0, 0) + 1;
     const limitNum = Math.min(
       Math.max(parseInt(limit || '50', 10) || 50, 1),
       200,
@@ -104,14 +111,14 @@ export class DataMasterController {
       'Ambil data master Instansi',
   })
   @ApiQuery({ name: 'search', required: false })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'offset', required: false, example: 0 })
   @ApiQuery({ name: 'limit', required: false, example: 50 })
   async listInstansi(
     @Query('search') search?: string,
-    @Query('page') page = '1',
+    @Query('offset') offset = '0',
     @Query('limit') limit = '50',
   ) {
-    const pageNum = Math.max(parseInt(page || '1', 10) || 1, 1);
+    const pageNum = Math.max(parseInt(offset || '0', 10) || 0, 0) + 1;
     const limitNum = Math.min(
       Math.max(parseInt(limit || '50', 10) || 50, 1),
       200,

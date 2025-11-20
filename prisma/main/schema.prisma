@@ -62,19 +62,23 @@ model m_das {
 }
 
 model m_users {
-  id            Int       @id @default(autoincrement())
-  username      String    @unique @db.VarChar(100)
-  email         String    @unique @db.VarChar(150)
-  password      String    @db.VarChar(255)
-  full_name     String?   @db.VarChar(150)
-  jabatan       String?   @db.VarChar(100)
-  role          user_role
-  wilayah_kerja String[]
-  is_active     Boolean?  @default(true)
-  created_at    DateTime? @default(now()) @db.Timestamp(6)
-  updated_at    DateTime? @default(now()) @db.Timestamp(6)
-  last_login    DateTime? @db.Timestamp(6)
-  instansi_id   Int?
+  id                 Int                  @id @default(autoincrement())
+  username           String               @unique @db.VarChar(100)
+  email              String               @unique @db.VarChar(150)
+  password           String               @db.VarChar(255)
+  full_name          String?              @db.VarChar(150)
+  wilayah_kerja      String[]
+  is_active          Boolean?             @default(true)
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamp(6)
+  last_login         DateTime?            @db.Timestamp(6)
+  instansi_id        Int?
+  jabatan_id         Int?
+  role_id            Int?
+  m_menu_permissions m_menu_permissions[]
+  m_instansi         m_instansi?          @relation(fields: [instansi_id], references: [id], map: "fk_users_instansi")
+  m_jabatan          m_jabatan?           @relation(fields: [jabatan_id], references: [id], map: "fk_users_jabatan")
+  m_roles            m_roles?             @relation(fields: [role_id], references: [id], map: "fk_users_role")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -165,19 +169,96 @@ model m_sensor {
 }
 
 model m_instansi {
-  id             Int        @id @default(autoincrement())
-  name           String?    @db.VarChar(255)
-  no_telepon     String?    @db.VarChar(50)
-  email          String?    @db.VarChar(255)
-  provinsi_code  String?    @db.VarChar(20)
-  kab_kota_code  String?    @db.VarChar(20)
-  kecamatan_code String?    @db.VarChar(20)
-  kel_des_code   String?    @db.VarChar(20)
+  id             Int         @id @default(autoincrement())
+  name           String?     @db.VarChar(255)
+  no_telepon     String?     @db.VarChar(50)
+  email          String?     @db.VarChar(255)
+  provinsi_code  String?     @db.VarChar(20)
+  kab_kota_code  String?     @db.VarChar(20)
+  kecamatan_code String?     @db.VarChar(20)
+  kel_des_code   String?     @db.VarChar(20)
   alamat         String?
-  kode_pos       String?    @db.VarChar(50)
-  created_at     DateTime?  @default(now()) @db.Timestamp(6)
-  updated_at     DateTime?  @default(now()) @db.Timestamp(6)
+  kode_pos       String?     @db.VarChar(50)
+  created_at     DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?   @default(now()) @db.Timestamp(6)
   m_device       m_device[]
+  m_jabatan      m_jabatan[]
+  m_modules      m_modules[]
+  m_users        m_users[]
+}
+
+model m_jabatan {
+  id          Int         @id @default(autoincrement())
+  instansi_id Int?
+  name        String      @db.VarChar(255)
+  description String?
+  kelompok    String[]    @default([])
+  created_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  m_instansi  m_instansi? @relation(fields: [instansi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_instansi")
+  m_users     m_users[]
+}
+
+model m_menu_permissions {
+  id          Int       @id @default(autoincrement())
+  menu_id     Int
+  menu_name   String    @db.VarChar(255)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  user_id     Int?
+  permissions String[]
+  m_menus     m_menus   @relation(fields: [menu_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_menu_perm")
+  m_users     m_users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_menu_perm_user")
+
+  @@unique([menu_id, user_id], map: "menu_user_unique")
+}
+
+model m_menus {
+  id                 Int                  @id @default(autoincrement())
+  module_id          Int
+  title              String               @db.VarChar(255)
+  value              String               @db.VarChar(255)
+  icon               String?              @db.VarChar(255)
+  path               String?              @db.VarChar(255)
+  is_active          Boolean              @default(true)
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  m_menu_permissions m_menu_permissions[]
+  m_modules          m_modules            @relation(fields: [module_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_menu_module")
+}
+
+model m_module_permissions {
+  id         Int       @id @default(autoincrement())
+  role_id    Int
+  module_id  Int
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  m_modules  m_modules @relation(fields: [module_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_perm_module")
+  m_roles    m_roles   @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_perm_role")
+}
+
+model m_modules {
+  id                   Int                    @id @default(autoincrement())
+  instansi_id          Int
+  name                 String                 @db.VarChar(255)
+  description          String?
+  icon                 String?                @db.VarChar(255)
+  is_active            Boolean                @default(true)
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  m_menus              m_menus[]
+  m_module_permissions m_module_permissions[]
+  m_instansi           m_instansi             @relation(fields: [instansi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_instansi")
+}
+
+model m_roles {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  description          String?
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  m_module_permissions m_module_permissions[]
+  m_users              m_users[]
 }
 
 enum user_role {

@@ -12,12 +12,13 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
 import { S3Service } from './s3.service';
 import { RedisCacheInterceptor } from './interceptors/redis-cache.interceptor';
 import { GeocodeService } from './geocode.service';
+import { RolesGuard } from './guards/roles.guard';
 
 @Global()
 @Module({
   imports: [
     WinstonModule.forRoot({
-      level: process.env.LOG_LEVEL || 'info',
+      level: process.env.LOG_LEVEL || 'debug',
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.json(),
@@ -31,7 +32,7 @@ import { GeocodeService } from './geocode.service';
         }),
         new winston.transports.File({
           filename: 'logs/app.log',
-          level: process.env.LOG_LEVEL || 'info',
+          level: process.env.LOG_LEVEL || 'debug',
           tailable: true, // optional, tetap bisa dipakai
         }),
       ],
@@ -42,7 +43,9 @@ import { GeocodeService } from './geocode.service';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'ItgdFVuiX2Kn7F6hLlYT',
-      signOptions: { expiresIn: '7d' },
+      signOptions: {
+        expiresIn: Number(process.env.EXPIRED_JWT_DAYS || 1) * 24 * 60 * 60,
+      },
     }),
   ],
   providers: [
@@ -52,8 +55,9 @@ import { GeocodeService } from './geocode.service';
     RedisService,
     GeocodeService,
     { provide: APP_FILTER, useClass: ErrorFilter },
-    { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_INTERCEPTOR, useClass: RedisCacheInterceptor },
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
   exports: [
     PrismaService,

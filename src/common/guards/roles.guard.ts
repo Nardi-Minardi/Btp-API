@@ -1,82 +1,37 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, SetMetadata } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  HttpException,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole, hasPermission } from '../../auth/interface/auth.interface';
-export { Roles } from '../decorators/roles.decorator';
-
-export const PERMISSIONS_KEY = 'permissions';
-export const RequirePermission = (resource: string, action: string) =>
-  SetMetadata(PERMISSIONS_KEY, { resource, action });
+import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
-      'roles',
-      [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    
-    const requiredPermission = this.reflector.getAllAndOverride<{resource: string, action: string}>(
-      PERMISSIONS_KEY,
-      [context.getHandler(), context.getClass()]
+    const requiredRoles = this.reflector.getAllAndOverride<number[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
     );
 
-    if (!requiredRoles && !requiredPermission) {
-      return true;
-    }
+    // jika endpoint tidak pakai @Roles → allow semua
+    if (!requiredRoles) return true;
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (!user) {
-      throw new ForbiddenException('User not authenticated');
+    if (!user || typeof user.role_id === 'undefined') {
+      throw new HttpException('Unauthorized: User role missing', 401);
     }
 
-    // Check role-based access
-    if (requiredRoles && !requiredRoles.includes(user.role)) {
-      throw new ForbiddenException(`Access denied. Required roles: ${requiredRoles.join(', ')}`);
-    }
-
-    // Check permission-based access
-    if (requiredPermission) {
-      const hasAccess = hasPermission(user.role, requiredPermission.resource, requiredPermission.action);
-      if (!hasAccess) {
-        throw new ForbiddenException(
-          `Access denied. Required permission: ${requiredPermission.action} on ${requiredPermission.resource}`
-        );
-      }
+    if (!requiredRoles.includes(user.role_id)) {
+      throw new HttpException('Forbidden: You do not have access to this resource', 403);
     }
 
     return true;
-  }
-}
-
-@Injectable()
-export class WilayahAccessGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
-    
-    if (!user) {
-      return false;
-    }
-
-    // Admin dapat mengakses semua wilayah
-    if (user.role === UserRole.ADMIN || user.wilayahKerja?.includes('all')) {
-      return true;
-    }
-
-    // Periksa akses wilayah berdasarkan parameter request
-    const { provinsiId, kotaId, kecamatanId } = request.query;
-    const areaToCheck = kecamatanId || kotaId || provinsiId;
-    
-    if (areaToCheck && user.wilayahKerja) {
-      return user.wilayahKerja.includes(areaToCheck);
-    }
-
-    return true; // Jika tidak ada filter wilayah spesifik
   }
 }

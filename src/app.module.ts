@@ -7,6 +7,9 @@ import { DataMasterModule } from './data-master/data-master.module';
 import { SensorModule } from './sensor/sensor.module';
 import { QueueModule } from './queue/queue.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { CmsUserModule } from './cms/user/user.module';
+import { CmsModuleModule } from './cms/module/module.module';
+import { CmsMenuModule } from './cms/menu/menu.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { WebsocketModule } from './websocket/websocket.module';
     DashboardModule,
     DataMasterModule,
     SensorModule,
+    CmsUserModule,
+    CmsModuleModule,
+    CmsMenuModule,
     QueueModule,
     WebsocketModule,
   ],

@@ -25,10 +25,9 @@ export interface JwtPayload {
   sub: number; // user id
   username: string;
   email: string;
-  role: UserRole;
-  jabatan: string;
-  instansi_id: number | null;
-  wilayah_kerja?: string[];
+  role_id: number | null;
+  jabatan_id?: number | null;
+  instansi_id?: number | null;
   iat?: number;
   exp?: number;
 }
@@ -36,52 +35,10 @@ export interface JwtPayload {
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    full_name: string;
-    role: UserRole;
-    jabatan: string;
-    instansi_id: number | null;
-    wilayah_kerja?: string[];
-  };
+  expired_at: number; // in seconds
+  user: any
 }
 
 export interface AuthRequest extends Request {
   user: JwtPayload;
 }
-
-// Role permissions mapping
-export const ROLE_PERMISSIONS = {
-  [UserRole.ADMIN]: {
-    dashboard: ['read', 'write', 'manage'],
-    users: ['read', 'write', 'manage'],
-    sensors: ['read', 'write', 'manage'],
-    reports: ['read', 'write', 'manage'],
-    system: ['read', 'write', 'manage'],
-  },
-  [UserRole.OPERATOR]: {
-    dashboard: ['read', 'write'],
-    users: ['read'],
-    sensors: ['read', 'write'],
-    reports: ['read', 'write'],
-    system: ['read'],
-  },
-  [UserRole.USER]: {
-    dashboard: ['read'],
-    users: [],
-    sensors: ['read'],
-    reports: ['read'],
-    system: [],
-  },
-};
-
-export const hasPermission = (
-  userRole: UserRole,
-  resource: string,
-  action: string,
-): boolean => {
-  const permissions = ROLE_PERMISSIONS[userRole]?.[resource];
-  return permissions ? permissions.includes(action) : false;
-};
