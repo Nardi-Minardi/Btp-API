@@ -4,7 +4,7 @@ WORKDIR /app
 
 # set environment default (bisa override lewat docker-compose)
 ENV NODE_ENV=staging \
-    PORT=3014
+    PORT=3017
 
 # --- Dependencies stage ---
 FROM base AS dependencies
@@ -33,7 +33,7 @@ RUN npx prisma generate --schema=./prisma/main/schema.prisma
 # Debug: cek isi dist
 RUN ls -la ./dist
 
-EXPOSE 3014
+EXPOSE 3017
 # Default to API; override CMD in docker-compose for worker and websocket
 CMD ["node", "dist/src/main.js"]
   

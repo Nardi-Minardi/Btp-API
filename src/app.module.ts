@@ -4,28 +4,17 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { DataMasterModule } from './data-master/data-master.module';
-import { SensorModule } from './sensor/sensor.module';
-import { QueueModule } from './queue/queue.module';
-import { WebsocketModule } from './websocket/websocket.module';
-import { CmsUserModule } from './cms/user/user.module';
-import { CmsModuleModule } from './cms/module/module.module';
-import { CmsMenuModule } from './cms/menu/menu.module';
-
+import { HarvestModule } from './harvest/harves.module';
+import { SpbModule } from './spb/spb.module';
+import { RestanModule } from './restan/restan.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     CommonModule,
     AuthModule,
-    DashboardModule,
-    DataMasterModule,
-    SensorModule,
-    CmsUserModule,
-    CmsModuleModule,
-    CmsMenuModule,
-    QueueModule,
-    WebsocketModule,
+    HarvestModule,
+    SpbModule,
+    RestanModule,
   ],
   controllers: [],
   providers: [],

@@ -47,10 +47,10 @@ async function bootstrap() {
 
   // Setup OpenAPI config
   const config = new DocumentBuilder()
-    .setTitle('FFEWFMS-BE API Documentation')
+    .setTitle('BTP API Documentation')
     .setDescription(
       `
-      # FFEWFMS-BE API Documentation
+      # BTP API Documentation
       `,
     )
     .setVersion('1.0')
@@ -81,7 +81,7 @@ async function bootstrap() {
     <!doctype html>
     <html>
       <head>
-        <title>FFEWFMS-BE API Documentation</title>
+        <title>BTP API Documentation</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
@@ -95,7 +95,7 @@ async function bootstrap() {
           data-configuration='{
             "theme": "kepler",
             "layout": "modern",
-            "customCss": ".scalar-app { font-family: Inter, sans-serif; --scalar-color-1: #b6921dff; --scalar-color-2: #c98c1bff; }"
+            "customCss": ".scalar-app { font-family: Inter, sans-serif; --scalar-color-1: #1d41b6ff; --scalar-color-2: #1b49c9ff; }"
           }'></script>
         <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@latest"></script>
       </body>
