@@ -2,17 +2,12 @@ import { Global, Module } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { PrismaService } from './prisma.service';
-import { RedisService } from './redis.service';
 import { ValidationService } from './validation.service';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
-import { AuthGuard } from './guards/auth.guard';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigService, ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { S3Service } from './s3.service';
-import { RedisCacheInterceptor } from './interceptors/redis-cache.interceptor';
-import { GeocodeService } from './geocode.service';
-import { RolesGuard } from './guards/roles.guard';
+import { StaticTokenGuard } from './guards/static.token.guard';
 
 @Global()
 @Module({
@@ -33,39 +28,19 @@ import { RolesGuard } from './guards/roles.guard';
         new winston.transports.File({
           filename: 'logs/app.log',
           level: process.env.LOG_LEVEL || 'info',
-          tailable: true, // optional, tetap bisa dipakai
+          tailable: true,
         }),
       ],
     }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET || 'ItgdFVuiX2Kn7F6hLlYT',
-      signOptions: {
-        expiresIn: Number(process.env.EXPIRED_JWT_DAYS || 1) * 24 * 60 * 60,
-      },
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   providers: [
     PrismaService,
     ValidationService,
     S3Service,
-    RedisService,
-    GeocodeService,
     { provide: APP_FILTER, useClass: ErrorFilter },
-    { provide: APP_INTERCEPTOR, useClass: RedisCacheInterceptor },
-    { provide: APP_GUARD, useClass: AuthGuard },
-    { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: StaticTokenGuard }, // global static token guard
   ],
-  exports: [
-    PrismaService,
-    ValidationService,
-    S3Service,
-    RedisService,
-    GeocodeService,
-    WinstonModule,
-  ],
+  exports: [PrismaService, ValidationService, S3Service, WinstonModule],
 })
 export class CommonModule {}

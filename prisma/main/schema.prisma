@@ -9,398 +9,106 @@ datasource db {
 }
 
 model operating_unit {
-  id                                                                                         Int                                          @id @default(autoincrement())
-  company_id                                                                                 Int
-  partner_id                                                                                 Int?
-  state_id                                                                                   Int?
-  country_id                                                                                 Int?
-  plan_id                                                                                    Int?
-  create_uid                                                                                 Int?
-  write_uid                                                                                  Int?
-  name                                                                                       String                                       @db.VarChar
-  code                                                                                       String                                       @db.VarChar(4)
-  street                                                                                     String?                                      @db.VarChar
-  street2                                                                                    String?                                      @db.VarChar
-  zip                                                                                        String?                                      @db.VarChar
-  city                                                                                       String?                                      @db.VarChar
-  email                                                                                      String?                                      @db.VarChar
-  phone                                                                                      String?                                      @db.VarChar
-  mobile                                                                                     String?                                      @db.VarChar
-  partner_latitude                                                                           Decimal?                                     @db.Decimal
-  partner_longitude                                                                          Decimal?                                     @db.Decimal
-  active                                                                                     Boolean?
-  create_date                                                                                DateTime?                                    @db.Timestamp(6)
-  write_date                                                                                 DateTime?                                    @db.Timestamp(6)
-  tipe_ou_id                                                                                 Int?
-  manager                                                                                    String?                                      @db.VarChar
-  ktu                                                                                        String?                                      @db.VarChar
-  manager_id                                                                                 Int?
-  account_payment_approval                                                                   Boolean?
-  approval_payment_1                                                                         String?                                      @db.VarChar
-  approval_payment_2                                                                         String?                                      @db.VarChar
-  approval_payment_3                                                                         String?                                      @db.VarChar
-  approval_payment_4                                                                         String?                                      @db.VarChar
-  approval_pc_1                                                                              String?                                      @db.VarChar
-  approval_pc_2                                                                              String?                                      @db.VarChar
-  approval_pc_3                                                                              String?                                      @db.VarChar
-  approval_pc_4                                                                              String?                                      @db.VarChar
-  analytic_id                                                                                Int?
-  harvest_by                                                                                 String?                                      @db.VarChar
-  max_radius                                                                                 Int?
-  approval_po_1                                                                              String?                                      @db.VarChar
-  approval_po_jabatan_1                                                                      String?                                      @db.VarChar
-  approval_po_2                                                                              String?                                      @db.VarChar
-  approval_po_jabatan_2                                                                      String?                                      @db.VarChar
-  approval_po_3                                                                              String?                                      @db.VarChar
-  approval_po_jabatan_3                                                                      String?                                      @db.VarChar
-  analytic_asset_id                                                                          Int?
-  is_payroll_tax21                                                                           Boolean?
-  account_vra_debit_base_id                                                                  Int?
-  account_vra_credit_base_id                                                                 Int?
-  account_vra_debit_plasma_base_id                                                           Int?
-  account_analytic_account_account_analytic_account_operating_unit_idTooperating_unit        account_analytic_account[]                   @relation("account_analytic_account_operating_unit_idTooperating_unit")
-  account_asset_asset                                                                        account_asset_asset[]
-  account_asset_depreciation_line                                                            account_asset_depreciation_line[]
-  account_journal                                                                            account_journal[]
-  account_move                                                                               account_move[]
-  account_move_line                                                                          account_move_line[]
-  account_payment                                                                            account_payment[]
-  account_reconcile_wizard                                                                   account_reconcile_wizard[]
-  alocation_plasma                                                                           alocation_plasma[]
-  alokasi_cogm                                                                               alokasi_cogm[]
-  alokasi_cogm_config_alokasi_cogm_config_from_operating_unit_idTooperating_unit             alokasi_cogm_config[]                        @relation("alokasi_cogm_config_from_operating_unit_idTooperating_unit")
-  alokasi_cogm_config_alokasi_cogm_config_to_operating_unit_idTooperating_unit               alokasi_cogm_config[]                        @relation("alokasi_cogm_config_to_operating_unit_idTooperating_unit")
-  alokasi_cogm_line                                                                          alokasi_cogm_line[]
-  alokasi_cogs_line                                                                          alokasi_cogs_line[]
-  alokasi_produksi                                                                           alokasi_produksi[]
-  alokasi_produksi_line                                                                      alokasi_produksi_line[]
-  alokasi_produksi_tbs                                                                       alokasi_produksi_tbs[]
-  analytic_account_operating_unit_rel                                                        analytic_account_operating_unit_rel[]
-  ap_rainfall                                                                                ap_rainfall[]
-  asset_transfer_asset_transfer_destination_operating_unit_idTooperating_unit                asset_transfer[]                             @relation("asset_transfer_destination_operating_unit_idTooperating_unit")
-  asset_transfer_asset_transfer_operating_unit_idTooperating_unit                            asset_transfer[]                             @relation("asset_transfer_operating_unit_idTooperating_unit")
-  closesing_account_forestry                                                                 closesing_account_forestry[]
-  closing_period_models                                                                      closing_period_models[]
-  config_closing_rate                                                                        config_closing_rate[]
-  cost_bkm_wizard                                                                            cost_bkm_wizard[]
-  grading_mill                                                                               grading_mill[]
-  grading_mill_wb                                                                            grading_mill_wb[]
-  harvest_line_block                                                                         harvest_line_block[]
-  hr_attendance                                                                              hr_attendance[]
-  hr_contract                                                                                hr_contract[]
-  hr_contract_type                                                                           hr_contract_type[]
-  hr_department                                                                              hr_department[]
-  hr_employee_hr_employee_default_operating_unit_idTooperating_unit                          hr_employee[]                                @relation("hr_employee_default_operating_unit_idTooperating_unit")
-  hr_employee_hr_employee_operating_unit_idTooperating_unit                                  hr_employee[]                                @relation("hr_employee_operating_unit_idTooperating_unit")
-  hr_holidays_public                                                                         hr_holidays_public[]
-  hr_job_allowance                                                                           hr_job_allowance[]
-  hr_payroll_ump                                                                             hr_payroll_ump[]
-  hr_payslip                                                                                 hr_payslip[]
-  hr_payslip_run                                                                             hr_payslip_run[]
-  hr_salary_rule_account                                                                     hr_salary_rule_account[]
-  hr_work_entry                                                                              hr_work_entry[]
-  maintenance_order                                                                          maintenance_order[]
-  maintenance_order_line                                                                     maintenance_order_line[]
-  material_request                                                                           material_request[]
-  mill_team                                                                                  mill_team[]
-  nursery_seed_mutation                                                                      nursery_seed_mutation[]
-  account_account_base_operating_unit_account_vra_credit_base_idToaccount_account_base       account_account_base?                        @relation("operating_unit_account_vra_credit_base_idToaccount_account_base", fields: [account_vra_credit_base_id], references: [id], onUpdate: NoAction)
-  account_account_base_operating_unit_account_vra_debit_base_idToaccount_account_base        account_account_base?                        @relation("operating_unit_account_vra_debit_base_idToaccount_account_base", fields: [account_vra_debit_base_id], references: [id], onUpdate: NoAction)
-  account_account_base_operating_unit_account_vra_debit_plasma_base_idToaccount_account_base account_account_base?                        @relation("operating_unit_account_vra_debit_plasma_base_idToaccount_account_base", fields: [account_vra_debit_plasma_base_id], references: [id], onUpdate: NoAction)
-  account_analytic_account_operating_unit_analytic_asset_idToaccount_analytic_account        account_analytic_account?                    @relation("operating_unit_analytic_asset_idToaccount_analytic_account", fields: [analytic_asset_id], references: [id], onUpdate: NoAction)
-  account_analytic_account_operating_unit_analytic_idToaccount_analytic_account              account_analytic_account?                    @relation("operating_unit_analytic_idToaccount_analytic_account", fields: [analytic_id], references: [id], onUpdate: NoAction)
-  res_company_operating_unit_company_idTores_company                                         res_company                                  @relation("operating_unit_company_idTores_company", fields: [company_id], references: [id], onUpdate: NoAction)
-  res_country                                                                                res_country?                                 @relation(fields: [country_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  res_users_operating_unit_create_uidTores_users                                             res_users?                                   @relation("operating_unit_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  res_partner_operating_unit_manager_idTores_partner                                         res_partner?                                 @relation("operating_unit_manager_idTores_partner", fields: [manager_id], references: [id], onUpdate: NoAction)
-  res_partner_operating_unit_partner_idTores_partner                                         res_partner?                                 @relation("operating_unit_partner_idTores_partner", fields: [partner_id], references: [id], onUpdate: NoAction)
-  account_analytic_plan                                                                      account_analytic_plan?                       @relation(fields: [plan_id], references: [id], onUpdate: NoAction)
-  res_country_state                                                                          res_country_state?                           @relation(fields: [state_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  tipe_operating_unit                                                                        tipe_operating_unit?                         @relation(fields: [tipe_ou_id], references: [id], onUpdate: NoAction)
-  res_users_operating_unit_write_uidTores_users                                              res_users?                                   @relation("operating_unit_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  operating_unit_employees_rel                                                               operating_unit_employees_rel[]
-  operating_unit_report_cost_overhead_rel                                                    operating_unit_report_cost_overhead_rel[]
-  operating_unit_sequence                                                                    operating_unit_sequence[]
-  operating_unit_settlement_config_rel                                                       operating_unit_settlement_config_rel[]
-  operating_unit_stock_location_rel                                                          operating_unit_stock_location_rel[]
-  operating_unit_stock_move_line_rel                                                         operating_unit_stock_move_line_rel[]
-  operating_unit_stock_move_rel                                                              operating_unit_stock_move_rel[]
-  operating_unit_users_rel                                                                   operating_unit_users_rel[]
-  operating_unit_wiz_report_spb_rel                                                          operating_unit_wiz_report_spb_rel[]
-  operating_unit_wiz_zharvest_collection_rel                                                 operating_unit_wiz_zharvest_collection_rel[]
-  operating_unit_wizard_report_hr_attend_rel                                                 operating_unit_wizard_report_hr_attend_rel[]
-  operating_unit_zmobile_users_rel                                                           operating_unit_zmobile_users_rel[]
-  payroll_thr                                                                                payroll_thr[]
-  payroll_thr_line                                                                           payroll_thr_line[]
-  petty_cash                                                                                 petty_cash[]
-  ppn_material_plasma                                                                        ppn_material_plasma[]
-  production_hpp_config                                                                      production_hpp_config[]
-  purchase_order_purchase_order_operating_unit_idTooperating_unit                            purchase_order[]                             @relation("purchase_order_operating_unit_idTooperating_unit")
-  purchase_order_purchase_order_requesting_operating_unit_idTooperating_unit                 purchase_order[]                             @relation("purchase_order_requesting_operating_unit_idTooperating_unit")
-  purchase_request                                                                           purchase_request[]
-  purchase_request_line                                                                      purchase_request_line[]
-  purchase_request_line_make_purchase_order                                                  purchase_request_line_make_purchase_order[]
-  purchase_request_team                                                                      purchase_request_team[]
-  purchase_team                                                                              purchase_team[]
-  push_vra_config_push_vra_config_from_operating_unit_idTooperating_unit                     push_vra_config[]                            @relation("push_vra_config_from_operating_unit_idTooperating_unit")
-  push_vra_config_push_vra_config_to_operating_unit_idTooperating_unit                       push_vra_config[]                            @relation("push_vra_config_to_operating_unit_idTooperating_unit")
-  report_cost_overhead                                                                       report_cost_overhead[]
-  report_entry_absen_view                                                                    report_entry_absen_view[]
-  report_spb_summary_view                                                                    report_spb_summary_view[]
-  report_spb_view_report_spb_view_ou_dest_idTooperating_unit                                 report_spb_view[]                            @relation("report_spb_view_ou_dest_idTooperating_unit")
-  report_spb_view_report_spb_view_ou_plasma_idTooperating_unit                               report_spb_view[]                            @relation("report_spb_view_ou_plasma_idTooperating_unit")
-  res_company_res_company_opering_unit_estate_idTooperating_unit                             res_company[]                                @relation("res_company_opering_unit_estate_idTooperating_unit")
-  res_partner_res_partner_wb_operating_unit_idTooperating_unit                               res_partner[]                                @relation("res_partner_wb_operating_unit_idTooperating_unit")
-  res_users_res_users_default_operating_unit_idTooperating_unit                              res_users[]                                  @relation("res_users_default_operating_unit_idTooperating_unit")
-  ro_activity                                                                                ro_activity[]
-  sale_order                                                                                 sale_order[]
-  settlement_alokasi                                                                         settlement_alokasi[]
-  stock_inventory                                                                            stock_inventory[]
-  stock_issued                                                                               stock_issued[]
-  stock_location                                                                             stock_location[]
-  stock_move                                                                                 stock_move[]
-  stock_picking                                                                              stock_picking[]
-  stock_picking_type                                                                         stock_picking_type[]
-  stock_quant                                                                                stock_quant[]
-  stock_warehouse                                                                            stock_warehouse[]
-  temporary_closing                                                                          temporary_closing[]
-  thr_configuration                                                                          thr_configuration[]
-  vra_premi_truck                                                                            vra_premi_truck[]
-  vra_premi_truck_basis                                                                      vra_premi_truck_basis[]
-  wiz_entry_absen                                                                            wiz_entry_absen[]
-  wiz_report_area_statement                                                                  wiz_report_area_statement[]
-  wiz_report_daily_production                                                                wiz_report_daily_production[]
-  wiz_report_lhd                                                                             wiz_report_lhd[]
-  wiz_report_spb                                                                             wiz_report_spb[]
-  wiz_report_spb_summary                                                                     wiz_report_spb_summary[]
-  wizard_report_hr_attend                                                                    wizard_report_hr_attend[]
-  wizard_report_nursery                                                                      wizard_report_nursery[]
-  wizard_report_nursery_view                                                                 wizard_report_nursery_view[]
-  wizard_report_vra                                                                          wizard_report_vra[]
-  workshop_distribution_workshop_distribution_operating_unit_afiliasi_idTooperating_unit     workshop_distribution[]                      @relation("workshop_distribution_operating_unit_afiliasi_idTooperating_unit")
-  workshop_distribution_workshop_distribution_operating_unit_idTooperating_unit              workshop_distribution[]                      @relation("workshop_distribution_operating_unit_idTooperating_unit")
-  workshop_material_distribution                                                             workshop_material_distribution[]
-  z_vra                                                                                      z_vra[]
-  z_vra_line_z_vra_line_operating_unit_idTooperating_unit                                    z_vra_line[]                                 @relation("z_vra_line_operating_unit_idTooperating_unit")
-  z_vra_line_z_vra_line_partner_ou_idTooperating_unit                                        z_vra_line[]                                 @relation("z_vra_line_partner_ou_idTooperating_unit")
-  z_vra_premi_basis                                                                          z_vra_premi_basis[]
-  z_vra_premi_basis_cpo                                                                      z_vra_premi_basis_cpo[]
-  z_vra_premi_cpo                                                                            z_vra_premi_cpo[]
-  z_vra_premi_oab                                                                            z_vra_premi_oab[]
-  z_vra_premi_oma                                                                            z_vra_premi_oma[]
-  z_vra_premi_otr                                                                            z_vra_premi_otr[]
-  z_vra_premi_process                                                                        z_vra_premi_process[]
-  z_vra_premi_stk                                                                            z_vra_premi_stk[]
-  zabw_data                                                                                  zabw_data[]
-  zabw_data_temp                                                                             zabw_data_temp[]
-  zactivity_rate                                                                             zactivity_rate[]
-  zactivity_rate_sheet                                                                       zactivity_rate_sheet[]
-  zbasis_scissor_lift                                                                        zbasis_scissor_lift[]
-  zberita_acara_pp                                                                           zberita_acara_pp[]
-  zberita_acara_pp_line                                                                      zberita_acara_pp_line[]
-  zbkm_activity                                                                              zbkm_activity[]
-  zbkm_activity_line                                                                         zbkm_activity_line[]
-  zblock_master_zblock_master_operating_unit_idTooperating_unit                              zblock_master[]                              @relation("zblock_master_operating_unit_idTooperating_unit")
-  zblock_master_zblock_master_ou_plasma_idTooperating_unit                                   zblock_master[]                              @relation("zblock_master_ou_plasma_idTooperating_unit")
-  zblock_master_history_zblock_master_history_operating_unit_idTooperating_unit              zblock_master_history[]                      @relation("zblock_master_history_operating_unit_idTooperating_unit")
-  zblock_master_history_zblock_master_history_ou_plasma_idTooperating_unit                   zblock_master_history[]                      @relation("zblock_master_history_ou_plasma_idTooperating_unit")
-  zblock_master_mutation                                                                     zblock_master_mutation[]
-  zcontract_activity                                                                         zcontract_activity[]
-  zcost_center_mutation                                                                      zcost_center_mutation[]
-  zdistribution_equipment                                                                    zdistribution_equipment[]
-  zdistribution_payroll                                                                      zdistribution_payroll[]
-  zdistribution_rate                                                                         zdistribution_rate[]
-  zdistribution_rule                                                                         zdistribution_rule[]
-  zfruit_courier_zfruit_courier_operating_unit_idTooperating_unit                            zfruit_courier[]                             @relation("zfruit_courier_operating_unit_idTooperating_unit")
-  zfruit_courier_zfruit_courier_ou_dest_idTooperating_unit                                   zfruit_courier[]                             @relation("zfruit_courier_ou_dest_idTooperating_unit")
-  zfruit_courier_loader                                                                      zfruit_courier_loader[]
-  zfruit_courier_wb                                                                          zfruit_courier_wb[]
-  zgrading_fine                                                                              zgrading_fine[]
-  zgrading_formula_lf                                                                        zgrading_formula_lf[]
-  zgrading_premi                                                                             zgrading_premi[]
-  zgrading_premi_loader_sheet                                                                zgrading_premi_loader_sheet[]
-  zh_bentor_basis                                                                            zh_bentor_basis[]
-  zh_premi_loader                                                                            zh_premi_loader[]
-  zh_premi_process                                                                           zh_premi_process[]
-  zh_premi_process_line                                                                      zh_premi_process_line[]
-  zh_premi_spv                                                                               zh_premi_spv[]
-  zh_premi_transport                                                                         zh_premi_transport[]
-  zharvest_activity                                                                          zharvest_activity[]
-  zharvest_activity_line                                                                     zharvest_activity_line[]
-  zharvest_inspection                                                                        zharvest_inspection[]
-  zhr_attendance_check_wizard                                                                zhr_attendance_check_wizard[]
-  zhr_employee_levels_wage                                                                   zhr_employee_levels_wage[]
-  zhr_leave_balance                                                                          zhr_leave_balance[]
-  zhr_levels_wizard                                                                          zhr_levels_wizard[]
-  zhr_natura                                                                                 zhr_natura[]
-  zhr_overtime                                                                               zhr_overtime[]
-  zhr_overtime_line                                                                          zhr_overtime_line[]
-  zhr_overtime_rate                                                                          zhr_overtime_rate[]
-  zhr_overtime_report_wizard                                                                 zhr_overtime_report_wizard[]
-  zhr_overtime_rule                                                                          zhr_overtime_rule[]
-  zhr_payroll_bkm_wizard                                                                     zhr_payroll_bkm_wizard[]
-  zhr_payroll_bpjs_kes_wizard                                                                zhr_payroll_bpjs_kes_wizard[]
-  zhr_payroll_bpjs_wizard                                                                    zhr_payroll_bpjs_wizard[]
-  zhr_payroll_journal                                                                        zhr_payroll_journal[]
-  zhr_payslip_period                                                                         zhr_payslip_period[]
-  zmar_batch                                                                                 zmar_batch[]
-  zmaster_tpn                                                                                zmaster_tpn[]
-  zmechanic_activity_report                                                                  zmechanic_activity_report[]
-  zmrp_production                                                                            zmrp_production[]
-  zquality_check                                                                             zquality_check[]
-  zquality_point                                                                             zquality_point[]
-  zra_master                                                                                 zra_master[]
-  zrepair_work_order                                                                         zrepair_work_order[]
-  zreport_cost_wizard                                                                        zreport_cost_wizard[]
-  zw_bridge                                                                                  zw_bridge[]
-  zweekly_inspection_line                                                                    zweekly_inspection_line[]
-  zwork_order_zwork_order_operating_unit_afiliasi_idTooperating_unit                         zwork_order[]                                @relation("zwork_order_operating_unit_afiliasi_idTooperating_unit")
-  zwork_order_zwork_order_operating_unit_idTooperating_unit                                  zwork_order[]                                @relation("zwork_order_operating_unit_idTooperating_unit")
-  zwork_order_activity                                                                       zwork_order_activity[]
-  zwork_plan                                                                                 zwork_plan[]
-  zworkshop_summary_performance                                                              zworkshop_summary_performance[]
+  id                                 Int       @id @default(autoincrement())
+  company_id                         Int
+  partner_id                         Int?
+  state_id                           Int?
+  country_id                         Int?
+  plan_id                            Int?
+  create_uid                         Int?
+  write_uid                          Int?
+  name                               String    @db.VarChar
+  code                               String    @db.VarChar(4)
+  street                             String?   @db.VarChar
+  street2                            String?   @db.VarChar
+  zip                                String?   @db.VarChar
+  city                               String?   @db.VarChar
+  email                              String?   @db.VarChar
+  phone                              String?   @db.VarChar
+  mobile                             String?   @db.VarChar
+  partner_latitude                   Decimal?  @db.Decimal
+  partner_longitude                  Decimal?  @db.Decimal
+  active                             Boolean?
+  create_date                        DateTime? @db.Timestamp(6)
+  write_date                         DateTime? @db.Timestamp(6)
+  tipe_ou_id                         Int?
+  manager                            String?   @db.VarChar
+  ktu                                String?   @db.VarChar
+  manager_id                         Int?
+  account_payment_approval           Boolean?
+  approval_payment_1                 String?   @db.VarChar
+  approval_payment_2                 String?   @db.VarChar
+  approval_payment_3                 String?   @db.VarChar
+  approval_payment_4                 String?   @db.VarChar
+  approval_pc_1                      String?   @db.VarChar
+  approval_pc_2                      String?   @db.VarChar
+  approval_pc_3                      String?   @db.VarChar
+  approval_pc_4                      String?   @db.VarChar
+  analytic_id                        Int?
+  harvest_by                         String?   @db.VarChar
+  max_radius                         Int?
+  approval_po_1                      String?   @db.VarChar
+  approval_po_jabatan_1              String?   @db.VarChar
+  approval_po_2                      String?   @db.VarChar
+  approval_po_jabatan_2              String?   @db.VarChar
+  approval_po_3                      String?   @db.VarChar
+  approval_po_jabatan_3              String?   @db.VarChar
+  analytic_asset_id                  Int?
+  is_payroll_tax21                   Boolean?
+  account_vra_debit_base_id          Int?
+  account_vra_credit_base_id         Int?
+  account_vra_debit_plasma_base_id   Int?
+  account_vra_debit_inti_base_id     Int?
+  account_credit_base_inti_id        Int?
+  account_credit_base_plasma_inti_id Int?
+  is_not_activity                    Boolean?
+  analytic_currency_difference_id    Int?
 
   @@unique([code, company_id], map: "operating_unit_code_company_uniq")
   @@unique([name, company_id], map: "operating_unit_name_company_uniq")
 }
 
 model zmobile_users {
-  id                                            Int                                @id @default(autoincrement())
-  company_id                                    Int
-  create_uid                                    Int?
-  write_uid                                     Int?
-  name                                          String                             @db.VarChar
-  username                                      String                             @db.VarChar
-  password                                      String                             @db.VarChar
-  create_date                                   DateTime?                          @db.Timestamp(6)
-  write_date                                    DateTime?                          @db.Timestamp(6)
-  hr_department_zmobile_users_rel               hr_department_zmobile_users_rel[]
-  operating_unit_zmobile_users_rel              operating_unit_zmobile_users_rel[]
-  res_company                                   res_company                        @relation(fields: [company_id], references: [id], onUpdate: NoAction)
-  res_users_zmobile_users_create_uidTores_users res_users?                         @relation("zmobile_users_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  res_users_zmobile_users_write_uidTores_users  res_users?                         @relation("zmobile_users_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
+  id          Int       @id @default(autoincrement())
+  company_id  Int
+  create_uid  Int?
+  write_uid   Int?
+  name        String    @db.VarChar
+  username    String    @db.VarChar
+  password    String    @db.VarChar
+  create_date DateTime? @db.Timestamp(6)
+  write_date  DateTime? @db.Timestamp(6)
 }
 
 model hr_department {
-  id                                                                              Int                                          @id @default(autoincrement())
-  company_id                                                                      Int?
-  parent_id                                                                       Int?
-  manager_id                                                                      Int?
-  color                                                                           Int?
-  master_department_id                                                            Int?
-  create_uid                                                                      Int?
-  write_uid                                                                       Int?
-  complete_name                                                                   String?                                      @db.VarChar
-  parent_path                                                                     String?                                      @db.VarChar
-  name                                                                            Json
-  note                                                                            String?
-  active                                                                          Boolean?
-  create_date                                                                     DateTime?                                    @db.Timestamp(6)
-  write_date                                                                      DateTime?                                    @db.Timestamp(6)
-  operating_unit_id                                                               Int?
-  code                                                                            String?                                      @db.VarChar
-  div_ast                                                                         String?                                      @db.VarChar
-  head_ast                                                                        String?                                      @db.VarChar
-  distance_to_mill                                                                Float?
-  location_id                                                                     Int?
-  location_dest_id                                                                Int?
-  picking_type_id                                                                 Int?
-  is_compute_cost                                                                 Boolean?
-  cost_center_id                                                                  Int?
-  is_exclusion_settlement                                                         Boolean?
-  Division                                                                        Division[]
-  account_analytic_account_account_analytic_account_department_idTohr_department  account_analytic_account[]                   @relation("account_analytic_account_department_idTohr_department")
-  account_analytic_account_hr_department_rel                                      account_analytic_account_hr_department_rel[]
-  account_move_line                                                               account_move_line[]
-  ap_rainfall                                                                     ap_rainfall[]
-  department_users_rel                                                            department_users_rel[]
-  discuss_channel_hr_department_rel                                               discuss_channel_hr_department_rel[]
-  hr_attendance                                                                   hr_attendance[]
-  hr_contract                                                                     hr_contract[]
-  res_company                                                                     res_company?                                 @relation(fields: [company_id], references: [id], onUpdate: NoAction)
-  account_analytic_account_hr_department_cost_center_idToaccount_analytic_account account_analytic_account?                    @relation("hr_department_cost_center_idToaccount_analytic_account", fields: [cost_center_id], references: [id], onUpdate: NoAction)
-  res_users_hr_department_create_uidTores_users                                   res_users?                                   @relation("hr_department_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  stock_location_hr_department_location_dest_idTostock_location                   stock_location?                              @relation("hr_department_location_dest_idTostock_location", fields: [location_dest_id], references: [id], onUpdate: NoAction)
-  stock_location_hr_department_location_idTostock_location                        stock_location?                              @relation("hr_department_location_idTostock_location", fields: [location_id], references: [id], onUpdate: NoAction)
-  hr_employee_hr_department_manager_idTohr_employee                               hr_employee?                                 @relation("hr_department_manager_idTohr_employee", fields: [manager_id], references: [id], onUpdate: NoAction)
-  hr_department_hr_department_master_department_idTohr_department                 hr_department?                               @relation("hr_department_master_department_idTohr_department", fields: [master_department_id], references: [id], onUpdate: NoAction)
-  other_hr_department_hr_department_master_department_idTohr_department           hr_department[]                              @relation("hr_department_master_department_idTohr_department")
-  operating_unit                                                                  operating_unit?                              @relation(fields: [operating_unit_id], references: [id], onUpdate: NoAction)
-  hr_department_hr_department_parent_idTohr_department                            hr_department?                               @relation("hr_department_parent_idTohr_department", fields: [parent_id], references: [id], onUpdate: NoAction)
-  other_hr_department_hr_department_parent_idTohr_department                      hr_department[]                              @relation("hr_department_parent_idTohr_department")
-  stock_picking_type                                                              stock_picking_type?                          @relation(fields: [picking_type_id], references: [id], onUpdate: NoAction)
-  res_users_hr_department_write_uidTores_users                                    res_users?                                   @relation("hr_department_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  hr_department_hr_salary_rule_account_rel                                        hr_department_hr_salary_rule_account_rel[]
-  hr_department_thr_configuration_rel                                             hr_department_thr_configuration_rel[]
-  hr_department_wiz_report_spb_rel                                                hr_department_wiz_report_spb_rel[]
-  hr_department_wiz_zharvest_collection_rel                                       hr_department_wiz_zharvest_collection_rel[]
-  hr_department_wizard_report_hr_attend_rel                                       hr_department_wizard_report_hr_attend_rel[]
-  hr_department_wizard_report_nursery_rel                                         hr_department_wizard_report_nursery_rel[]
-  hr_department_zblock_master_history_rel                                         hr_department_zblock_master_history_rel[]
-  hr_department_zblock_master_rel                                                 hr_department_zblock_master_rel[]
-  hr_department_zmobile_users_rel                                                 hr_department_zmobile_users_rel[]
-  hr_employee_hr_employee_department_idTohr_department                            hr_employee[]                                @relation("hr_employee_department_idTohr_department")
-  hr_job                                                                          hr_job[]
-  hr_payslip                                                                      hr_payslip[]
-  hr_payslip_employees                                                            hr_payslip_employees[]
-  hr_payslip_run                                                                  hr_payslip_run[]
-  hr_payslip_run_total                                                            hr_payslip_run_total[]
-  hr_work_entry                                                                   hr_work_entry[]
-  mail_activity_plan                                                              mail_activity_plan[]
-  maintenance_order                                                               maintenance_order[]
-  maintenance_order_employee_line                                                 maintenance_order_employee_line[]
-  material_request                                                                material_request[]
-  nursery_seed_mutation                                                           nursery_seed_mutation[]
-  payroll_thr_line                                                                payroll_thr_line[]
-  petty_cash                                                                      petty_cash[]
-  report_area_statement_view                                                      report_area_statement_view[]
-  report_entry_absen_view                                                         report_entry_absen_view[]
-  report_lhd_view                                                                 report_lhd_view[]
-  report_spb_summary_view                                                         report_spb_summary_view[]
-  report_spb_view                                                                 report_spb_view[]
-  source_department_rel_source_department_rel_department_idTohr_department        source_department_rel[]                      @relation("source_department_rel_department_idTohr_department")
-  source_department_rel_source_department_rel_source_idTohr_department            source_department_rel[]                      @relation("source_department_rel_source_idTohr_department")
-  stock_issued                                                                    stock_issued[]
-  stock_move                                                                      stock_move[]
-  vra_premi_truck_line                                                            vra_premi_truck_line[]
-  wiz_entry_absen                                                                 wiz_entry_absen[]
-  wiz_report_area_statement                                                       wiz_report_area_statement[]
-  wiz_report_daily_production                                                     wiz_report_daily_production[]
-  wiz_report_lhd                                                                  wiz_report_lhd[]
-  wiz_report_spb                                                                  wiz_report_spb[]
-  wiz_report_spb_summary                                                          wiz_report_spb_summary[]
-  z_vra                                                                           z_vra[]
-  z_vra_line                                                                      z_vra_line[]
-  z_vra_premi_line                                                                z_vra_premi_line[]
-  zabw_data_line                                                                  zabw_data_line[]
-  zbkm_activity                                                                   zbkm_activity[]
-  zbkm_activity_line                                                              zbkm_activity_line[]
-  zblock_master                                                                   zblock_master[]
-  zblock_master_history                                                           zblock_master_history[]
-  zcontract_activity                                                              zcontract_activity[]
-  zcost_center_mutation                                                           zcost_center_mutation[]
-  zfruit_courier                                                                  zfruit_courier[]
-  zfruit_courier_loader                                                           zfruit_courier_loader[]
-  zgrading_formula_lf_line                                                        zgrading_formula_lf_line[]
-  zh_premi_process                                                                zh_premi_process[]
-  zh_premi_process_helper                                                         zh_premi_process_helper[]
-  zh_premi_process_line                                                           zh_premi_process_line[]
-  zharvest_activity                                                               zharvest_activity[]
-  zharvest_activity_line                                                          zharvest_activity_line[]
-  zharvest_collection_point                                                       zharvest_collection_point[]
-  zharvest_inspection                                                             zharvest_inspection[]
-  zhr_attendance_check_wizard                                                     zhr_attendance_check_wizard[]
-  zhr_leave_balance                                                               zhr_leave_balance[]
-  zhr_natura                                                                      zhr_natura[]
-  zhr_overtime                                                                    zhr_overtime[]
-  zhr_overtime_line                                                               zhr_overtime_line[]
-  zhr_overtime_report_wizard                                                      zhr_overtime_report_wizard[]
-  zhr_payroll_kes_view                                                            zhr_payroll_kes_view[]
-  zhr_payroll_tk_view                                                             zhr_payroll_tk_view[]
-  zmaster_tpn                                                                     zmaster_tpn[]
-  zra_master                                                                      zra_master[]
-  zrepair_work_order                                                              zrepair_work_order[]
-  zwork_plan                                                                      zwork_plan[]
+  id                      Int       @id @default(autoincrement())
+  company_id              Int?
+  parent_id               Int?
+  manager_id              Int?
+  color                   Int?
+  master_department_id    Int?
+  create_uid              Int?
+  write_uid               Int?
+  complete_name           String?   @db.VarChar
+  parent_path             String?   @db.VarChar
+  name                    Json
+  note                    String?
+  active                  Boolean?
+  create_date             DateTime? @db.Timestamp(6)
+  write_date              DateTime? @db.Timestamp(6)
+  operating_unit_id       Int?
+  code                    String?   @db.VarChar
+  div_ast                 String?   @db.VarChar
+  head_ast                String?   @db.VarChar
+  distance_to_mill        Float?
+  location_id             Int?
+  location_dest_id        Int?
+  picking_type_id         Int?
+  is_compute_cost         Boolean?
+  cost_center_id          Int?
+  is_exclusion_settlement Boolean?
+  is_settlement           Boolean?
+  lock                    String?   @db.VarChar
 
   @@unique([code, operating_unit_id], map: "hr_department_code_unit_uniq")
   @@index([company_id], map: "hr_department__company_id_index")
@@ -411,230 +119,121 @@ model hr_department {
 }
 
 model hr_employee {
-  id                                                                                 Int                                                 @id @default(autoincrement())
-  resource_id                                                                        Int
-  company_id                                                                         Int
-  resource_calendar_id                                                               Int?
-  message_main_attachment_id                                                         Int?
-  color                                                                              Int?
-  department_id                                                                      Int?
-  job_id                                                                             Int?
-  address_id                                                                         Int?
-  work_contact_id                                                                    Int?
-  work_location_id                                                                   Int?
-  user_id                                                                            Int?
-  parent_id                                                                          Int?
-  coach_id                                                                           Int?
-  private_state_id                                                                   Int?
-  private_country_id                                                                 Int?
-  country_id                                                                         Int?
-  children                                                                           Int?
-  country_of_birth                                                                   Int?
-  bank_account_id                                                                    Int?
-  km_home_work                                                                       Int?
-  departure_reason_id                                                                Int?
-  create_uid                                                                         Int?
-  write_uid                                                                          Int?
-  name                                                                               String?                                             @db.VarChar
-  job_title                                                                          String?                                             @db.VarChar
-  work_phone                                                                         String?                                             @db.VarChar
-  mobile_phone                                                                       String?                                             @db.VarChar
-  work_email                                                                         String?                                             @db.VarChar
-  private_street                                                                     String?                                             @db.VarChar
-  private_street2                                                                    String?                                             @db.VarChar
-  private_city                                                                       String?                                             @db.VarChar
-  private_zip                                                                        String?                                             @db.VarChar
-  private_phone                                                                      String?                                             @db.VarChar
-  private_email                                                                      String?                                             @db.VarChar
-  lang                                                                               String?                                             @db.VarChar
-  gender                                                                             String?                                             @db.VarChar
-  marital                                                                            String?                                             @db.VarChar
-  spouse_complete_name                                                               String?                                             @db.VarChar
-  place_of_birth                                                                     String?                                             @db.VarChar
-  ssnid                                                                              String?                                             @db.VarChar
-  sinid                                                                              String?                                             @db.VarChar
-  identification_id                                                                  String?                                             @db.VarChar
-  passport_id                                                                        String?                                             @db.VarChar
-  permit_no                                                                          String?                                             @db.VarChar
-  visa_no                                                                            String?                                             @db.VarChar
-  certificate                                                                        String?                                             @db.VarChar
-  study_field                                                                        String?                                             @db.VarChar
-  study_school                                                                       String?                                             @db.VarChar
-  emergency_contact                                                                  String?                                             @db.VarChar
-  emergency_phone                                                                    String?                                             @db.VarChar
-  employee_type                                                                      String                                              @db.VarChar
-  barcode                                                                            String?                                             @unique(map: "hr_employee_barcode_uniq") @db.VarChar
-  pin                                                                                String?                                             @db.VarChar
-  private_car_plate                                                                  String?                                             @db.VarChar
-  spouse_birthdate                                                                   DateTime?                                           @db.Date
-  birthday                                                                           DateTime?                                           @db.Date
-  visa_expire                                                                        DateTime?                                           @db.Date
-  work_permit_expiration_date                                                        DateTime?                                           @db.Date
-  departure_date                                                                     DateTime?                                           @db.Date
-  employee_properties                                                                Json?
-  additional_note                                                                    String?
-  notes                                                                              String?
-  departure_description                                                              String?
-  active                                                                             Boolean?
-  work_permit_scheduled_activity                                                     Boolean?
-  create_date                                                                        DateTime?                                           @db.Timestamp(6)
-  write_date                                                                         DateTime?                                           @db.Timestamp(6)
-  mobile_ref                                                                         String?                                             @db.VarChar
-  mobile_pass                                                                        String?                                             @db.VarChar
-  attendance_manager_id                                                              Int?
-  last_attendance_id                                                                 Int?
-  last_check_in                                                                      DateTime?                                           @db.Timestamp(6)
-  last_check_out                                                                     DateTime?                                           @db.Timestamp(6)
-  contract_id                                                                        Int?
-  vehicle                                                                            String?                                             @db.VarChar
-  first_contract_date                                                                DateTime?                                           @db.Date
-  contract_warning                                                                   Boolean?
-  registration_number                                                                String?                                             @db.VarChar
-  is_non_resident                                                                    Boolean?
-  default_operating_unit_id                                                          Int?
-  operating_unit_id                                                                  Int?
-  employee_type_id                                                                   Int?
-  employee_grade_id                                                                  Int?
-  job_title_id                                                                       Int?
-  address_state_id                                                                   Int?
-  address_country_id                                                                 Int?
-  bank_id                                                                            Int?
-  family_status_id                                                                   Int?
-  graduate                                                                           String?                                             @db.VarChar
-  religion                                                                           String?                                             @db.VarChar
-  address_street                                                                     String?                                             @db.VarChar
-  address_street2                                                                    String?                                             @db.VarChar
-  address_city                                                                       String?                                             @db.VarChar
-  address_zip                                                                        String?                                             @db.VarChar
-  bank_acc_number                                                                    String?                                             @db.VarChar
-  phone                                                                              String?                                             @db.VarChar
-  join_date                                                                          DateTime?                                           @db.Date
-  permanent_date                                                                     DateTime?                                           @db.Date
-  work_days                                                                          Int?
-  absent_days                                                                        Int?
-  leave_days                                                                         Int?
-  attend_days                                                                        Int?
-  activity_days                                                                      Int?
-  mechanic_grade_id                                                                  Int?
-  ptkp_id                                                                            Int?
-  dependents                                                                         Int?
-  npwp_id                                                                            String?                                             @db.VarChar
-  bpjstk_id                                                                          String?                                             @db.VarChar
-  bpjsks_id                                                                          String?                                             @db.VarChar
-  bpjsps_id                                                                          String?                                             @db.VarChar
-  levels_id                                                                          Int?
-  is_bentor_driver                                                                   Boolean?
-  Employee                                                                           Employee[]
-  employee_category_rel                                                              employee_category_rel[]
-  employee_pph                                                                       employee_pph[]
-  employee_pph_view                                                                  employee_pph_view[]
-  hr_attendance_hr_attendance_employee_idTohr_employee                               hr_attendance[]                                     @relation("hr_attendance_employee_idTohr_employee")
-  hr_attendance_overtime                                                             hr_attendance_overtime[]
-  hr_contract_hr_contract_employee_idTohr_employee                                   hr_contract[]                                       @relation("hr_contract_employee_idTohr_employee")
-  hr_department_hr_department_manager_idTohr_employee                                hr_department[]                                     @relation("hr_department_manager_idTohr_employee")
-  hr_departure_wizard                                                                hr_departure_wizard[]
-  res_country_hr_employee_address_country_idTores_country                            res_country?                                        @relation("hr_employee_address_country_idTores_country", fields: [address_country_id], references: [id], onUpdate: NoAction)
-  res_partner_hr_employee_address_idTores_partner                                    res_partner?                                        @relation("hr_employee_address_idTores_partner", fields: [address_id], references: [id], onUpdate: NoAction)
-  res_country_state_hr_employee_address_state_idTores_country_state                  res_country_state?                                  @relation("hr_employee_address_state_idTores_country_state", fields: [address_state_id], references: [id], onUpdate: NoAction)
-  res_users_hr_employee_attendance_manager_idTores_users                             res_users?                                          @relation("hr_employee_attendance_manager_idTores_users", fields: [attendance_manager_id], references: [id], onUpdate: NoAction)
-  res_partner_bank                                                                   res_partner_bank?                                   @relation(fields: [bank_account_id], references: [id], onUpdate: NoAction)
-  res_bank                                                                           res_bank?                                           @relation(fields: [bank_id], references: [id], onUpdate: NoAction)
-  hr_employee_hr_employee_coach_idTohr_employee                                      hr_employee?                                        @relation("hr_employee_coach_idTohr_employee", fields: [coach_id], references: [id], onUpdate: NoAction)
-  other_hr_employee_hr_employee_coach_idTohr_employee                                hr_employee[]                                       @relation("hr_employee_coach_idTohr_employee")
-  res_company                                                                        res_company                                         @relation(fields: [company_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  hr_contract_hr_employee_contract_idTohr_contract                                   hr_contract?                                        @relation("hr_employee_contract_idTohr_contract", fields: [contract_id], references: [id], onUpdate: NoAction)
-  res_country_hr_employee_country_idTores_country                                    res_country?                                        @relation("hr_employee_country_idTores_country", fields: [country_id], references: [id], onUpdate: NoAction)
-  res_country_hr_employee_country_of_birthTores_country                              res_country?                                        @relation("hr_employee_country_of_birthTores_country", fields: [country_of_birth], references: [id], onUpdate: NoAction)
-  res_users_hr_employee_create_uidTores_users                                        res_users?                                          @relation("hr_employee_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  operating_unit_hr_employee_default_operating_unit_idTooperating_unit               operating_unit?                                     @relation("hr_employee_default_operating_unit_idTooperating_unit", fields: [default_operating_unit_id], references: [id], onUpdate: NoAction)
-  hr_department_hr_employee_department_idTohr_department                             hr_department?                                      @relation("hr_employee_department_idTohr_department", fields: [department_id], references: [id], onUpdate: NoAction)
-  hr_departure_reason                                                                hr_departure_reason?                                @relation(fields: [departure_reason_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  zhr_grade                                                                          zhr_grade?                                          @relation(fields: [employee_grade_id], references: [id], onUpdate: NoAction)
-  zhr_employee_type                                                                  zhr_employee_type?                                  @relation(fields: [employee_type_id], references: [id], onUpdate: NoAction)
-  zhr_family_status                                                                  zhr_family_status?                                  @relation(fields: [family_status_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  hr_job                                                                             hr_job?                                             @relation(fields: [job_id], references: [id], onUpdate: NoAction)
-  zhr_job_title                                                                      zhr_job_title?                                      @relation(fields: [job_title_id], references: [id], onUpdate: NoAction)
-  hr_attendance_hr_employee_last_attendance_idTohr_attendance                        hr_attendance?                                      @relation("hr_employee_last_attendance_idTohr_attendance", fields: [last_attendance_id], references: [id], onUpdate: NoAction)
-  zhr_employee_levels                                                                zhr_employee_levels?                                @relation(fields: [levels_id], references: [id], onUpdate: NoAction)
-  zmechanic_grade                                                                    zmechanic_grade?                                    @relation(fields: [mechanic_grade_id], references: [id], onUpdate: NoAction)
-  ir_attachment                                                                      ir_attachment?                                      @relation(fields: [message_main_attachment_id], references: [id], onUpdate: NoAction)
-  operating_unit_hr_employee_operating_unit_idTooperating_unit                       operating_unit?                                     @relation("hr_employee_operating_unit_idTooperating_unit", fields: [operating_unit_id], references: [id], onUpdate: NoAction)
-  hr_employee_hr_employee_parent_idTohr_employee                                     hr_employee?                                        @relation("hr_employee_parent_idTohr_employee", fields: [parent_id], references: [id], onUpdate: NoAction)
-  other_hr_employee_hr_employee_parent_idTohr_employee                               hr_employee[]                                       @relation("hr_employee_parent_idTohr_employee")
-  res_country_hr_employee_private_country_idTores_country                            res_country?                                        @relation("hr_employee_private_country_idTores_country", fields: [private_country_id], references: [id], onUpdate: NoAction)
-  res_country_state_hr_employee_private_state_idTores_country_state                  res_country_state?                                  @relation("hr_employee_private_state_idTores_country_state", fields: [private_state_id], references: [id], onUpdate: NoAction)
-  hr_ptkp                                                                            hr_ptkp?                                            @relation(fields: [ptkp_id], references: [id], onUpdate: NoAction)
-  resource_calendar                                                                  resource_calendar?                                  @relation(fields: [resource_calendar_id], references: [id], onUpdate: NoAction)
-  resource_resource                                                                  resource_resource                                   @relation(fields: [resource_id], references: [id], onUpdate: NoAction)
-  res_users_hr_employee_user_idTores_users                                           res_users?                                          @relation("hr_employee_user_idTores_users", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  res_partner_hr_employee_work_contact_idTores_partner                               res_partner?                                        @relation("hr_employee_work_contact_idTores_partner", fields: [work_contact_id], references: [id], onUpdate: NoAction)
-  hr_work_location                                                                   hr_work_location?                                   @relation(fields: [work_location_id], references: [id], onUpdate: NoAction)
-  res_users_hr_employee_write_uidTores_users                                         res_users?                                          @relation("hr_employee_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  hr_employee_group_rel                                                              hr_employee_group_rel[]
-  hr_employee_hr_salary_attachment_rel                                               hr_employee_hr_salary_attachment_rel[]
-  hr_employee_hr_work_entry_regeneration_wizard_rel                                  hr_employee_hr_work_entry_regeneration_wizard_rel[]
-  hr_employee_zbkm_activity_line_rel                                                 hr_employee_zbkm_activity_line_rel[]
-  hr_employee_zhr_attendance_check_wizard_rel                                        hr_employee_zhr_attendance_check_wizard_rel[]
-  hr_employee_zhr_payroll_bkm_wizard_rel                                             hr_employee_zhr_payroll_bkm_wizard_rel[]
-  hr_employee_zhr_payroll_bpjs_kes_wizard_rel                                        hr_employee_zhr_payroll_bpjs_kes_wizard_rel[]
-  hr_employee_zhr_payroll_bpjs_wizard_rel                                            hr_employee_zhr_payroll_bpjs_wizard_rel[]
-  hr_payroll_employee_declaration                                                    hr_payroll_employee_declaration[]
-  hr_payslip                                                                         hr_payslip[]
-  hr_payslip_line                                                                    hr_payslip_line[]
-  hr_user_work_entry_employee                                                        hr_user_work_entry_employee[]
-  hr_work_entry                                                                      hr_work_entry[]
-  maintenance_order_employee_line                                                    maintenance_order_employee_line[]
-  maintenance_order_line                                                             maintenance_order_line[]
-  operating_unit_employees_rel                                                       operating_unit_employees_rel[]
-  payroll_thr_line                                                                   payroll_thr_line[]
-  report_entry_absen_view                                                            report_entry_absen_view[]
-  ro_activity                                                                        ro_activity[]
-  z_vra_z_vra_helper_idTohr_employee                                                 z_vra[]                                             @relation("z_vra_helper_idTohr_employee")
-  z_vra_z_vra_operator_idTohr_employee                                               z_vra[]                                             @relation("z_vra_operator_idTohr_employee")
-  z_vra_line_employee                                                                z_vra_line_employee[]
-  z_vra_premi_cpo                                                                    z_vra_premi_cpo[]
-  z_vra_premi_oab                                                                    z_vra_premi_oab[]
-  z_vra_premi_oma                                                                    z_vra_premi_oma[]
-  z_vra_premi_otr                                                                    z_vra_premi_otr[]
-  z_vra_premi_stk                                                                    z_vra_premi_stk[]
-  zberita_acara_pp                                                                   zberita_acara_pp[]
-  zbkm_activity                                                                      zbkm_activity[]
-  zbkm_activity_employee                                                             zbkm_activity_employee[]
-  zcontract_activity                                                                 zcontract_activity[]
-  zcontract_activity_progress                                                        zcontract_activity_progress[]
-  zdistribution_equipment_line_zdistribution_equipment_line_helper_idTohr_employee   zdistribution_equipment_line[]                      @relation("zdistribution_equipment_line_helper_idTohr_employee")
-  zdistribution_equipment_line_zdistribution_equipment_line_operator_idTohr_employee zdistribution_equipment_line[]                      @relation("zdistribution_equipment_line_operator_idTohr_employee")
-  zdistribution_payroll_line_zdistribution_payroll_line_helper_idTohr_employee       zdistribution_payroll_line[]                        @relation("zdistribution_payroll_line_helper_idTohr_employee")
-  zdistribution_payroll_line_zdistribution_payroll_line_operator_idTohr_employee     zdistribution_payroll_line[]                        @relation("zdistribution_payroll_line_operator_idTohr_employee")
-  zfruit_courier_zfruit_courier_driver_idTohr_employee                               zfruit_courier[]                                    @relation("zfruit_courier_driver_idTohr_employee")
-  zfruit_courier_zfruit_courier_krani_idTohr_employee                                zfruit_courier[]                                    @relation("zfruit_courier_krani_idTohr_employee")
-  zfruit_courier_loader                                                              zfruit_courier_loader[]
-  zh_premi_loader_line                                                               zh_premi_loader_line[]
-  zh_premi_loader_rekap                                                              zh_premi_loader_rekap[]
-  zh_premi_process_line_zh_premi_process_line_employee_idTohr_employee               zh_premi_process_line[]                             @relation("zh_premi_process_line_employee_idTohr_employee")
-  zh_premi_process_line_zh_premi_process_line_harvest_foreman_idTohr_employee        zh_premi_process_line[]                             @relation("zh_premi_process_line_harvest_foreman_idTohr_employee")
-  zh_premi_process_line_zh_premi_process_line_harvest_user_idTohr_employee           zh_premi_process_line[]                             @relation("zh_premi_process_line_harvest_user_idTohr_employee")
-  zh_premi_process_line_zh_premi_process_line_head_foreman_idTohr_employee           zh_premi_process_line[]                             @relation("zh_premi_process_line_head_foreman_idTohr_employee")
-  zh_premi_process_spv                                                               zh_premi_process_spv[]
-  zh_premi_transport_line                                                            zh_premi_transport_line[]
-  zharvest_activity_zharvest_activity_harvest_foreman_idTohr_employee                zharvest_activity[]                                 @relation("zharvest_activity_harvest_foreman_idTohr_employee")
-  zharvest_activity_zharvest_activity_harvest_user_idTohr_employee                   zharvest_activity[]                                 @relation("zharvest_activity_harvest_user_idTohr_employee")
-  zharvest_activity_zharvest_activity_head_foreman_idTohr_employee                   zharvest_activity[]                                 @relation("zharvest_activity_head_foreman_idTohr_employee")
-  zharvest_activity_line                                                             zharvest_activity_line[]
-  zharvest_activity_workdays                                                         zharvest_activity_workdays[]
-  zharvest_collection_point_zharvest_collection_point_employee_idTohr_employee       zharvest_collection_point[]                         @relation("zharvest_collection_point_employee_idTohr_employee")
-  zharvest_collection_point_zharvest_collection_point_harvest_user_idTohr_employee   zharvest_collection_point[]                         @relation("zharvest_collection_point_harvest_user_idTohr_employee")
-  zharvest_inspection_zharvest_inspection_harvest_employee_idTohr_employee           zharvest_inspection[]                               @relation("zharvest_inspection_harvest_employee_idTohr_employee")
-  zharvest_inspection_zharvest_inspection_harvest_foreman_idTohr_employee            zharvest_inspection[]                               @relation("zharvest_inspection_harvest_foreman_idTohr_employee")
-  zharvest_inspection_zharvest_inspection_harvest_user_idTohr_employee               zharvest_inspection[]                               @relation("zharvest_inspection_harvest_user_idTohr_employee")
-  zhr_leave_balance                                                                  zhr_leave_balance[]
-  zhr_natura_line                                                                    zhr_natura_line[]
-  zhr_overtime_line                                                                  zhr_overtime_line[]
-  zhr_payroll_kes_view                                                               zhr_payroll_kes_view[]
-  zhr_payroll_tk_view                                                                zhr_payroll_tk_view[]
-  zhr_payslip_run_input_wizard_line                                                  zhr_payslip_run_input_wizard_line[]
-  zmechanic_activity_report                                                          zmechanic_activity_report[]
-  zwork_plan_line                                                                    zwork_plan_line[]
+  id                             Int       @id @default(autoincrement())
+  resource_id                    Int
+  company_id                     Int
+  resource_calendar_id           Int?
+  message_main_attachment_id     Int?
+  color                          Int?
+  department_id                  Int?
+  job_id                         Int?
+  address_id                     Int?
+  work_contact_id                Int?
+  work_location_id               Int?
+  user_id                        Int?
+  parent_id                      Int?
+  coach_id                       Int?
+  private_state_id               Int?
+  private_country_id             Int?
+  country_id                     Int?
+  children                       Int?
+  country_of_birth               Int?
+  bank_account_id                Int?
+  km_home_work                   Int?
+  departure_reason_id            Int?
+  create_uid                     Int?
+  write_uid                      Int?
+  name                           String?   @db.VarChar
+  job_title                      String?   @db.VarChar
+  work_phone                     String?   @db.VarChar
+  mobile_phone                   String?   @db.VarChar
+  work_email                     String?   @db.VarChar
+  private_street                 String?   @db.VarChar
+  private_street2                String?   @db.VarChar
+  private_city                   String?   @db.VarChar
+  private_zip                    String?   @db.VarChar
+  private_phone                  String?   @db.VarChar
+  private_email                  String?   @db.VarChar
+  lang                           String?   @db.VarChar
+  gender                         String?   @db.VarChar
+  marital                        String?   @db.VarChar
+  spouse_complete_name           String?   @db.VarChar
+  place_of_birth                 String?   @db.VarChar
+  ssnid                          String?   @db.VarChar
+  sinid                          String?   @db.VarChar
+  identification_id              String?   @db.VarChar
+  passport_id                    String?   @db.VarChar
+  permit_no                      String?   @db.VarChar
+  visa_no                        String?   @db.VarChar
+  certificate                    String?   @db.VarChar
+  study_field                    String?   @db.VarChar
+  study_school                   String?   @db.VarChar
+  emergency_contact              String?   @db.VarChar
+  emergency_phone                String?   @db.VarChar
+  employee_type                  String    @db.VarChar
+  barcode                        String?   @unique(map: "hr_employee_barcode_uniq") @db.VarChar
+  pin                            String?   @db.VarChar
+  private_car_plate              String?   @db.VarChar
+  spouse_birthdate               DateTime? @db.Date
+  birthday                       DateTime? @db.Date
+  visa_expire                    DateTime? @db.Date
+  work_permit_expiration_date    DateTime? @db.Date
+  departure_date                 DateTime? @db.Date
+  employee_properties            Json?
+  additional_note                String?
+  notes                          String?
+  departure_description          String?
+  active                         Boolean?
+  work_permit_scheduled_activity Boolean?
+  create_date                    DateTime? @db.Timestamp(6)
+  write_date                     DateTime? @db.Timestamp(6)
+  mobile_ref                     String?   @db.VarChar
+  mobile_pass                    String?   @db.VarChar
+  attendance_manager_id          Int?
+  last_attendance_id             Int?
+  last_check_in                  DateTime? @db.Timestamp(6)
+  last_check_out                 DateTime? @db.Timestamp(6)
+  contract_id                    Int?
+  vehicle                        String?   @db.VarChar
+  first_contract_date            DateTime? @db.Date
+  contract_warning               Boolean?
+  registration_number            String?   @db.VarChar
+  is_non_resident                Boolean?
+  default_operating_unit_id      Int?
+  operating_unit_id              Int?
+  employee_type_id               Int?
+  employee_grade_id              Int?
+  job_title_id                   Int?
+  address_state_id               Int?
+  address_country_id             Int?
+  bank_id                        Int?
+  family_status_id               Int?
+  graduate                       String?   @db.VarChar
+  religion                       String?   @db.VarChar
+  address_street                 String?   @db.VarChar
+  address_street2                String?   @db.VarChar
+  address_city                   String?   @db.VarChar
+  address_zip                    String?   @db.VarChar
+  bank_acc_number                String?   @db.VarChar
+  phone                          String?   @db.VarChar
+  join_date                      DateTime? @db.Date
+  permanent_date                 DateTime? @db.Date
+  work_days                      Int?
+  absent_days                    Int?
+  leave_days                     Int?
+  attend_days                    Int?
+  activity_days                  Int?
+  mechanic_grade_id              Int?
+  ptkp_id                        Int?
+  dependents                     Int?
+  npwp_id                        String?   @db.VarChar
+  bpjstk_id                      String?   @db.VarChar
+  bpjsks_id                      String?   @db.VarChar
+  bpjsps_id                      String?   @db.VarChar
+  levels_id                      Int?
+  is_bentor_driver               Boolean?
+  hourly_cost                    Decimal?  @db.Decimal
+  contract_state                 String?   @db.VarChar
 
   @@unique([registration_number, company_id], map: "hr_employee_unique_registration_number")
   @@unique([user_id, company_id], map: "hr_employee_user_uniq")
@@ -644,510 +243,241 @@ model hr_employee {
 }
 
 model zblock_master {
-  id                                                                           Int                                             @id @default(autoincrement())
-  company_id                                                                   Int
-  operating_unit_id                                                            Int
-  department_id                                                                Int
-  soil_class_id                                                                Int?
-  topografy_id                                                                 Int?
-  stage_id                                                                     Int?
-  ou_plasma_id                                                                 Int?
-  blcok_area_id                                                                Int?
-  seed_id                                                                      Int?
-  area_id                                                                      Int?
-  uom_id                                                                       Int?
-  analytic_id                                                                  Int?
-  currency_id                                                                  Int?
-  stand_ha                                                                     Int?
-  population                                                                   Int?
-  phase_id                                                                     Int?
-  create_uid                                                                   Int?
-  write_uid                                                                    Int?
-  infra_type_id                                                                Int?
-  parent_infra_id                                                              Int?
-  asset_id                                                                     Int?
-  name                                                                         String?                                         @db.VarChar
-  code                                                                         String                                          @db.VarChar
-  code_stage                                                                   String?                                         @db.VarChar
-  year_month                                                                   String?                                         @db.VarChar(7)
-  select_year                                                                  String?                                         @db.VarChar
-  select_month                                                                 String?                                         @db.VarChar
-  ra_year                                                                      String?                                         @db.VarChar(4)
-  vilage                                                                       String?                                         @db.VarChar
-  source                                                                       String?                                         @db.VarChar
-  cycle                                                                        String?                                         @db.VarChar
-  spacing                                                                      String?                                         @db.VarChar
-  date_from                                                                    DateTime?                                       @db.Date
-  date_to                                                                      DateTime?                                       @db.Date
-  description                                                                  String?
-  active                                                                       Boolean?
-  is_harvest                                                                   Boolean?
-  create_date                                                                  DateTime?                                       @db.Timestamp(6)
-  write_date                                                                   DateTime?                                       @db.Timestamp(6)
-  wide                                                                         Float?
-  qty                                                                          Float?
-  tree_planted                                                                 Float?
-  key_road                                                                     Float?
-  main_road                                                                    Float?
-  col_road                                                                     Float?
-  road_con                                                                     Float?
-  leng_key_road                                                                Float?
-  leng_main_road                                                               Float?
-  leng_col_road                                                                Float?
-  account_analytic_account_account_analytic_account_block_idTozblock_master    account_analytic_account[]                      @relation("account_analytic_account_block_idTozblock_master")
-  account_move_line_zblock_master_rel                                          account_move_line_zblock_master_rel[]
-  contract_create_bapp_line                                                    contract_create_bapp_line[]
-  cost_bkm_wizard_zblock_master_rel                                            cost_bkm_wizard_zblock_master_rel[]
-  harvest_line_block_item                                                      harvest_line_block_item[]
-  hr_department_zblock_master_rel                                              hr_department_zblock_master_rel[]
-  nursery_seed_mutation                                                        nursery_seed_mutation[]
-  push_vra_config_zblock_master_rel                                            push_vra_config_zblock_master_rel[]
-  report_area_statement_view                                                   report_area_statement_view[]
-  report_lhd_view                                                              report_lhd_view[]
-  report_spb_summary_view                                                      report_spb_summary_view[]
-  report_spb_view                                                              report_spb_view[]
-  res_company_res_company_workshop_block_idTozblock_master                     res_company[]                                   @relation("res_company_workshop_block_idTozblock_master")
-  wb_line_integration                                                          wb_line_integration[]
-  wiz_report_daily_production_zblock_master_rel                                wiz_report_daily_production_zblock_master_rel[]
-  z_vra_line                                                                   z_vra_line[]
-  z_vra_premi_line                                                             z_vra_premi_line[]
-  zabw_data_line                                                               zabw_data_line[]
-  zabw_data_temp                                                               zabw_data_temp[]
-  zberita_acara_pp_line                                                        zberita_acara_pp_line[]
-  zbkm_activity_line                                                           zbkm_activity_line[]
-  account_analytic_account_zblock_master_analytic_idToaccount_analytic_account account_analytic_account?                       @relation("zblock_master_analytic_idToaccount_analytic_account", fields: [analytic_id], references: [id], onUpdate: NoAction)
-  zblock_area_zblock_master_area_idTozblock_area                               zblock_area?                                    @relation("zblock_master_area_idTozblock_area", fields: [area_id], references: [id], onUpdate: NoAction)
-  account_asset                                                                account_asset?                                  @relation(fields: [asset_id], references: [id], onUpdate: NoAction)
-  zblock_area_zblock_master_blcok_area_idTozblock_area                         zblock_area?                                    @relation("zblock_master_blcok_area_idTozblock_area", fields: [blcok_area_id], references: [id], onUpdate: NoAction)
-  res_company_zblock_master_company_idTores_company                            res_company                                     @relation("zblock_master_company_idTores_company", fields: [company_id], references: [id], onUpdate: NoAction)
-  res_users_zblock_master_create_uidTores_users                                res_users?                                      @relation("zblock_master_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  res_currency                                                                 res_currency?                                   @relation(fields: [currency_id], references: [id], onUpdate: NoAction)
-  hr_department                                                                hr_department                                   @relation(fields: [department_id], references: [id], onUpdate: NoAction)
-  zinfra_type                                                                  zinfra_type?                                    @relation(fields: [infra_type_id], references: [id], onUpdate: NoAction)
-  operating_unit_zblock_master_operating_unit_idTooperating_unit               operating_unit                                  @relation("zblock_master_operating_unit_idTooperating_unit", fields: [operating_unit_id], references: [id], onUpdate: NoAction)
-  operating_unit_zblock_master_ou_plasma_idTooperating_unit                    operating_unit?                                 @relation("zblock_master_ou_plasma_idTooperating_unit", fields: [ou_plasma_id], references: [id], onUpdate: NoAction)
-  zblock_master                                                                zblock_master?                                  @relation("zblock_masterTozblock_master", fields: [parent_infra_id], references: [id], onUpdate: NoAction)
-  other_zblock_master                                                          zblock_master[]                                 @relation("zblock_masterTozblock_master")
-  zblock_phase                                                                 zblock_phase?                                   @relation(fields: [phase_id], references: [id], onUpdate: NoAction)
-  zblock_seed                                                                  zblock_seed?                                    @relation(fields: [seed_id], references: [id], onUpdate: NoAction)
-  zsoil_class                                                                  zsoil_class?                                    @relation(fields: [soil_class_id], references: [id], onUpdate: NoAction)
-  zblock_stage                                                                 zblock_stage?                                   @relation(fields: [stage_id], references: [id], onUpdate: NoAction)
-  zblock_topografy                                                             zblock_topografy?                               @relation(fields: [topografy_id], references: [id], onUpdate: NoAction)
-  uom_uom                                                                      uom_uom?                                        @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zblock_master_write_uidTores_users                                 res_users?                                      @relation("zblock_master_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  zblock_master_history_zblock_master_history_history_idTozblock_master        zblock_master_history[]                         @relation("zblock_master_history_history_idTozblock_master")
-  zblock_master_history_zblock_master_history_parent_infra_idTozblock_master   zblock_master_history[]                         @relation("zblock_master_history_parent_infra_idTozblock_master")
-  zblock_master_mutation                                                       zblock_master_mutation[]
-  zblock_master_zblock_stage_rel                                               zblock_master_zblock_stage_rel[]
-  zblock_move_zblock_move_block_idTozblock_master                              zblock_move[]                                   @relation("zblock_move_block_idTozblock_master")
-  zblock_move_zblock_move_block_tree_idTozblock_master                         zblock_move[]                                   @relation("zblock_move_block_tree_idTozblock_master")
-  zblock_opbal                                                                 zblock_opbal[]
-  zcontract_activity_line                                                      zcontract_activity_line[]
-  zcontract_activity_progress                                                  zcontract_activity_progress[]
-  zcost_center_mutation_line                                                   zcost_center_mutation_line[]
-  zdistribution_equipment_line_activity                                        zdistribution_equipment_line_activity[]
-  zdistribution_payroll_line                                                   zdistribution_payroll_line[]
-  zfruit_courier_block                                                         zfruit_courier_block[]
-  zfruit_courier_wb                                                            zfruit_courier_wb[]
-  zh_premi_process_line                                                        zh_premi_process_line[]
-  zharvest_activity_line                                                       zharvest_activity_line[]
-  zharvest_activity_result_area                                                zharvest_activity_result_area[]
-  zharvest_inspection                                                          zharvest_inspection[]
-  zmaster_tpn                                                                  zmaster_tpn[]
-  zw_bridge_line                                                               zw_bridge_line[]
-  zwork_plan_line                                                              zwork_plan_line[]
+  id                          Int       @id @default(autoincrement())
+  company_id                  Int
+  operating_unit_id           Int
+  department_id               Int
+  soil_class_id               Int?
+  topografy_id                Int?
+  stage_id                    Int?
+  ou_plasma_id                Int?
+  blcok_area_id               Int?
+  seed_id                     Int?
+  area_id                     Int?
+  uom_id                      Int?
+  analytic_id                 Int?
+  currency_id                 Int?
+  stand_ha                    Int?
+  population                  Int?
+  phase_id                    Int?
+  create_uid                  Int?
+  write_uid                   Int?
+  infra_type_id               Int?
+  parent_infra_id             Int?
+  asset_id                    Int?
+  name                        String?   @db.VarChar
+  code                        String    @db.VarChar
+  code_stage                  String?   @db.VarChar
+  year_month                  String?   @db.VarChar(7)
+  select_year                 String?   @db.VarChar
+  select_month                String?   @db.VarChar
+  ra_year                     String?   @db.VarChar(4)
+  vilage                      String?   @db.VarChar
+  source                      String?   @db.VarChar
+  cycle                       String?   @db.VarChar
+  spacing                     String?   @db.VarChar
+  date_from                   DateTime? @db.Date
+  date_to                     DateTime? @db.Date
+  description                 String?
+  active                      Boolean?
+  is_harvest                  Boolean?
+  create_date                 DateTime? @db.Timestamp(6)
+  write_date                  DateTime? @db.Timestamp(6)
+  wide                        Float?
+  qty                         Float?
+  tree_planted                Float?
+  key_road                    Float?
+  main_road                   Float?
+  col_road                    Float?
+  road_con                    Float?
+  leng_key_road               Float?
+  leng_main_road              Float?
+  leng_col_road               Float?
+  exclude_settlement          Boolean?
+  exclude_in_report_cost_mill Boolean?
 
   @@unique([code, company_id, area_id], map: "zblock_master_code_stage_uniq")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model zmaster_tpn {
-  id                                          Int                         @id @default(autoincrement())
-  block_id                                    Int
-  create_uid                                  Int?
-  write_uid                                   Int?
-  name                                        String?                     @db.VarChar
-  latitude                                    String?                     @db.VarChar
-  longitude                                   String?                     @db.VarChar
-  active                                      Boolean?
-  create_date                                 DateTime?                   @db.Timestamp(6)
-  write_date                                  DateTime?                   @db.Timestamp(6)
-  company_id                                  Int?
-  operating_unit_id                           Int?
-  department_id                               Int?
-  harvest_line_block_item                     harvest_line_block_item[]
-  zfruit_courier_block                        zfruit_courier_block[]
-  zharvest_collection_point                   zharvest_collection_point[]
-  zblock_master                               zblock_master               @relation(fields: [block_id], references: [id], onUpdate: NoAction)
-  res_company                                 res_company?                @relation(fields: [company_id], references: [id], onUpdate: NoAction)
-  res_users_zmaster_tpn_create_uidTores_users res_users?                  @relation("zmaster_tpn_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  hr_department                               hr_department?              @relation(fields: [department_id], references: [id], onUpdate: NoAction)
-  operating_unit                              operating_unit?             @relation(fields: [operating_unit_id], references: [id], onUpdate: NoAction)
-  res_users_zmaster_tpn_write_uidTores_users  res_users?                  @relation("zmaster_tpn_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
+  id                Int         @id @default(autoincrement())
+  block_id          Int
+  create_uid        Int?
+  write_uid         Int?
+  name              String?     @db.VarChar
+  latitude          String?     @db.VarChar
+  longitude         String?     @db.VarChar
+  active            Boolean?
+  create_date       DateTime?   @db.Timestamp(6)
+  write_date        DateTime?   @db.Timestamp(6)
+  company_id        Int?
+  operating_unit_id Int?
 }
 
 model zactivity_type {
-  id                                             Int                                        @id @default(autoincrement())
-  uom_id                                         Int
-  full_payment_days                              Int?
-  type_ref_id                                    Int?
-  create_uid                                     Int?
-  write_uid                                      Int?
-  name                                           String                                     @db.VarChar
-  code                                           String                                     @unique(map: "zactivity_type_code_uniq") @db.VarChar
-  active                                         Boolean?
-  is_all_departments                             Boolean?
-  is_required_material                           Boolean?
-  create_date                                    DateTime?                                  @db.Timestamp(6)
-  write_date                                     DateTime?                                  @db.Timestamp(6)
-  first_payment_percent                          Float?
-  is_cost_center_mutation                        Boolean?
-  is_inter_company                               Boolean?
-  account_move_line                              account_move_line[]
-  account_payment_multiple                       account_payment_multiple[]
-  contract_create_bapp_line                      contract_create_bapp_line[]
-  maintenance_order_line                         maintenance_order_line[]
-  material_request_line                          material_request_line[]
-  petty_cash_line                                petty_cash_line[]
-  petty_move_line                                petty_move_line[]
-  production_hpp_config_zactivity_type_rel       production_hpp_config_zactivity_type_rel[]
-  push_vra_config_zactivity_type_rel             push_vra_config_zactivity_type_rel[]
-  report_lhd_view                                report_lhd_view[]
-  ro_activity                                    ro_activity[]
-  settlement_alokasi_line                        settlement_alokasi_line[]
-  stock_issued_line                              stock_issued_line[]
-  stock_move                                     stock_move[]
-  temporary_closing_line                         temporary_closing_line[]
-  z_vra_line                                     z_vra_line[]
-  z_vra_premi_basis_line                         z_vra_premi_basis_line[]
-  z_vra_premi_basis_tractor                      z_vra_premi_basis_tractor[]
-  z_vra_premi_line                               z_vra_premi_line[]
-  zactivity_rate                                 zactivity_rate[]
-  res_users_zactivity_type_create_uidTores_users res_users?                                 @relation("zactivity_type_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  zactivity_type_ref                             zactivity_type_ref?                        @relation(fields: [type_ref_id], references: [id], onUpdate: NoAction)
-  uom_uom                                        uom_uom                                    @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zactivity_type_write_uidTores_users  res_users?                                 @relation("zactivity_type_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  zactivity_type_account                         zactivity_type_account[]
-  zactivity_type_product                         zactivity_type_product[]
-  zactivity_type_zblock_stage_rel                zactivity_type_zblock_stage_rel[]
-  zberita_acara_pp_line                          zberita_acara_pp_line[]
-  zbkm_activity_line                             zbkm_activity_line[]
-  zblock_master_mutation                         zblock_master_mutation[]
-  zcontract_activity_line                        zcontract_activity_line[]
-  zcontract_activity_progress                    zcontract_activity_progress[]
-  zcost_center_mutation_line                     zcost_center_mutation_line[]
-  zdistribution_equipment_line_activity          zdistribution_equipment_line_activity[]
-  zgrading_base                                  zgrading_base[]
-  zgrading_premi                                 zgrading_premi[]
-  zgrading_premi_loader_sheet                    zgrading_premi_loader_sheet[]
-  zh_premi_loader_line                           zh_premi_loader_line[]
-  zh_premi_spv                                   zh_premi_spv[]
-  zh_premi_transport_line                        zh_premi_transport_line[]
-  zwork_order_activity                           zwork_order_activity[]
-  zwork_plan_line                                zwork_plan_line[]
+  id                      Int       @id @default(autoincrement())
+  uom_id                  Int
+  full_payment_days       Int?
+  type_ref_id             Int?
+  create_uid              Int?
+  write_uid               Int?
+  name                    String    @db.VarChar
+  code                    String    @unique(map: "zactivity_type_code_uniq") @db.VarChar
+  active                  Boolean?
+  is_all_departments      Boolean?
+  is_required_material    Boolean?
+  create_date             DateTime? @db.Timestamp(6)
+  write_date              DateTime? @db.Timestamp(6)
+  first_payment_percent   Float?
+  is_cost_center_mutation Boolean?
+  is_inter_company        Boolean?
 }
 
 model zactivity_type_product {
-  id                                                     Int               @id @default(autoincrement())
-  activity_type_id                                       Int?
-  product_id                                             Int?
-  product_uom_category_id                                Int?
-  uom_id                                                 Int?
-  create_uid                                             Int?
-  write_uid                                              Int?
-  state                                                  String?           @db.VarChar
-  create_date                                            DateTime?         @db.Timestamp(6)
-  write_date                                             DateTime?         @db.Timestamp(6)
-  zactivity_type                                         zactivity_type?   @relation(fields: [activity_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  res_users_zactivity_type_product_create_uidTores_users res_users?        @relation("zactivity_type_product_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  product_product                                        product_product?  @relation(fields: [product_id], references: [id], onUpdate: NoAction)
-  product_category                                       product_category? @relation(fields: [product_uom_category_id], references: [id], onUpdate: NoAction)
-  uom_uom                                                uom_uom?          @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zactivity_type_product_write_uidTores_users  res_users?        @relation("zactivity_type_product_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
+  id                      Int       @id @default(autoincrement())
+  activity_type_id        Int?
+  product_id              Int?
+  product_uom_category_id Int?
+  uom_id                  Int?
+  create_uid              Int?
+  write_uid               Int?
+  state                   String?   @db.VarChar
+  create_date             DateTime? @db.Timestamp(6)
+  write_date              DateTime? @db.Timestamp(6)
 
   @@index([product_id], map: "zactivity_type_product__product_id_index")
 }
 
 model zharvest_result_ffb_production {
-  id                                                             Int                        @id @default(autoincrement())
-  grading_id                                                     Int?
-  quantity                                                       Int?
-  uom_id                                                         Int?
-  harvest_tph_id                                                 Int?
-  create_uid                                                     Int?
-  write_uid                                                      Int?
-  mobile_ref                                                     String?                    @db.VarChar
-  create_date                                                    DateTime?                  @db.Timestamp(6)
-  write_date                                                     DateTime?                  @db.Timestamp(6)
-  res_users_zharvest_result_ffb_production_create_uidTores_users res_users?                 @relation("zharvest_result_ffb_production_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  zgrading_base                                                  zgrading_base?             @relation(fields: [grading_id], references: [id], onUpdate: NoAction)
-  zharvest_collection_point                                      zharvest_collection_point? @relation(fields: [harvest_tph_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  uom_uom                                                        uom_uom?                   @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zharvest_result_ffb_production_write_uidTores_users  res_users?                 @relation("zharvest_result_ffb_production_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
+  id             Int       @id @default(autoincrement())
+  grading_id     Int?
+  quantity       Int?
+  uom_id         Int?
+  harvest_tph_id Int?
+  create_uid     Int?
+  write_uid      Int?
+  mobile_ref     String?   @db.VarChar
+  create_date    DateTime? @db.Timestamp(6)
+  write_date     DateTime? @db.Timestamp(6)
 }
 
 model zharvest_result_lf_production {
-  id                                                            Int                        @id @default(autoincrement())
-  grading_id                                                    Int?
-  quantity                                                      Int?
-  uom_id                                                        Int?
-  harvest_tph_id                                                Int?
-  create_uid                                                    Int?
-  write_uid                                                     Int?
-  mobile_ref                                                    String?                    @db.VarChar
-  create_date                                                   DateTime?                  @db.Timestamp(6)
-  write_date                                                    DateTime?                  @db.Timestamp(6)
-  res_users_zharvest_result_lf_production_create_uidTores_users res_users?                 @relation("zharvest_result_lf_production_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  zgrading_base                                                 zgrading_base?             @relation(fields: [grading_id], references: [id], onUpdate: NoAction)
-  zharvest_collection_point                                     zharvest_collection_point? @relation(fields: [harvest_tph_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  uom_uom                                                       uom_uom?                   @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zharvest_result_lf_production_write_uidTores_users  res_users?                 @relation("zharvest_result_lf_production_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-}
-
-model zharvest_result_ffb_penalty {
-  id                                                          Int                        @id @default(autoincrement())
-  grading_id                                                  Int?
-  quantity                                                    Int?
-  uom_id                                                      Int?
-  harvest_tph_id                                              Int?
-  create_uid                                                  Int?
-  write_uid                                                   Int?
-  mobile_ref                                                  String?                    @db.VarChar
-  create_date                                                 DateTime?                  @db.Timestamp(6)
-  write_date                                                  DateTime?                  @db.Timestamp(6)
-  res_users_zharvest_result_ffb_penalty_create_uidTores_users res_users?                 @relation("zharvest_result_ffb_penalty_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  zgrading_base                                               zgrading_base?             @relation(fields: [grading_id], references: [id], onUpdate: NoAction)
-  zharvest_collection_point                                   zharvest_collection_point? @relation(fields: [harvest_tph_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  uom_uom                                                     uom_uom?                   @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zharvest_result_ffb_penalty_write_uidTores_users  res_users?                 @relation("zharvest_result_ffb_penalty_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
+  id             Int       @id @default(autoincrement())
+  grading_id     Int?
+  quantity       Int?
+  uom_id         Int?
+  harvest_tph_id Int?
+  create_uid     Int?
+  write_uid      Int?
+  mobile_ref     String?   @db.VarChar
+  create_date    DateTime? @db.Timestamp(6)
+  write_date     DateTime? @db.Timestamp(6)
 }
 
 model zharvest_result_lf_penalty {
-  id                                                         Int                        @id @default(autoincrement())
-  grading_id                                                 Int?
-  quantity                                                   Int?
-  uom_id                                                     Int?
-  harvest_tph_id                                             Int?
-  create_uid                                                 Int?
-  write_uid                                                  Int?
-  mobile_ref                                                 String?                    @db.VarChar
-  create_date                                                DateTime?                  @db.Timestamp(6)
-  write_date                                                 DateTime?                  @db.Timestamp(6)
-  res_users_zharvest_result_lf_penalty_create_uidTores_users res_users?                 @relation("zharvest_result_lf_penalty_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  zgrading_base                                              zgrading_base?             @relation(fields: [grading_id], references: [id], onUpdate: NoAction)
-  zharvest_collection_point                                  zharvest_collection_point? @relation(fields: [harvest_tph_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  uom_uom                                                    uom_uom?                   @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zharvest_result_lf_penalty_write_uidTores_users  res_users?                 @relation("zharvest_result_lf_penalty_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
+  id             Int       @id @default(autoincrement())
+  grading_id     Int?
+  quantity       Int?
+  uom_id         Int?
+  harvest_tph_id Int?
+  create_uid     Int?
+  write_uid      Int?
+  mobile_ref     String?   @db.VarChar
+  create_date    DateTime? @db.Timestamp(6)
+  write_date     DateTime? @db.Timestamp(6)
 }
 
 model res_partner {
-  id                                                                            Int                                                   @id @default(autoincrement())
-  company_id                                                                    Int?
-  create_date                                                                   DateTime?                                             @db.Timestamp(6)
-  name                                                                          String?                                               @db.VarChar
-  title                                                                         Int?
-  parent_id                                                                     Int?
-  user_id                                                                       Int?
-  state_id                                                                      Int?
-  country_id                                                                    Int?
-  industry_id                                                                   Int?
-  color                                                                         Int?
-  commercial_partner_id                                                         Int?
-  create_uid                                                                    Int?
-  write_uid                                                                     Int?
-  complete_name                                                                 String?                                               @db.VarChar
-  ref                                                                           String?                                               @db.VarChar
-  lang                                                                          String?                                               @db.VarChar
-  tz                                                                            String?                                               @db.VarChar
-  vat                                                                           String?                                               @db.VarChar
-  company_registry                                                              String?                                               @db.VarChar
-  website                                                                       String?                                               @db.VarChar
-  function                                                                      String?                                               @db.VarChar
-  type                                                                          String?                                               @db.VarChar
-  street                                                                        String?                                               @db.VarChar
-  street2                                                                       String?                                               @db.VarChar
-  zip                                                                           String?                                               @db.VarChar
-  city                                                                          String?                                               @db.VarChar
-  email                                                                         String?                                               @db.VarChar
-  phone                                                                         String?                                               @db.VarChar
-  mobile                                                                        String?                                               @db.VarChar
-  commercial_company_name                                                       String?                                               @db.VarChar
-  company_name                                                                  String?                                               @db.VarChar
-  date                                                                          DateTime?                                             @db.Date
-  comment                                                                       String?
-  partner_latitude                                                              Decimal?                                              @db.Decimal
-  partner_longitude                                                             Decimal?                                              @db.Decimal
-  active                                                                        Boolean?
-  employee                                                                      Boolean?
-  is_company                                                                    Boolean?
-  partner_share                                                                 Boolean?
-  write_date                                                                    DateTime?                                             @db.Timestamp(6)
-  contact_address_complete                                                      String?                                               @db.VarChar
-  message_bounce                                                                Int?
-  email_normalized                                                              String?                                               @db.VarChar
-  signup_type                                                                   String?                                               @db.VarChar
-  signup_expiration                                                             DateTime?                                             @db.Timestamp(6)
-  signup_token                                                                  String?                                               @db.VarChar
-  partner_gid                                                                   Int?
-  additional_info                                                               String?                                               @db.VarChar
-  phone_sanitized                                                               String?                                               @db.VarChar
-  ocn_token                                                                     String?                                               @db.VarChar
-  supplier_rank                                                                 Int?
-  customer_rank                                                                 Int?
-  invoice_warn                                                                  String?                                               @db.VarChar
-  invoice_warn_msg                                                              String?
-  debit_limit                                                                   Decimal?                                              @db.Decimal
-  last_time_entries_checked                                                     DateTime?                                             @db.Timestamp(6)
-  ubl_cii_format                                                                String?                                               @db.VarChar
-  peppol_endpoint                                                               String?                                               @db.VarChar
-  peppol_eas                                                                    String?                                               @db.VarChar
-  online_partner_information                                                    String?                                               @db.VarChar
-  followup_reminder_type                                                        String?                                               @db.VarChar
-  vies_valid                                                                    Boolean?
-  l10n_id_nik                                                                   String?                                               @db.VarChar
-  l10n_id_tax_address                                                           String?                                               @db.VarChar
-  l10n_id_tax_name                                                              String?                                               @db.VarChar
-  l10n_id_kode_transaksi                                                        String?                                               @db.VarChar
-  l10n_id_pkp                                                                   Boolean?
-  team_id                                                                       Int?
-  picking_warn                                                                  String?                                               @db.VarChar
-  picking_warn_msg                                                              String?
-  buyer_id                                                                      Int?
-  purchase_warn                                                                 String?                                               @db.VarChar
-  purchase_warn_msg                                                             String?
-  sale_warn                                                                     String?                                               @db.VarChar
-  sale_warn_msg                                                                 String?
-  is_customer                                                                   Boolean?
-  is_vendor                                                                     Boolean?
-  default_supplierinfo_discount                                                 Decimal?                                              @db.Decimal
-  is_vendor_harvest                                                             Boolean?
-  is_customer_spb                                                               Boolean?
-  code_partner                                                                  String?                                               @db.VarChar
-  is_internal_user                                                              Boolean?
-  wb_company_id                                                                 Int?
-  wb_operating_unit_id                                                          Int?
-  wb_picking_type_id                                                            Int?
-  is_wb                                                                         Boolean?
-  partner_type                                                                  String?                                               @db.VarChar
-  code_partner_wb                                                               String?                                               @db.VarChar
-  is_transporter                                                                Boolean?
-  account_analytic_account                                                      account_analytic_account[]
-  account_analytic_distribution_model                                           account_analytic_distribution_model[]
-  account_analytic_line                                                         account_analytic_line[]
-  account_asset_asset                                                           account_asset_asset[]
-  account_asset_sell                                                            account_asset_sell[]
-  account_auto_reconcile_wizard_res_partner_rel                                 account_auto_reconcile_wizard_res_partner_rel[]
-  account_bank_statement_line                                                   account_bank_statement_line[]
-  account_followup_manual_reminder                                              account_followup_manual_reminder[]
-  account_move_account_move_commercial_partner_idTores_partner                  account_move[]                                        @relation("account_move_commercial_partner_idTores_partner")
-  account_move_account_move_partner_idTores_partner                             account_move[]                                        @relation("account_move_partner_idTores_partner")
-  account_move_account_move_partner_shipping_idTores_partner                    account_move[]                                        @relation("account_move_partner_shipping_idTores_partner")
-  account_move_line                                                             account_move_line[]
-  account_move_send_res_partner_rel                                             account_move_send_res_partner_rel[]
-  account_payment                                                               account_payment[]
-  account_payment_register                                                      account_payment_register[]
-  account_reconcile_model_partner_mapping                                       account_reconcile_model_partner_mapping[]
-  account_reconcile_model_res_partner_rel                                       account_reconcile_model_res_partner_rel[]
-  account_transfer_model_line_res_partner_rel                                   account_transfer_model_line_res_partner_rel[]
-  base_partner_merge_automatic_wizard                                           base_partner_merge_automatic_wizard[]
-  base_partner_merge_automatic_wizard_res_partner_rel                           base_partner_merge_automatic_wizard_res_partner_rel[]
-  create_stock_picking_wizard                                                   create_stock_picking_wizard[]
-  discuss_channel_member                                                        discuss_channel_member[]
-  hr_employee_hr_employee_address_idTores_partner                               hr_employee[]                                         @relation("hr_employee_address_idTores_partner")
-  hr_employee_hr_employee_work_contact_idTores_partner                          hr_employee[]                                         @relation("hr_employee_work_contact_idTores_partner")
-  hr_payslip_line                                                               hr_payslip_line[]
-  hr_salary_rule                                                                hr_salary_rule[]
-  hr_work_location                                                              hr_work_location[]
-  inventory_over_stock_data_report                                              inventory_over_stock_data_report[]
-  ir_act_server_res_partner_rel                                                 ir_act_server_res_partner_rel[]
-  mail_activity                                                                 mail_activity[]
-  mail_compose_message                                                          mail_compose_message[]
-  mail_compose_message_res_partner_rel                                          mail_compose_message_res_partner_rel[]
-  mail_followers                                                                mail_followers[]
-  mail_mail_res_partner_rel                                                     mail_mail_res_partner_rel[]
-  mail_message                                                                  mail_message[]
-  mail_message_reaction                                                         mail_message_reaction[]
-  mail_message_res_partner_rel                                                  mail_message_res_partner_rel[]
-  mail_message_res_partner_starred_rel                                          mail_message_res_partner_starred_rel[]
-  mail_notification_mail_notification_author_idTores_partner                    mail_notification[]                                   @relation("mail_notification_author_idTores_partner")
-  mail_notification_mail_notification_res_partner_idTores_partner               mail_notification[]                                   @relation("mail_notification_res_partner_idTores_partner")
-  mail_partner_device                                                           mail_partner_device[]
-  mail_wizard_invite_res_partner_rel                                            mail_wizard_invite_res_partner_rel[]
-  operating_unit_operating_unit_manager_idTores_partner                         operating_unit[]                                      @relation("operating_unit_manager_idTores_partner")
-  operating_unit_operating_unit_partner_idTores_partner                         operating_unit[]                                      @relation("operating_unit_partner_idTores_partner")
-  payment_link_wizard                                                           payment_link_wizard[]
-  payment_token                                                                 payment_token[]
-  payment_transaction                                                           payment_transaction[]
-  portal_share_res_partner_rel                                                  portal_share_res_partner_rel[]
-  portal_wizard_res_partner_rel                                                 portal_wizard_res_partner_rel[]
-  portal_wizard_user                                                            portal_wizard_user[]
-  ppn_material_plasma_line                                                      ppn_material_plasma_line[]
-  procurement_group                                                             procurement_group[]
-  product_supplierinfo                                                          product_supplierinfo[]
-  purchase_order_purchase_order_dest_address_idTores_partner                    purchase_order[]                                      @relation("purchase_order_dest_address_idTores_partner")
-  purchase_order_purchase_order_partner_idTores_partner                         purchase_order[]                                      @relation("purchase_order_partner_idTores_partner")
-  purchase_order_line                                                           purchase_order_line[]
-  purchase_other_line                                                           purchase_other_line[]
-  purchase_request_line                                                         purchase_request_line[]
-  purchase_request_line_make_purchase_order                                     purchase_request_line_make_purchase_order[]
-  rel_followup_manual_reminder_res_partner                                      rel_followup_manual_reminder_res_partner[]
-  report_spb_summary_view                                                       report_spb_summary_view[]
-  report_spb_view                                                               report_spb_view[]
-  res_company_res_company_account_representative_idTores_partner                res_company[]                                         @relation("res_company_account_representative_idTores_partner")
-  res_company_res_company_partner_idTores_partner                               res_company[]                                         @relation("res_company_partner_idTores_partner")
-  res_users_res_partner_buyer_idTores_users                                     res_users?                                            @relation("res_partner_buyer_idTores_users", fields: [buyer_id], references: [id], onUpdate: NoAction)
-  res_partner_res_partner_commercial_partner_idTores_partner                    res_partner?                                          @relation("res_partner_commercial_partner_idTores_partner", fields: [commercial_partner_id], references: [id], onUpdate: NoAction)
-  other_res_partner_res_partner_commercial_partner_idTores_partner              res_partner[]                                         @relation("res_partner_commercial_partner_idTores_partner")
-  res_company_res_partner_company_idTores_company                               res_company?                                          @relation("res_partner_company_idTores_company", fields: [company_id], references: [id], onUpdate: NoAction)
-  res_country                                                                   res_country?                                          @relation(fields: [country_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  res_users_res_partner_create_uidTores_users                                   res_users?                                            @relation("res_partner_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  res_partner_industry                                                          res_partner_industry?                                 @relation(fields: [industry_id], references: [id], onUpdate: NoAction)
-  res_partner_res_partner_parent_idTores_partner                                res_partner?                                          @relation("res_partner_parent_idTores_partner", fields: [parent_id], references: [id], onUpdate: NoAction)
-  other_res_partner_res_partner_parent_idTores_partner                          res_partner[]                                         @relation("res_partner_parent_idTores_partner")
-  res_country_state                                                             res_country_state?                                    @relation(fields: [state_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  crm_team                                                                      crm_team?                                             @relation(fields: [team_id], references: [id], onUpdate: NoAction)
-  res_partner_title                                                             res_partner_title?                                    @relation(fields: [title], references: [id], onUpdate: NoAction)
-  res_users_res_partner_user_idTores_users                                      res_users?                                            @relation("res_partner_user_idTores_users", fields: [user_id], references: [id], onUpdate: NoAction)
-  res_company_res_partner_wb_company_idTores_company                            res_company?                                          @relation("res_partner_wb_company_idTores_company", fields: [wb_company_id], references: [id], onUpdate: NoAction)
-  operating_unit_res_partner_wb_operating_unit_idTooperating_unit               operating_unit?                                       @relation("res_partner_wb_operating_unit_idTooperating_unit", fields: [wb_operating_unit_id], references: [id], onUpdate: NoAction)
-  stock_picking_type                                                            stock_picking_type?                                   @relation(fields: [wb_picking_type_id], references: [id], onUpdate: NoAction)
-  res_users_res_partner_write_uidTores_users                                    res_users?                                            @relation("res_partner_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  res_partner_autocomplete_sync                                                 res_partner_autocomplete_sync[]
-  res_partner_bank                                                              res_partner_bank[]
-  res_partner_res_partner_category_rel                                          res_partner_res_partner_category_rel[]
-  res_users_res_users_partner_idTores_partner                                   res_users[]                                           @relation("res_users_partner_idTores_partner")
-  res_users_settings_volumes_res_users_settings_volumes_guest_idTores_partner   res_users_settings_volumes[]                          @relation("res_users_settings_volumes_guest_idTores_partner")
-  res_users_settings_volumes_res_users_settings_volumes_partner_idTores_partner res_users_settings_volumes[]                          @relation("res_users_settings_volumes_partner_idTores_partner")
-  sale_order_sale_order_partner_idTores_partner                                 sale_order[]                                          @relation("sale_order_partner_idTores_partner")
-  sale_order_sale_order_partner_invoice_idTores_partner                         sale_order[]                                          @relation("sale_order_partner_invoice_idTores_partner")
-  sale_order_sale_order_partner_shipping_idTores_partner                        sale_order[]                                          @relation("sale_order_partner_shipping_idTores_partner")
-  sale_order_cancel                                                             sale_order_cancel[]
-  sale_order_line                                                               sale_order_line[]
-  sms_sms                                                                       sms_sms[]
-  snailmail_letter                                                              snailmail_letter[]
-  snailmail_letter_missing_required_fields                                      snailmail_letter_missing_required_fields[]
-  stock_card_view                                                               stock_card_view[]
-  stock_move_stock_move_partner_idTores_partner                                 stock_move[]                                          @relation("stock_move_partner_idTores_partner")
-  stock_move_stock_move_restrict_partner_idTores_partner                        stock_move[]                                          @relation("stock_move_restrict_partner_idTores_partner")
-  stock_move_line                                                               stock_move_line[]
-  stock_picking_stock_picking_owner_idTores_partner                             stock_picking[]                                       @relation("stock_picking_owner_idTores_partner")
-  stock_picking_stock_picking_partner_idTores_partner                           stock_picking[]                                       @relation("stock_picking_partner_idTores_partner")
-  stock_quant                                                                   stock_quant[]
-  stock_rule                                                                    stock_rule[]
-  stock_scrap                                                                   stock_scrap[]
-  stock_warehouse                                                               stock_warehouse[]
-  stock_warehouse_orderpoint                                                    stock_warehouse_orderpoint[]
-  zberita_acara_pp                                                              zberita_acara_pp[]
-  zbkm_activity                                                                 zbkm_activity[]
-  zblock_master_mutation                                                        zblock_master_mutation[]
-  zcontract_activity                                                            zcontract_activity[]
-  zcontract_activity_progress                                                   zcontract_activity_progress[]
-  zfruit_courier                                                                zfruit_courier[]
-  zh_premi_process_line                                                         zh_premi_process_line[]
-  zharvest_activity_line                                                        zharvest_activity_line[]
-  zrepair_work_order                                                            zrepair_work_order[]
-  zw_bridge_zw_bridge_partner_idTores_partner                                   zw_bridge[]                                           @relation("zw_bridge_partner_idTores_partner")
-  zw_bridge_zw_bridge_transporter_idTores_partner                               zw_bridge[]                                           @relation("zw_bridge_transporter_idTores_partner")
-  zwork_order                                                                   zwork_order[]
+  id                            Int       @id @default(autoincrement())
+  company_id                    Int?
+  create_date                   DateTime? @db.Timestamp(6)
+  name                          String?   @db.VarChar
+  title                         Int?
+  parent_id                     Int?
+  user_id                       Int?
+  state_id                      Int?
+  country_id                    Int?
+  industry_id                   Int?
+  color                         Int?
+  commercial_partner_id         Int?
+  create_uid                    Int?
+  write_uid                     Int?
+  complete_name                 String?   @db.VarChar
+  ref                           String?   @db.VarChar
+  lang                          String?   @db.VarChar
+  tz                            String?   @db.VarChar
+  vat                           String?   @db.VarChar
+  company_registry              String?   @db.VarChar
+  website                       String?   @db.VarChar
+  function                      String?   @db.VarChar
+  type                          String?   @db.VarChar
+  street                        String?   @db.VarChar
+  street2                       String?   @db.VarChar
+  zip                           String?   @db.VarChar
+  city                          String?   @db.VarChar
+  email                         String?   @db.VarChar
+  phone                         String?   @db.VarChar
+  mobile                        String?   @db.VarChar
+  commercial_company_name       String?   @db.VarChar
+  company_name                  String?   @db.VarChar
+  date                          DateTime? @db.Date
+  comment                       String?
+  partner_latitude              Decimal?  @db.Decimal
+  partner_longitude             Decimal?  @db.Decimal
+  active                        Boolean?
+  employee                      Boolean?
+  is_company                    Boolean?
+  partner_share                 Boolean?
+  write_date                    DateTime? @db.Timestamp(6)
+  contact_address_complete      String?   @db.VarChar
+  message_bounce                Int?
+  email_normalized              String?   @db.VarChar
+  signup_type                   String?   @db.VarChar
+  signup_expiration             DateTime? @db.Timestamp(6)
+  signup_token                  String?   @db.VarChar
+  partner_gid                   Int?
+  additional_info               String?   @db.VarChar
+  phone_sanitized               String?   @db.VarChar
+  ocn_token                     String?   @db.VarChar
+  supplier_rank                 Int?
+  customer_rank                 Int?
+  invoice_warn                  String?   @db.VarChar
+  invoice_warn_msg              String?
+  debit_limit                   Decimal?  @db.Decimal
+  last_time_entries_checked     DateTime? @db.Timestamp(6)
+  ubl_cii_format                String?   @db.VarChar
+  peppol_endpoint               String?   @db.VarChar
+  peppol_eas                    String?   @db.VarChar
+  online_partner_information    String?   @db.VarChar
+  followup_reminder_type        String?   @db.VarChar
+  vies_valid                    Boolean?
+  l10n_id_nik                   String?   @db.VarChar
+  l10n_id_tax_address           String?   @db.VarChar
+  l10n_id_tax_name              String?   @db.VarChar
+  l10n_id_kode_transaksi        String?   @db.VarChar
+  l10n_id_pkp                   Boolean?
+  team_id                       Int?
+  picking_warn                  String?   @db.VarChar
+  picking_warn_msg              String?
+  buyer_id                      Int?
+  purchase_warn                 String?   @db.VarChar
+  purchase_warn_msg             String?
+  sale_warn                     String?   @db.VarChar
+  sale_warn_msg                 String?
+  is_customer                   Boolean?
+  is_vendor                     Boolean?
+  default_supplierinfo_discount Decimal?  @db.Decimal
+  is_vendor_harvest             Boolean?
+  is_customer_spb               Boolean?
+  code_partner                  String?   @db.VarChar
+  is_internal_user              Boolean?
+  wb_company_id                 Int?
+  wb_operating_unit_id          Int?
+  wb_picking_type_id            Int?
+  is_wb                         Boolean?
+  partner_type                  String?   @db.VarChar
+  code_partner_wb               String?   @db.VarChar
 
   @@index([commercial_partner_id], map: "res_partner__commercial_partner_id_index")
   @@index([company_id], map: "res_partner__company_id_index")
@@ -1161,85 +491,242 @@ model res_partner {
 }
 
 model zra_master {
-  id                                                                          Int                                     @id @default(autoincrement())
-  operating_unit_id                                                           Int
-  company_id                                                                  Int
-  department_id                                                               Int?
-  ra_model_id                                                                 Int
-  stage_id                                                                    Int?
-  asset_id                                                                    Int?
-  uom_id                                                                      Int?
-  analytic_id                                                                 Int?
-  currency_id                                                                 Int?
-  create_uid                                                                  Int?
-  write_uid                                                                   Int?
-  name                                                                        String?                                 @db.VarChar
-  code                                                                        String                                  @db.VarChar(20)
-  ra_owner_name                                                               String?                                 @db.VarChar
-  ra_chasis_number                                                            String?                                 @db.VarChar
-  ra_engine_number                                                            String?                                 @db.VarChar
-  ra_police_number                                                            String?                                 @db.VarChar
-  ra_color                                                                    String?                                 @db.VarChar
-  ra_year                                                                     String?                                 @db.VarChar
-  ra_odometer                                                                 String?                                 @db.VarChar
-  code_stage                                                                  String                                  @db.VarChar
-  year_ra                                                                     String?                                 @db.VarChar(4)
-  ra_stnk_number                                                              String?                                 @db.VarChar
-  ra_stnk_plat                                                                String?                                 @db.VarChar
-  ra_kir                                                                      String?                                 @db.VarChar
-  owner_type                                                                  String?                                 @db.VarChar
-  last_service_date                                                           DateTime?                               @db.Date
-  ra_stnk_valid                                                               DateTime?                               @db.Date
-  ra_plat_valid                                                               DateTime?                               @db.Date
-  ra_kir_valid                                                                DateTime?                               @db.Date
-  description                                                                 String?
-  active                                                                      Boolean?
-  is_employee_required                                                        Boolean?
-  is_wb                                                                       Boolean?
-  create_date                                                                 DateTime?                               @db.Timestamp(6)
-  write_date                                                                  DateTime?                               @db.Timestamp(6)
-  phase_id                                                                    Int?
-  ra_category_id                                                              Int?
-  workshop                                                                    Boolean?
-  type_model                                                                  String?                                 @db.VarChar
-  is_assistant_approval                                                       Boolean?
-  is_exclusion_equipment                                                      Boolean?
-  account_analytic_account_account_analytic_account_zra_master_idTozra_master account_analytic_account[]              @relation("account_analytic_account_zra_master_idTozra_master")
-  account_move_line_zra_master_rel                                            account_move_line_zra_master_rel[]
-  config_closing_rate_km                                                      config_closing_rate_km[]
-  hr_job_zra_master_rel                                                       hr_job_zra_master_rel[]
-  hr_salary_rule_account_zra_master_rel                                       hr_salary_rule_account_zra_master_rel[]
-  maintenance_order                                                           maintenance_order[]
-  maintenance_order_line                                                      maintenance_order_line[]
-  report_spb_view                                                             report_spb_view[]
-  wizard_report_vra_zra_master_rel                                            wizard_report_vra_zra_master_rel[]
-  workshop_distribution_equipment_line                                        workshop_distribution_equipment_line[]
-  workshop_distribution_line                                                  workshop_distribution_line[]
-  workshop_distribution_material_line                                         workshop_distribution_material_line[]
-  workshop_material_distribution_line                                         workshop_material_distribution_line[]
-  z_vra                                                                       z_vra[]
-  z_vra_line                                                                  z_vra_line[]
-  z_vra_premi_line                                                            z_vra_premi_line[]
-  zblock_opbal                                                                zblock_opbal[]
-  zblock_stage_zra_master_rel                                                 zblock_stage_zra_master_rel[]
-  zdistribution_equipment_line                                                zdistribution_equipment_line[]
-  zdistribution_payroll_line                                                  zdistribution_payroll_line[]
-  zdistribution_rule                                                          zdistribution_rule[]
-  zfruit_courier                                                              zfruit_courier[]
-  account_analytic_account_zra_master_analytic_idToaccount_analytic_account   account_analytic_account?               @relation("zra_master_analytic_idToaccount_analytic_account", fields: [analytic_id], references: [id], onUpdate: NoAction)
-  account_asset                                                               account_asset?                          @relation(fields: [asset_id], references: [id], onUpdate: NoAction)
-  res_company                                                                 res_company                             @relation(fields: [company_id], references: [id], onUpdate: NoAction)
-  res_users_zra_master_create_uidTores_users                                  res_users?                              @relation("zra_master_create_uidTores_users", fields: [create_uid], references: [id], onUpdate: NoAction)
-  res_currency                                                                res_currency?                           @relation(fields: [currency_id], references: [id], onUpdate: NoAction)
-  hr_department                                                               hr_department?                          @relation(fields: [department_id], references: [id], onUpdate: NoAction)
-  operating_unit                                                              operating_unit                          @relation(fields: [operating_unit_id], references: [id], onUpdate: NoAction)
-  zblock_phase                                                                zblock_phase?                           @relation(fields: [phase_id], references: [id], onUpdate: NoAction)
-  zra_category                                                                zra_category?                           @relation(fields: [ra_category_id], references: [id], onUpdate: NoAction)
-  zra_model                                                                   zra_model                               @relation(fields: [ra_model_id], references: [id], onUpdate: NoAction)
-  zblock_stage                                                                zblock_stage?                           @relation(fields: [stage_id], references: [id], onUpdate: NoAction)
-  uom_uom                                                                     uom_uom?                                @relation(fields: [uom_id], references: [id], onUpdate: NoAction)
-  res_users_zra_master_write_uidTores_users                                   res_users?                              @relation("zra_master_write_uidTores_users", fields: [write_uid], references: [id], onUpdate: NoAction)
-  zra_master_line                                                             zra_master_line[]
-  zrepair_work_order                                                          zrepair_work_order[]
-  zwork_order                                                                 zwork_order[]
+  id                     Int       @id @default(autoincrement())
+  operating_unit_id      Int
+  company_id             Int
+  department_id          Int?
+  ra_model_id            Int
+  stage_id               Int?
+  asset_id               Int?
+  uom_id                 Int?
+  analytic_id            Int?
+  currency_id            Int?
+  create_uid             Int?
+  write_uid              Int?
+  name                   String?   @db.VarChar
+  code                   String    @db.VarChar(22)
+  ra_owner_name          String?   @db.VarChar
+  ra_chasis_number       String?   @db.VarChar
+  ra_engine_number       String?   @db.VarChar
+  ra_police_number       String?   @db.VarChar
+  ra_color               String?   @db.VarChar
+  ra_year                String?   @db.VarChar
+  ra_odometer            String?   @db.VarChar
+  code_stage             String    @db.VarChar
+  year_ra                String?   @db.VarChar(4)
+  ra_stnk_number         String?   @db.VarChar
+  ra_stnk_plat           String?   @db.VarChar
+  ra_kir                 String?   @db.VarChar
+  owner_type             String?   @db.VarChar
+  last_service_date      DateTime? @db.Date
+  ra_stnk_valid          DateTime? @db.Date
+  ra_plat_valid          DateTime? @db.Date
+  ra_kir_valid           DateTime? @db.Date
+  description            String?
+  active                 Boolean?
+  is_employee_required   Boolean?
+  is_wb                  Boolean?
+  create_date            DateTime? @db.Timestamp(6)
+  write_date             DateTime? @db.Timestamp(6)
+  phase_id               Int?
+  ra_category_id         Int?
+  workshop               Boolean?
+  type_model             String?   @db.VarChar
+  is_assistant_approval  Boolean?
+  is_exclusion_equipment Boolean?
+  account_asset_id       Int?
+}
+
+model zharvest_activity {
+  id                   Int       @id @default(autoincrement())
+  company_id           Int
+  operating_unit_id    Int
+  department_id        Int
+  head_foreman_id      Int?
+  harvest_foreman_id   Int
+  harvest_user_id      Int?
+  create_uid           Int?
+  write_uid            Int?
+  name                 String?   @db.VarChar
+  mobile_ref           String?   @db.VarChar
+  state                String    @db.VarChar
+  harvest_by           String?   @db.VarChar
+  harvest_date         DateTime  @db.Date
+  description          String?
+  is_foreman_only      Boolean?
+  is_harvest_user_only Boolean?
+  is_mobile            Boolean?
+  is_all_division      Boolean?
+  is_all_unit          Boolean?
+  create_date          DateTime? @db.Timestamp(6)
+  write_date           DateTime? @db.Timestamp(6)
+  active               Boolean?
+  t_jjg                Float?
+  t_bron               Float?
+
+  @@index([active], map: "zharvest_activity__active_index")
+  @@index([company_id], map: "zharvest_activity__company_id_index")
+  @@index([department_id], map: "zharvest_activity__department_id_index")
+  @@index([harvest_date], map: "zharvest_activity__harvest_date_index")
+  @@index([mobile_ref], map: "zharvest_activity__mobile_ref_index")
+  @@index([operating_unit_id], map: "zharvest_activity__operating_unit_id_index")
+  @@index([state], map: "zharvest_activity__state_index")
+}
+
+model zharvest_activity_line {
+  id                Int       @id @default(autoincrement())
+  harvest_id        Int?
+  block_id          Int
+  employee_id       Int?
+  partner_id        Int?
+  create_uid        Int?
+  write_uid         Int?
+  yo_plant          String?   @db.VarChar
+  area              String?   @db.VarChar
+  mobile_ref        String?   @db.VarChar
+  create_date       DateTime? @db.Timestamp(6)
+  write_date        DateTime? @db.Timestamp(6)
+  company_id        Int?
+  operating_unit_id Int?
+  department_id     Int?
+  work_day          Decimal?  @db.Decimal
+  depart_mobile_id  Int?
+  fruit_qty         Int?
+  leaf_qty          Int?
+  harvest_by        String?   @db.VarChar
+  harvest_date      DateTime? @db.Date
+
+  @@index([company_id], map: "zharvest_activity_line__company_id_index")
+  @@index([employee_id], map: "zharvest_activity_line__employee_id_index")
+  @@index([harvest_date], map: "zharvest_activity_line__harvest_date_index")
+  @@index([harvest_id], map: "zharvest_activity_line__harvest_id_index")
+  @@index([operating_unit_id], map: "zharvest_activity_line__operating_unit_id_index")
+}
+
+model zharvest_collection_point {
+  id                Int       @id @default(autoincrement())
+  harvest_line_id   Int?
+  tph_id            Int?
+  employee_id       Int?
+  create_uid        Int?
+  write_uid         Int?
+  mobile_ref        String?   @db.VarChar
+  create_date       DateTime? @db.Timestamp(6)
+  write_date        DateTime? @db.Timestamp(6)
+  latitude          String?   @db.VarChar
+  longitude         String?   @db.VarChar
+  company_id        Int?
+  harvest_date      DateTime? @db.Date
+  serial_number     String?   @db.VarChar
+  department_id     Int?
+  harvest_user_id   Int?
+  mobile_ref_tph    String?   @db.VarChar
+  fruit_qty         Int?
+  leaf_qty          Int?
+  operating_unit_id Int?
+  harvest_id        Int?
+
+  @@index([company_id], map: "zharvest_collection_point__company_id_index")
+  @@index([harvest_id], map: "zharvest_collection_point__harvest_id_index")
+  @@index([mobile_ref_tph], map: "zharvest_collection_point__mobile_ref_tph_index")
+  @@index([operating_unit_id], map: "zharvest_collection_point__operating_unit_id_index")
+}
+
+model zfruit_courier {
+  id                     Int       @id @default(autoincrement())
+  company_id             Int
+  operating_unit_id      Int
+  department_id          Int
+  vehicle_id             Int?
+  driver_id              Int?
+  krani_id               Int?
+  netto_after_grad       Int?
+  version                Int?
+  customer_id            Int?
+  ou_dest_id             Int?
+  tipe_ou_id             Int?
+  create_uid             Int?
+  write_uid              Int?
+  name                   String?   @db.VarChar
+  no_spb                 String?   @db.VarChar
+  transportir            String    @db.VarChar
+  driver_name            String?   @db.VarChar
+  state                  String    @db.VarChar
+  ticket_no              String?   @db.VarChar
+  send_type              String?   @db.VarChar
+  date                   DateTime? @db.Date
+  description            String?
+  is_mobile              Boolean?
+  is_driver_only         Boolean?
+  is_krani_only          Boolean?
+  create_date            DateTime? @db.Timestamp(6)
+  write_date             DateTime? @db.Timestamp(6)
+  stock_move_id          Int?
+  returned_stock_move_id Int?
+  sale_order_id          Int?
+  netto_before_grad      Int?
+  wb_date                DateTime? @db.Date
+  mobile_ref             String?   @db.VarChar
+  serial_number          String?   @db.VarChar
+  active                 Boolean?
+  t_jjg                  Float?
+  t_bron                 Float?
+
+  @@index([date], map: "zfruit_courier__date_index")
+  @@index([department_id], map: "zfruit_courier__department_id_index")
+}
+
+model zfruit_courier_block {
+  id                   Int       @id @default(autoincrement())
+  fruit_courier_id     Int?
+  courir_wb_id         Int?
+  block_id             Int
+  tph_id               Int
+  det_panen_id         Int?
+  det_tph_id           Int?
+  create_uid           Int?
+  write_uid            Int?
+  fruit_jjg            Decimal?  @db.Decimal
+  fruit_bron           Decimal?  @db.Decimal
+  fruit_tax            Decimal?  @db.Decimal
+  create_date          DateTime? @db.Timestamp(6)
+  write_date           DateTime? @db.Timestamp(6)
+  description          String?   @db.VarChar
+  is_restan            Boolean?
+  serial_number        String?   @db.VarChar
+  mobile_ref_panen_tph String?   @db.VarChar
+  harvest_date         String?   @db.VarChar
+  tgl_panen            String?   @db.VarChar
+  department_id        Int?
+  date                 DateTime? @db.Date
+  netto_qty_wb         Float?
+  employee_id          Int?
+
+  @@index([block_id], map: "zfruit_courier_block__block_id_index")
+  @@index([date], map: "zfruit_courier_block__date_index")
+  @@index([fruit_courier_id], map: "zfruit_courier_block__fruit_courier_id_index")
+  @@index([mobile_ref_panen_tph], map: "zfruit_courier_block__mobile_ref_panen_tph_index")
+  @@index([tph_id], map: "zfruit_courier_block__tph_id_index")
+}
+
+model zfruit_courier_loader {
+  id                  Int       @id @default(autoincrement())
+  fruit_courier_id    Int?
+  no_emp              Int?
+  employee_id         Int
+  create_uid          Int?
+  write_uid           Int?
+  create_date         DateTime? @db.Timestamp(6)
+  write_date          DateTime? @db.Timestamp(6)
+  employee_type_id    Int?
+  company_id          Int?
+  operating_unit_id   Int?
+  department_id       Int?
+  netto_after_grad    Int?
+  date                DateTime? @db.Date
+  netto_after_grading Int?
+  netto_adjust        Int?
+  netto_final         Int?
+  attendance_id       Int?
+  work_day            Float?
 }

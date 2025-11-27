@@ -1,4 +1,44 @@
-def _get_query(self, obj):
+@api.model_create_multi
+	def create(self, vals_list):
+		res = super(HarvestActivity, self).create(vals_list)
+		for record in res:
+			# # Pencegahan Duplicate
+			if record.mobile_ref:
+				hv_env = self.search([('mobile_ref','=',record.mobile_ref),('state','=','draft'),('id','!=',res.id)])
+				m_draft = hv_env.filtered(lambda ms: ms.state == 'draft')
+				m_notdraft = hv_env.filtered(lambda ms: ms.state != 'draft')
+				if m_notdraft:
+					raise ValidationError('Record Ini Sudah Di Approve.')
+				if m_draft:
+					hv_env[0].unlink()
+
+			record.name = self.env['ir.sequence'].next_by_code(
+					'harvest.activity', sequence_date=record.harvest_date
+				)
+		return res
+
+    def action_update_images(self, datas=None):
+        result = []
+        results = {}
+        # _logger.info(type(datas))
+        if not datas:
+            return {'error':'data of ref and image is required !'}
+        for data in datas:
+            for ref, img in data.items():
+                zcp_obj = self.env['zharvest.collection.point']
+                harvest_tph_id = zcp_obj.search(
+                    [('mobile_ref', '=', ref)], limit=1)
+                if not harvest_tph_id or not img:
+                    continue
+                harvest_tph_id.image = img
+                result.append(harvest_tph_id.id) \
+                    if harvest_tph_id.id not in result else None
+                # harvest_id = harvest_tph_id.harvest_line_id.harvest_id
+                # _logger.info([ref, harvest_tph_id, harvest_id, len(img)])
+                results.update({'id': result})
+        return results
+
+        def _get_query(self, obj):
 		_select = """
 			SELECT DISTINCT
 				hv.name AS harvest_name,
@@ -91,42 +131,3 @@ def _get_query(self, obj):
 		"""
 
 		return _select, _from, _where, _group, _order
-
-	def create(self, vals_list):
-		res = super(HarvestActivity, self).create(vals_list)
-		for record in res:
-			# # Pencegahan Duplicate
-			if record.mobile_ref:
-				hv_env = self.search([('mobile_ref','=',record.mobile_ref),('state','=','draft'),('id','!=',res.id)])
-				m_draft = hv_env.filtered(lambda ms: ms.state == 'draft')
-				m_notdraft = hv_env.filtered(lambda ms: ms.state != 'draft')
-				if m_notdraft:
-					raise ValidationError('Record Ini Sudah Di Approve.')
-				if m_draft:
-					hv_env[0].unlink()
-
-			record.name = self.env['ir.sequence'].next_by_code(
-					'harvest.activity', sequence_date=record.harvest_date
-				)
-
-        
-		return res
-        result = []
-        results = {}
-        # _logger.info(type(datas))
-        if not datas:
-            return {'error':'data of ref and image is required !'}
-        for data in datas:
-            for ref, img in data.items():
-                zcp_obj = self.env['zharvest.collection.point']
-                harvest_tph_id = zcp_obj.search(
-                    [('mobile_ref', '=', ref)], limit=1)
-                if not harvest_tph_id or not img:
-                    continue
-                harvest_tph_id.image = img
-                result.append(harvest_tph_id.id) \
-                    if harvest_tph_id.id not in result else None
-                # harvest_id = harvest_tph_id.harvest_line_id.harvest_id
-                # _logger.info([ref, harvest_tph_id, harvest_id, len(img)])
-                results.update({'id': result})
-        return results
